@@ -15,6 +15,7 @@ from ansible.module_utils.basic import AnsibleModule, env_fallback
 
 class SonarrModule(AnsibleModule):
     def __init__(self, *args, **kwargs):
+        # self._validate()
         arg_spec = kwargs.get('argument_spec', {})
 
         kwargs['argument_spec'] = self._merge_dictionaries(
@@ -38,7 +39,7 @@ class SonarrModule(AnsibleModule):
 
     def _validate(self):
         if not HAS_PYARR_LIBRARIY:
-            self.module.fail_json(msg="Please install the pyarr library")
+            self.fail_json(msg="Please install the pyarr library")
 
     def _merge_dictionaries(self, a, b):
         new = a.copy()

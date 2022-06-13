@@ -100,7 +100,7 @@ def run_module():
         result['changed'] = True
         if not module.check_mode:
             response = module.api.del_tag(result['id'])
-            result.update(response)
+            result['id'] = 0
     elif module.check_mode:
         module.exit_json(**result)
 
