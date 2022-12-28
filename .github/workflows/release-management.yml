@@ -44,11 +44,11 @@ jobs:
     needs: release-please
     if: ${{ needs.release-please.outputs.release_created }}
     steps:
-      - name: Get the version name from the tags
-        run: echo "RELEASE_VERSION=${GITHUB_REF/refs\/tags\//}" >> $GITHUB_ENV
-
-      - name: Injecting a dynamic Collection version
-        uses: artis3n/ansible_galaxy_collection@v2
+      - name: Set version in galaxy.yml
+        run: |
+          VERSION=${GITHUB_REF#refs/tags/v}
+          sed -re "s/^version:.*$/version: ${VERSION}/" -i galaxy.yml
+      - name: Upload collection to Ansible Galaxy
+        uses: ansible/ansible-publish-action@v1.0.0
         with:
-          api_key: '${{ secrets.ANSIBLE_GALAXY_API_KEY }}'
-          galaxy_version: '${{ env.RELEASE_VERSION }}'
+          api_key: ${{ secrets.ANSIBLE_GALAXY_API_KEY }}
