@@ -166,8 +166,6 @@ package_update_mechanism:
     sample: 'docker'
 '''
 
-# from ansible.module_utils.basic import AnsibleModule
-from ansible.module_utils.common.dict_transformations import camel_dict_to_snake_dict
 from ansible_collections.devopsarr.sonarr.plugins.module_utils.sonarr_module import SonarrModule
 
 __metaclass__ = type
@@ -184,9 +182,9 @@ def run_module():
     )
 
     # get the response from api
-    response = module.api.get_system_status()
+    response = module.api.system_status.get()
     # map the response to result
-    result.update(**camel_dict_to_snake_dict(response))
+    result.update(**response)
 
     module.exit_json(**result)
 

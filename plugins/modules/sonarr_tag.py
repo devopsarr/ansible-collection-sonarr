@@ -62,7 +62,6 @@ label:
     sample: 'hd'
 '''
 
-from ansible.module_utils.basic import AnsibleModule
 from ansible_collections.devopsarr.sonarr.plugins.module_utils.sonarr_module import SonarrModule
 
 
@@ -84,7 +83,7 @@ def run_module():
         supports_check_mode=True
     )
 
-    tags = module.api.get_tag()
+    tags = module.api.tag.list()
 
     for tag in tags:
         if tag['label'] == module.params['label']:
@@ -94,12 +93,14 @@ def run_module():
     if module.params['state'] == 'present' and result['id'] == 0:
         result['changed'] = True
         if not module.check_mode:
-            response = module.api.create_tag(module.params['label'])
+            module.api.tag.label = module.params['label']
+            response = module.api.tag.create()
             result.update(response)
     elif module.params['state'] == 'absent' and result['id'] != 0:
         result['changed'] = True
         if not module.check_mode:
-            response = module.api.del_tag(result['id'])
+            module.api.tag.id = result['id']
+            response = module.api.tag.delete()
             result['id'] = 0
     elif module.check_mode:
         module.exit_json(**result)
