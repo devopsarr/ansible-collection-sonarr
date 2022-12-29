@@ -1,0 +1,28 @@
+# Ansible Module release workflow.
+name: Release Management
+
+# This GitHub action creates a release when a tag that matches the pattern
+# "v*" (e.g. v0.1.0) is created.
+on:
+  workflow_dispatch:
+
+# Releases need permissions to read and write the repository contents.
+# GitHub considers creating releases and uploading assets as writing contents.
+#permissions:
+#  contents: write
+
+# Default values to simplify job configurations below.
+env:
+  # Python language version to use This value should also be updated
+  # in the testing workflow if changed.
+  PYTHON_VERSION: '3.10'
+
+jobs:
+  collection-release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Upload collection to Ansible Galaxy
+        uses: ansible/ansible-publish-action@v1.0.0
+        with:
+          api_key: ${{ secrets.ANSIBLE_GALAXY_API_KEY }}
