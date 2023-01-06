@@ -30,6 +30,9 @@ jobs:
       - name: Install ansible-base (${{ matrix.ansible }})
         run: pip install https://github.com/ansible/ansible/archive/${{ matrix.ansible }}.tar.gz --disable-pip-version-check
 
+      - name: Install python dependencies
+        run: pip install --upgrade git+https://github.com/devopsarr/sonarr-py.git --upgrade-strategy eager --disable-pip-version-check
+
       # run ansible-test sanity inside of Docker.
       # The docker container has all the pinned dependencies that are required
       # and all python versions ansible supports.
@@ -137,7 +140,7 @@ jobs:
       # - name: Install collection dependencies
       #   run: ansible-galaxy collection install ansible.netcommon -p .
       - name: Install python dependencies
-        run: pip install --upgrade sonarr-py --upgrade-strategy eager --disable-pip-version-check
+        run: pip install --upgrade git+https://github.com/devopsarr/sonarr-py.git --upgrade-strategy eager --disable-pip-version-check
 
       # Run the integration tests
       - name: Run integration test
