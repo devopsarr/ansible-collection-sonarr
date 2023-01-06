@@ -168,6 +168,12 @@ package_update_mechanism:
 
 from ansible_collections.devopsarr.sonarr.plugins.module_utils.sonarr_module import SonarrModule
 
+try:
+    import sonarr
+    HAS_SONARR_LIBRARY = True
+except ImportError:
+    HAS_SONARR_LIBRARY = False
+
 __metaclass__ = type
 
 
@@ -178,11 +184,14 @@ def run_module():
 
     # init SonarrModule
     module = SonarrModule(
+        argument_spec={},
         supports_check_mode=True
     )
 
+    client = sonarr.SystemApi(module.api)
+
     # get the response from api
-    response = module.api.system_status.get()
+    response = client.get_system_status()
     # map the response to result
     result.update(**response)
 

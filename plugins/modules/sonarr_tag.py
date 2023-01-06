@@ -64,6 +64,12 @@ label:
 
 from ansible_collections.devopsarr.sonarr.plugins.module_utils.sonarr_module import SonarrModule
 
+try:
+    import sonarr
+    HAS_SONARR_LIBRARY = True
+except ImportError:
+    HAS_SONARR_LIBRARY = False
+
 
 def run_module():
     # define available arguments/parameters a user can pass to the module
@@ -83,7 +89,9 @@ def run_module():
         supports_check_mode=True
     )
 
-    tags = module.api.tag.list()
+    client = sonarr.TagApi(module.api)
+
+    tags = client.list_tag()
 
     for tag in tags:
         if tag['label'] == module.params['label']:
@@ -93,14 +101,12 @@ def run_module():
     if module.params['state'] == 'present' and result['id'] == 0:
         result['changed'] = True
         if not module.check_mode:
-            module.api.tag.label = module.params['label']
-            response = module.api.tag.create()
+            response = client.create_tag(tag_resource={'label': module.params['label']})
             result.update(response)
     elif module.params['state'] == 'absent' and result['id'] != 0:
         result['changed'] = True
         if not module.check_mode:
-            module.api.tag.id = result['id']
-            response = module.api.tag.delete()
+            response = client.delete_tag(result['id'])
             result['id'] = 0
     elif module.check_mode:
         module.exit_json(**result)
