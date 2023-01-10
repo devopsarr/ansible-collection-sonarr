@@ -47,8 +47,9 @@ jobs:
       - uses: actions/checkout@v3
       - name: Set version in galaxy.yml
         run: |
-          VERSION=${needs.release-please.outputs.tag_name}
-          sed -re 's/^version:.*$/version: ${VERSION}/' -i galaxy.yml
+          sed -re 's/^version:.*$/version: ${version}/' -i galaxy.yml
+        with:
+          version: ${{ needs.release-please.outputs.tag_name }}
       - name: Upload collection to Ansible Galaxy
         uses: ansible/ansible-publish-action@v1.0.0
         with:

@@ -37,7 +37,7 @@ jobs:
       # The docker container has all the pinned dependencies that are required
       # and all python versions ansible supports.
       - name: Run sanity tests
-        run: ansible-test sanity --docker -v --color --coverage
+        run: ansible-test sanity --docker -v --color --coverage --exclude .github/
         working-directory: ./ansible_collections/${{env.NAMESPACE}}/${{env.COLLECTION_NAME}}
 
       # ansible-test support producing code coverage date
@@ -125,8 +125,13 @@ jobs:
         with:
           path: ansible_collections/${{env.NAMESPACE}}/${{env.COLLECTION_NAME}}
 
+      - name: config rights
+        run: >
+          sudo chown 1000:1000 ${{ github.workspace }}/ansible_collections/${{env.NAMESPACE}}/${{env.COLLECTION_NAME}}/.github/provider/config.xml &&
+          sudo chmod +x ${{ github.workspace }}/ansible_collections/${{env.NAMESPACE}}/${{env.COLLECTION_NAME}}/.github/provider/test.sh
+
       - name: run provider
-        run: docker run -d -v ${{ github.workspace }}/ansible_collections/${{env.NAMESPACE}}/${{env.COLLECTION_NAME}}/.github/workflows/config.xml:/config/config.xml -p 8989:8989 --health-cmd "curl --fail http://localhost:8989/system/status || exit 1" linuxserver/sonarr
+        run: docker-compose -f ${{ github.workspace }}/ansible_collections/${{env.NAMESPACE}}/${{env.COLLECTION_NAME}}/.github/provider/docker-compose.yml up -d
 
       - name: Set up Python
         uses: actions/setup-python@v4
