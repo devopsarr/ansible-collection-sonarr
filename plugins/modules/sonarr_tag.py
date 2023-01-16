@@ -63,6 +63,7 @@ label:
 '''
 
 from ansible_collections.devopsarr.sonarr.plugins.module_utils.sonarr_module import SonarrModule
+from ansible.module_utils.common.text.converters import to_native
 
 try:
     import sonarr
@@ -91,25 +92,40 @@ def run_module():
 
     client = sonarr.TagApi(module.api)
 
-    tags = client.list_tag()
+    # List resources.
+    try:
+        tags = client.list_tag()
+    except Exception as e:
+        module.fail_json('Error listing tags: %s' % to_native(e.reason), **result)
 
+    # Check if a resource is present already.
     for tag in tags:
         if tag['label'] == module.params['label']:
             result.update(tag)
 
-    # TODO: add error handling
+    # Create a new resource.
     if module.params['state'] == 'present' and result['id'] == 0:
         result['changed'] = True
+        # Only without check mode.
         if not module.check_mode:
-            response = client.create_tag(tag_resource={'label': module.params['label']})
+            try:
+                response = client.create_tag(tag_resource={
+                    'label': module.params['label'],
+                })
+            except Exception as e:
+                module.fail_json('Error creating tag: %s' % to_native(e.reason), **result)
             result.update(response)
+
+    # Delete the resource.
     elif module.params['state'] == 'absent' and result['id'] != 0:
         result['changed'] = True
+        # Only without check mode.
         if not module.check_mode:
-            response = client.delete_tag(result['id'])
+            try:
+                response = client.delete_tag(result['id'])
+            except Exception as e:
+                module.fail_json('Error deleting tag: %s' % to_native(e.reason), **result)
             result['id'] = 0
-    elif module.check_mode:
-        module.exit_json(**result)
 
     module.exit_json(**result)
 

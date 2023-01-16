@@ -23,7 +23,7 @@
         that:
           - result['preferred_protocol'] == 'torrent'
     # ----------------------------------------------------------------------------
-    - name: create already present delay profile
+    - name: edit already present delay profile
       devopsarr.sonarr.sonarr_delay_profile:
         preferred_protocol: torrent
         usenet_delay: 10
@@ -40,6 +40,25 @@
       assert:
         that:
           - result.changed == true
+          - result.usenet_delay == 10
+    # ----------------------------------------------------------------------------
+    - name: check idempotercy
+      devopsarr.sonarr.sonarr_delay_profile:
+        preferred_protocol: torrent
+        usenet_delay: 10
+        torrent_delay: 0
+        order: 100
+        enable_usenet: true
+        enable_torrent: true
+        bypass_if_highest_quality: false
+        tags: ["{{ tag.id }}"]
+        sonarr_api_key: "{{ sonarr_api_key }}"
+        sonarr_url: "{{ sonarr_url }}"
+      register: result
+    - name: assert delay profile creation
+      assert:
+        that:
+          - result.changed == false
           - result.usenet_delay == 10
     # ----------------------------------------------------------------------------
     - name: delete delay profile
