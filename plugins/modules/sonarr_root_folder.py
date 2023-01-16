@@ -12,7 +12,7 @@ module: sonarr_root_folder
 
 short_description: Manages Sonarr root folder.
 
-version_added: "1.0.0"
+version_added: "0.0.2"
 
 description: Manages Sonarr root folder.
 
