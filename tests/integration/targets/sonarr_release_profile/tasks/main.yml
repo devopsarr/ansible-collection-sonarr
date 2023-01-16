@@ -1,0 +1,56 @@
+---
+    - name: create release profile
+      devopsarr.sonarr.sonarr_release_profile:
+        enabled: true
+        name: "Example"
+        required: ["proper"]
+        ignored: ["repack"]
+        sonarr_api_key: "{{ sonarr_api_key }}"
+        sonarr_url: "{{ sonarr_url }}"
+      register: result
+    - name: assert release profile creation
+      assert:
+        that:
+          - result['required'] == ['proper']
+    # ----------------------------------------------------------------------------
+    - name: edit already present release profile
+      devopsarr.sonarr.sonarr_release_profile:
+        enabled: true
+        name: "Example"
+        required: ["proper"]
+        ignored: ["repack", "dvdrip"]
+        sonarr_api_key: "{{ sonarr_api_key }}"
+        sonarr_url: "{{ sonarr_url }}"
+      register: result
+    - name: assert release profile changes
+      assert:
+        that:
+          - result.changed == true
+          - result.ignored == ["repack", "dvdrip"]
+    # ----------------------------------------------------------------------------
+    - name: create already present release profile
+      devopsarr.sonarr.sonarr_release_profile:
+        enabled: true
+        name: "Example"
+        required: ["proper"]
+        ignored: ["repack", "dvdrip"]
+        sonarr_api_key: "{{ sonarr_api_key }}"
+        sonarr_url: "{{ sonarr_url }}"
+      register: result
+    - name: assert release profile idempotency
+      assert:
+        that:
+          - result.changed == false
+          - result.ignored == ["repack", "dvdrip"]
+    # ----------------------------------------------------------------------------
+    - name: delete release profile
+      devopsarr.sonarr.sonarr_release_profile:
+        name: "Example"
+        sonarr_api_key: "{{ sonarr_api_key }}"
+        sonarr_url: "{{ sonarr_url }}"
+        state: 'absent'
+      register: result
+    - name: assert release profile deletion
+      assert:
+        that:
+          - result['id'] == 0
