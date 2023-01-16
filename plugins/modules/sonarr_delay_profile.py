@@ -220,7 +220,7 @@ def run_module():
             try:
                 response = client.delete_delay_profile(result['id'])
             except Exception as e:
-                    module.fail_json('Error deleting delay profile: %s' % to_native(e.reason), **result)
+                module.fail_json('Error deleting delay profile: %s' % to_native(e.reason), **result)
             result['id'] = 0
 
     module.exit_json(**result)

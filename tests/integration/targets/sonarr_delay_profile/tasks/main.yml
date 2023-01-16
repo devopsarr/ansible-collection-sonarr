@@ -36,13 +36,13 @@
         sonarr_api_key: "{{ sonarr_api_key }}"
         sonarr_url: "{{ sonarr_url }}"
       register: result
-    - name: assert delay profile creation
+    - name: assert delay profile changes
       assert:
         that:
           - result.changed == true
           - result.usenet_delay == 10
     # ----------------------------------------------------------------------------
-    - name: check idempotercy
+    - name: create already present delay profile
       devopsarr.sonarr.sonarr_delay_profile:
         preferred_protocol: torrent
         usenet_delay: 10
@@ -55,7 +55,7 @@
         sonarr_api_key: "{{ sonarr_api_key }}"
         sonarr_url: "{{ sonarr_url }}"
       register: result
-    - name: assert delay profile creation
+    - name: assert delay profile idempotency
       assert:
         that:
           - result.changed == false
