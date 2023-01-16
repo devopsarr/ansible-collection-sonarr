@@ -197,7 +197,7 @@ def run_module():
     except Exception as e:
         module.fail_json('Error retrieving system status: %s' % to_native(e.reason), **result)
 
-    result.update(**response)
+    result.update(response)
 
     module.exit_json(**result)
 

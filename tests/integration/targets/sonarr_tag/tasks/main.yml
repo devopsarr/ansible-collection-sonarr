@@ -16,7 +16,7 @@
     sonarr_api_key: "{{ sonarr_api_key }}"
     sonarr_url: "{{ sonarr_url }}"
   register: result
-- name: assert tag creation
+- name: assert tag idempotency
   assert:
     that:
       - result.changed == false
