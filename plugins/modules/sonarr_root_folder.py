@@ -12,7 +12,7 @@ module: sonarr_root_folder
 
 short_description: Manages Sonarr root folder.
 
-version_added: "1.0.0"
+version_added: "0.0.2"
 
 description: Manages Sonarr root folder.
 
@@ -73,6 +73,8 @@ unmapped_folders:
 '''
 
 from ansible_collections.devopsarr.sonarr.plugins.module_utils.sonarr_module import SonarrModule
+from ansible.module_utils.common.text.converters import to_native
+
 
 try:
     import sonarr
@@ -101,25 +103,38 @@ def run_module():
 
     client = sonarr.RootFolderApi(module.api)
 
-    root_folders = client.list_root_folder()
+    # List resources.
+    try:
+        root_folders = client.list_root_folder()
+    except Exception as e:
+        module.fail_json('Error listing root folders: %s' % to_native(e.reason), **result)
 
+    # Check if a resource is present already.
     for root_folder in root_folders:
         if root_folder['path'] == module.params['path']:
             result.update(root_folder)
 
-    # TODO: add error handling
+    # Create a new resource.
     if module.params['state'] == 'present' and result['id'] == 0:
         result['changed'] = True
+        # Only without check mode.
         if not module.check_mode:
-            response = client.create_root_folder(root_folder_resource={'path': module.params['path']})
+            try:
+                response = client.create_root_folder(root_folder_resource={'path': module.params['path']})
+            except Exception as e:
+                module.fail_json('Error creating root folder: %s' % to_native(e.reason), **result)
             result.update(response)
+
+    # Delete the resource.
     elif module.params['state'] == 'absent' and result['id'] != 0:
         result['changed'] = True
+        # Only without check mode.
         if not module.check_mode:
-            response = client.delete_root_folder(result['id'])
+            try:
+                response = client.delete_root_folder(result['id'])
+            except Exception as e:
+                module.fail_json('Error deleting root folder: %s' % to_native(e.reason), **result)
             result['id'] = 0
-    elif module.check_mode:
-        module.exit_json(**result)
 
     module.exit_json(**result)
 
