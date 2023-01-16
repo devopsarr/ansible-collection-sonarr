@@ -10,7 +10,7 @@ module: sonarr_system_info
 
 short_description: Sonarr system info module
 
-version_added: "1.0.0"
+version_added: "0.0.1"
 
 description: Provide Sonarr system info
 

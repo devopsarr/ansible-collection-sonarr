@@ -1,7 +1,6 @@
-# See https://docs.ansible.com/ansible/latest/dev_guide/collections_galaxy_meta.html
-
 namespace: devopsarr
 name: sonarr
+# Version will be updated by workflow
 version: 0.0.1
 readme: README.md
 authors:
@@ -9,16 +8,14 @@ authors:
 description: "Ansible collection for Sonarr"
 license_file: LICENSE
 tags:
-# tags so people can search for collections https://galaxy.ansible.com/search
-# tags are all lower-case, no spaces, no dashes.
   - sonarr
   - arr
-repository: https://github.com/ansible-collections/devopsarr.sonarr
+  - series
+repository: https://github.com/devopsarr/ansible-collection-sonarr
 #documentation: https://github.com/ansible-collection-migration/devopsarr.sonarr/tree/main/docs
-homepage: https://github.com/ansible-collections/devopsarr.sonarr
-issues: https://github.com/ansible-collections/devopsarr.sonarr/issues
+homepage: https://github.com/devopsarr/ansible-collection-sonarr
+issues: https://github.com/devopsarr/ansible-collection-sonarr/issues
 build_ignore:
-# https://docs.ansible.com/ansible/devel/dev_guide/developing_collections_distributing.html#ignoring-files-and-folders
   - .gitignore
-  - changelogs/.plugin-cache.yaml
   - .github/
+  - changelogs/.plugin-cache.yaml
