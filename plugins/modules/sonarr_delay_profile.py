@@ -167,8 +167,13 @@ def run_module():
 
     client = sonarr.DelayProfileApi(module.api)
 
-    delay_profiles = client.list_delay_profile()
+    # List resources.
+    try:
+        delay_profiles = client.list_delay_profile()
+    except Exception as e:
+        module.fail_json('Error listing dellay profiles: %s' % to_native(e.reason), **result)
 
+    # Check if a resource is present already.
     for profile in delay_profiles:
         if profile['tags'] == module.params['tags']:
             result.update(profile)
@@ -185,25 +190,37 @@ def run_module():
         'tags': module.params['tags'],
     })
 
+    # Create a new resource.
     if module.params['state'] == 'present' and result['id'] == 0:
         result['changed'] = True
-
+        # Only without check mode.
         if not module.check_mode:
-            response = client.create_delay_profile(delay_profile_resource=want)
+            try:
+                response = client.create_delay_profile(delay_profile_resource=want)
+            except Exception as e:
+                module.fail_json('Error creating delay profile: %s' % to_native(e.reason), **result)
             result.update(response)
+
+    # Update an existing resource.
     elif module.params['state'] == 'present':
         want.id = result['id']
         if want != state:
             result['changed'] = True
             if not module.check_mode:
-                response = client.update_delay_profile(delay_profile_resource=want, id=str(want.id))
+                try:
+                    response = client.update_delay_profile(delay_profile_resource=want, id=str(want.id))
+                except Exception as e:
+                    module.fail_json('Error updating delay profile: %s' % to_native(e.reason), **result)
+            result.update(response)
 
-                result.update(response)
-
+    # Delete the resource.
     elif module.params['state'] == 'absent' and result['id'] != 0:
         result['changed'] = True
         if not module.check_mode:
-            response = client.delete_delay_profile(result['id'])
+            try:
+                response = client.delete_delay_profile(result['id'])
+            except Exception as e:
+                    module.fail_json('Error deleting delay profile: %s' % to_native(e.reason), **result)
             result['id'] = 0
 
     module.exit_json(**result)

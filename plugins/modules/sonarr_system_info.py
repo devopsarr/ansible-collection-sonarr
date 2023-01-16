@@ -167,6 +167,8 @@ package_update_mechanism:
 '''
 
 from ansible_collections.devopsarr.sonarr.plugins.module_utils.sonarr_module import SonarrModule
+from ansible.module_utils.common.text.converters import to_native
+
 
 try:
     import sonarr
@@ -182,7 +184,6 @@ def run_module():
         changed=False,
     )
 
-    # init SonarrModule
     module = SonarrModule(
         argument_spec={},
         supports_check_mode=True
@@ -190,9 +191,12 @@ def run_module():
 
     client = sonarr.SystemApi(module.api)
 
-    # get the response from api
-    response = client.get_system_status()
-    # map the response to result
+    # Get the system status.
+    try:
+        response = client.get_system_status()
+    except Exception as e:
+        module.fail_json('Error retrieving system status: %s' % to_native(e.reason), **result)
+
     result.update(**response)
 
     module.exit_json(**result)
