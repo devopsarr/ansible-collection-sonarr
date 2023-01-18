@@ -1,6 +1,7 @@
 .DS_Store
 /tests/output/
 /changelogs/.plugin-cache.yaml
+.github/provider/config.xml
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
