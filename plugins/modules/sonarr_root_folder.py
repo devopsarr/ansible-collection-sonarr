@@ -44,7 +44,7 @@ EXAMPLES = r'''
 # Delete a root folder
 - name: Delete a root_folder
   devopsarr.sonarr.root_folder:
-    path: 'series'
+    path: '/series'
     state: absent
 '''
 
