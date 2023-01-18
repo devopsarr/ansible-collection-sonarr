@@ -1,0 +1,12 @@
+name: CD
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+jobs:
+  cd:
+    uses: devopsarr/shared-workflows/.github/workflows/ansible_collection_cd.yml@main
+    secrets: inherit
