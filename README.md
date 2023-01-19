@@ -1,7 +1,7 @@
 # Sonarr Collection for Ansible
 [![CI](https://github.com/devopsarr/ansible-collection-sonarr/workflows/CI/badge.svg?event=push)](https://github.com/devopsarr/ansible-collection-sonarr/actions) [![Codecov](https://img.shields.io/codecov/c/github/devopsarr/ansible-collection-sonarr)](https://codecov.io/gh/adevopsarr/ansible-collection-sonarr)
 
-Ansible colletion for Sonarr based on [sonarr-py SDK](https://github.com/devopsarr/sonarr-py)
+Ansible collection for Sonarr based on [sonarr-py SDK](https://github.com/devopsarr/sonarr-py)
 ## Code of Conduct
 
 We follow the [Ansible Code of Conduct](https://docs.ansible.com/ansible/devel/community/code_of_conduct.html) in all our interactions within this project.
