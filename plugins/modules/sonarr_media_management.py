@@ -12,7 +12,7 @@ module: sonarr_media_management
 
 short_description: Manages Sonarr media management.
 
-version_added: "0.0.2"
+version_added: "0.0.5"
 
 description: Manages Sonarr media management.
 
@@ -128,7 +128,7 @@ EXAMPLES = r'''
 RETURN = r'''
 # These are examples of possible return values, and in general should use other names for return values.
 id:
-    description: root folder ID.
+    description: Media management ID.
     type: int
     returned: always
     sample: '1'
@@ -270,7 +270,7 @@ def run_module():
 
     client = sonarr.MediaManagementConfigApi(module.api)
 
-    # Get resources.
+    # Get resource.
     try:
         media_management = client.get_media_management_config()
     except Exception as e:
@@ -307,7 +307,7 @@ def run_module():
             try:
                 response = client.update_media_management_config(media_management_config_resource=want, id=str(want.id))
             except Exception as e:
-                module.fail_json('Error updating delay profile: %s' % to_native(e.reason), **result)
+                module.fail_json('Error updating media management: %s' % to_native(e.reason), **result)
         result.update(response)
 
     module.exit_json(**result)
