@@ -12,7 +12,7 @@ module: sonarr_remote_path_mapping
 
 short_description: Manages Sonarr remote path mapping.
 
-version_added: "0.0.2"
+version_added: "0.0.4"
 
 description: Manages Sonarr remote path mapping.
 
