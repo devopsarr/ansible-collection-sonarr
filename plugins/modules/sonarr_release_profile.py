@@ -149,7 +149,7 @@ def run_module():
     try:
         release_profiles = client.list_release_profile()
     except Exception as e:
-        module.fail_json('Error listing dellay profiles: %s' % to_native(e.reason), **result)
+        module.fail_json('Error listing release profiles: %s' % to_native(e.reason), **result)
 
     # Check if a resource is present already.
     for profile in release_profiles:
