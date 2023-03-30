@@ -28,6 +28,10 @@ options:
     torrent_delay:
         description: Torrent delay.
         type: int
+    minimum_custom_format_score:
+        description: Minimum cutoff format score.
+        type: int
+        default: 0
     order:
         description: Order.
         type: int
@@ -39,6 +43,9 @@ options:
         type: bool
     bypass_if_highest_quality:
         description: Bypass if highest quality flag.
+        type: bool
+    bypass_if_above_custom_format_score:
+        description: Bypass if above custom format score flag.
         type: bool
     tags:
         description: Tag list.
@@ -67,9 +74,11 @@ EXAMPLES = r'''
     preferred_protocol: torrent
     usenet_delay: 0
     torrent_delay: 0
+    minimum_custom_format_score: 0
     order: 100
     enable_usenet: true
     enable_torrent: true
+    bypass_if_above_custom_format_score: true
     bypass_if_highest_quality: false
     tags: [1,2]
 
@@ -103,6 +112,11 @@ torrent_delay:
     returned: always
     type: int
     sample: 0
+minimum_custom_format_score:
+    description: Minimum cutoff format score.
+    type: int
+    returned: always
+    sample: 0
 order:
     description: Order.
     returned: always
@@ -120,6 +134,11 @@ enable_torrent:
     sample: true
 bypass_if_highest_quality:
     description: Bypass if highest quality flag.
+    returned: always
+    type: bool
+    sample: true
+bypass_if_above_custom_format_score:
+    description: Bypass if above custom format score flag.
     returned: always
     type: bool
     sample: true
@@ -147,10 +166,12 @@ def run_module():
         preferred_protocol=dict(type='str', required=True, choices=['torrent', 'usenet']),
         usenet_delay=dict(type='int'),
         torrent_delay=dict(type='int'),
+        minimum_custom_format_score=dict(type='int', default=0),
         order=dict(type='int'),
         enable_usenet=dict(type='bool'),
         enable_torrent=dict(type='bool'),
         bypass_if_highest_quality=dict(type='bool'),
+        bypass_if_above_custom_format_score=dict(type='bool'),
         tags=dict(type='list', elements='int', required=True),
         state=dict(default='present', type='str', choices=['present', 'absent']),
     )
@@ -171,7 +192,7 @@ def run_module():
     try:
         delay_profiles = client.list_delay_profile()
     except Exception as e:
-        module.fail_json('Error listing dellay profiles: %s' % to_native(e.reason), **result)
+        module.fail_json('Error listing delay profiles: %s' % to_native(e.reason), **result)
 
     # Check if a resource is present already.
     for profile in delay_profiles:
@@ -185,7 +206,9 @@ def run_module():
         'preferred_protocol': module.params['preferred_protocol'],
         'usenet_delay': module.params['usenet_delay'],
         'torrent_delay': module.params['torrent_delay'],
+        'minimum_custom_format_score': module.params['minimum_custom_format_score'],
         'bypass_if_highest_quality': module.params['bypass_if_highest_quality'],
+        'bypass_if_above_custom_format_score': module.params['bypass_if_above_custom_format_score'],
         'order': module.params['order'],
         'tags': module.params['tags'],
     })
