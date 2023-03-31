@@ -1,0 +1,42 @@
+---
+- name: create tags
+  devopsarr.sonarr.sonarr_tag:
+    label: "{{ item }}"
+    sonarr_api_key: "{{ sonarr_api_key }}"
+    sonarr_url: "{{ sonarr_url }}"
+  with_items:
+    - 'first'
+    - 'second'
+
+- name: list a single tag
+  devopsarr.sonarr.sonarr_tag_info:
+    label: 'second'
+    sonarr_api_key: "{{ sonarr_api_key }}"
+    sonarr_url: "{{ sonarr_url }}"
+  register: result
+
+- name: assert single tag
+  assert:
+    that:
+      - result['tags'][0]['label'] == 'second'
+# ----------------------------------------------------------------------------
+- name: list all tags
+  devopsarr.sonarr.sonarr_tag_info:
+    sonarr_api_key: "{{ sonarr_api_key }}"
+    sonarr_url: "{{ sonarr_url }}"
+  register: result
+
+- name: assert multiple tags
+  assert:
+    that:
+      - result['tags'] | length > 1
+# # ----------------------------------------------------------------------------
+- name: clean up tags
+  devopsarr.sonarr.sonarr_tag:
+    label: "{{ item }}"
+    state: 'absent'
+    sonarr_api_key: "{{ sonarr_api_key }}"
+    sonarr_url: "{{ sonarr_url }}"
+  with_items:
+    - 'first'
+    - 'second'
