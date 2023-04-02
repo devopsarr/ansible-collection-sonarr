@@ -23,7 +23,7 @@ author:
 
 EXAMPLES = r'''
 # It will fetch the system info
-- name: Test with a message
+- name: Get system info
   devopsarr.sonarr.sonarr_system_info:
 '''
 
