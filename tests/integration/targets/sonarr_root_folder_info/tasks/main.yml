@@ -1,0 +1,42 @@
+---
+- name: create root folder
+  devopsarr.sonarr.sonarr_root_folder:
+    path: "{{ item }}"
+    sonarr_api_key: "{{ sonarr_api_key }}"
+    sonarr_url: "{{ sonarr_url }}"
+  with_items:
+    - '/tmp'
+    - '/config'
+
+- name: list a single root folder
+  devopsarr.sonarr.sonarr_root_folder_info:
+    path: "/tmp"
+    sonarr_api_key: "{{ sonarr_api_key }}"
+    sonarr_url: "{{ sonarr_url }}"
+  register: result
+
+- name: assert single root folder
+  assert:
+    that:
+      - result['root_folders'][0]['path'] == '/tmp'
+# ----------------------------------------------------------------------------
+- name: list all root folders
+  devopsarr.sonarr.sonarr_root_folder_info:
+    sonarr_api_key: "{{ sonarr_api_key }}"
+    sonarr_url: "{{ sonarr_url }}"
+  register: result
+
+- name: assert multiple root folders
+  assert:
+    that:
+      - result['root_folders'] | length > 1
+# ----------------------------------------------------------------------------
+- name: clean up root folder
+  devopsarr.sonarr.sonarr_root_folder:
+    path: "/tmp"
+    state: absent
+    sonarr_api_key: "{{ sonarr_api_key }}"
+    sonarr_url: "{{ sonarr_url }}"
+  with_items:
+    - '/tmp'
+    - '/config'
