@@ -19,7 +19,6 @@ description: Manages Sonarr delay profile.
 options:
     preferred_protocol:
         description: Preferred protocol.
-        required: true
         choices: [ "torrent", "usenet" ]
         type: str
     usenet_delay:
@@ -163,7 +162,7 @@ except ImportError:
 def run_module():
     # define available arguments/parameters a user can pass to the module
     module_args = dict(
-        preferred_protocol=dict(type='str', required=True, choices=['torrent', 'usenet']),
+        preferred_protocol=dict(type='str', choices=['torrent', 'usenet']),
         usenet_delay=dict(type='int'),
         torrent_delay=dict(type='int'),
         minimum_custom_format_score=dict(type='int', default=0),

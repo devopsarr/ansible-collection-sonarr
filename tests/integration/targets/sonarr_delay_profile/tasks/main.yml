@@ -67,7 +67,6 @@
     - name: delete delay profile
       devopsarr.sonarr.sonarr_delay_profile:
         tags: ["{{ tag.id }}"]
-        preferred_protocol: 'torrent'
         sonarr_api_key: "{{ sonarr_api_key }}"
         sonarr_url: "{{ sonarr_url }}"
         state: 'absent'

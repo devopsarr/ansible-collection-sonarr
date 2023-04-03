@@ -29,12 +29,13 @@ author:
 '''
 
 EXAMPLES = r'''
+---
 # Gather information about all tags.
 - name: Gather information about all tags
   devopsarr.sonarr.tag_info:
 
 # Gather information about a single tag.
-- name: Gather information about all tags
+- name: Gather information about a single tag
   devopsarr.sonarr.tag_info:
     label: test
 '''
