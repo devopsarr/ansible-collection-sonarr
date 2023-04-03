@@ -1,0 +1,64 @@
+---
+- name: create tag for delay profile
+  devopsarr.sonarr.sonarr_tag:
+    label: "{{ item }}"
+    sonarr_api_key: "{{ sonarr_api_key }}"
+    sonarr_url: "{{ sonarr_url }}"
+  register: tags
+  with_items:
+    - 'delay1'
+    - 'delay2'
+
+- name: create delay profile
+  devopsarr.sonarr.sonarr_delay_profile:
+    preferred_protocol: torrent
+    usenet_delay: 0
+    torrent_delay: 0
+    order: 100
+    enable_usenet: true
+    enable_torrent: true
+    bypass_if_above_custom_format_score: true
+    bypass_if_highest_quality: false
+    tags: ["{{ item.id }}"]
+    sonarr_api_key: "{{ sonarr_api_key }}"
+    sonarr_url: "{{ sonarr_url }}"
+  with_items: "{{ tags.results }}"
+
+- name: list a single delay profile
+  devopsarr.sonarr.sonarr_delay_profile_info:
+    tag: "{{ tags.results[0].id }}"
+    sonarr_api_key: "{{ sonarr_api_key }}"
+    sonarr_url: "{{ sonarr_url }}"
+  register: result
+
+- name: assert single delay profile
+  assert:
+    that:
+      - result['delay_profiles'][0]['preferred_protocol'] == 'torrent'
+# ----------------------------------------------------------------------------
+- name: list all delay profiles
+  devopsarr.sonarr.sonarr_delay_profile_info:
+    sonarr_api_key: "{{ sonarr_api_key }}"
+    sonarr_url: "{{ sonarr_url }}"
+  register: result
+
+- name: assert multiple delay profiles
+  assert:
+    that:
+      - result['delay_profiles'] | length > 2
+# ----------------------------------------------------------------------------
+- name: clean up relay_profiles
+  devopsarr.sonarr.sonarr_delay_profile:
+    tags: ["{{ item.id }}"]
+    state: 'absent'
+    sonarr_api_key: "{{ sonarr_api_key }}"
+    sonarr_url: "{{ sonarr_url }}"
+  with_items: "{{ tags.results }}"
+
+- name: clean up tags
+  devopsarr.sonarr.sonarr_tag:
+    label: "{{ item.label }}"
+    state: 'absent'
+    sonarr_api_key: "{{ sonarr_api_key }}"
+    sonarr_url: "{{ sonarr_url }}"
+  with_items: "{{ tags.results }}"

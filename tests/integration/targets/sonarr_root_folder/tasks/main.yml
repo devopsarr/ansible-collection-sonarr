@@ -1,34 +1,34 @@
 ---
-    - name: create root folder
-      devopsarr.sonarr.sonarr_root_folder:
-        path: '/tmp'
-        sonarr_api_key: "{{ sonarr_api_key }}"
-        sonarr_url: "{{ sonarr_url }}"
-      register: result
-    - name: assert root folder creation
-      assert:
-        that:
-          - result['path'] == '/tmp'
-    # ----------------------------------------------------------------------------
-    - name: create already present root folder
-      devopsarr.sonarr.sonarr_root_folder:
-        path: '/tmp'
-        sonarr_api_key: "{{ sonarr_api_key }}"
-        sonarr_url: "{{ sonarr_url }}"
-      register: result
-    - name: assert root folder idempotency
-      assert:
-        that:
-          - result.changed == false
-    # ----------------------------------------------------------------------------
-    - name: delete root folder
-      devopsarr.sonarr.sonarr_root_folder:
-        path: '/tmp'
-        state: 'absent'
-        sonarr_api_key: "{{ sonarr_api_key }}"
-        sonarr_url: "{{ sonarr_url }}"
-      register: result
-    - name: assert root folder deletion
-      assert:
-        that:
-          - result['id'] == 0
+- name: create root folder
+  devopsarr.sonarr.sonarr_root_folder:
+    path: '/tmp'
+    sonarr_api_key: "{{ sonarr_api_key }}"
+    sonarr_url: "{{ sonarr_url }}"
+  register: result
+- name: assert root folder creation
+  assert:
+    that:
+      - result['path'] == '/tmp'
+# ----------------------------------------------------------------------------
+- name: create already present root folder
+  devopsarr.sonarr.sonarr_root_folder:
+    path: '/tmp'
+    sonarr_api_key: "{{ sonarr_api_key }}"
+    sonarr_url: "{{ sonarr_url }}"
+  register: result
+- name: assert root folder idempotency
+  assert:
+    that:
+      - result.changed == false
+# ----------------------------------------------------------------------------
+- name: delete root folder
+  devopsarr.sonarr.sonarr_root_folder:
+    path: '/tmp'
+    state: 'absent'
+    sonarr_api_key: "{{ sonarr_api_key }}"
+    sonarr_url: "{{ sonarr_url }}"
+  register: result
+- name: assert root folder deletion
+  assert:
+    that:
+      - result['id'] == 0

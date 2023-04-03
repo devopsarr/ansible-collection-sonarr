@@ -1,78 +1,77 @@
 ---
-    - name: create tag for delay profile
-      devopsarr.sonarr.sonarr_tag:
-        label: "delay_profile_test"
-        sonarr_api_key: "{{ sonarr_api_key }}"
-        sonarr_url: "{{ sonarr_url }}"
-      register: tag
-    - name: create delay profile
-      devopsarr.sonarr.sonarr_delay_profile:
-        preferred_protocol: torrent
-        usenet_delay: 0
-        torrent_delay: 0
-        order: 100
-        enable_usenet: true
-        enable_torrent: true
-        bypass_if_above_custom_format_score: true
-        bypass_if_highest_quality: false
-        tags: ["{{ tag.id }}"]
-        sonarr_api_key: "{{ sonarr_api_key }}"
-        sonarr_url: "{{ sonarr_url }}"
-      register: result
-    - name: assert delay profile creation
-      assert:
-        that:
-          - result['preferred_protocol'] == 'torrent'
-    # ----------------------------------------------------------------------------
-    - name: edit already present delay profile
-      devopsarr.sonarr.sonarr_delay_profile:
-        preferred_protocol: torrent
-        usenet_delay: 10
-        torrent_delay: 0
-        order: 100
-        enable_usenet: true
-        enable_torrent: true
-        bypass_if_above_custom_format_score: true
-        bypass_if_highest_quality: false
-        tags: ["{{ tag.id }}"]
-        sonarr_api_key: "{{ sonarr_api_key }}"
-        sonarr_url: "{{ sonarr_url }}"
-      register: result
-    - name: assert delay profile changes
-      assert:
-        that:
-          - result.changed == true
-          - result.usenet_delay == 10
-    # ----------------------------------------------------------------------------
-    - name: test idempotency
-      devopsarr.sonarr.sonarr_delay_profile:
-        preferred_protocol: torrent
-        usenet_delay: 10
-        torrent_delay: 0
-        order: 100
-        enable_usenet: true
-        enable_torrent: true
-        bypass_if_above_custom_format_score: true
-        bypass_if_highest_quality: false
-        tags: ["{{ tag.id }}"]
-        sonarr_api_key: "{{ sonarr_api_key }}"
-        sonarr_url: "{{ sonarr_url }}"
-      register: result
-    - name: assert delay profile idempotency
-      assert:
-        that:
-          - result.changed == false
-          - result.usenet_delay == 10
-    # ----------------------------------------------------------------------------
-    - name: delete delay profile
-      devopsarr.sonarr.sonarr_delay_profile:
-        tags: ["{{ tag.id }}"]
-        preferred_protocol: 'torrent'
-        sonarr_api_key: "{{ sonarr_api_key }}"
-        sonarr_url: "{{ sonarr_url }}"
-        state: 'absent'
-      register: result
-    - name: assert delay profile deletion
-      assert:
-        that:
-          - result['id'] == 0
+- name: create tag for delay profile
+  devopsarr.sonarr.sonarr_tag:
+    label: "delay_profile_test"
+    sonarr_api_key: "{{ sonarr_api_key }}"
+    sonarr_url: "{{ sonarr_url }}"
+  register: tag
+- name: create delay profile
+  devopsarr.sonarr.sonarr_delay_profile:
+    preferred_protocol: torrent
+    usenet_delay: 0
+    torrent_delay: 0
+    order: 100
+    enable_usenet: true
+    enable_torrent: true
+    bypass_if_above_custom_format_score: true
+    bypass_if_highest_quality: false
+    tags: ["{{ tag.id }}"]
+    sonarr_api_key: "{{ sonarr_api_key }}"
+    sonarr_url: "{{ sonarr_url }}"
+  register: result
+- name: assert delay profile creation
+  assert:
+    that:
+      - result['preferred_protocol'] == 'torrent'
+# ----------------------------------------------------------------------------
+- name: edit already present delay profile
+  devopsarr.sonarr.sonarr_delay_profile:
+    preferred_protocol: torrent
+    usenet_delay: 10
+    torrent_delay: 0
+    order: 100
+    enable_usenet: true
+    enable_torrent: true
+    bypass_if_above_custom_format_score: true
+    bypass_if_highest_quality: false
+    tags: ["{{ tag.id }}"]
+    sonarr_api_key: "{{ sonarr_api_key }}"
+    sonarr_url: "{{ sonarr_url }}"
+  register: result
+- name: assert delay profile changes
+  assert:
+    that:
+      - result.changed == true
+      - result.usenet_delay == 10
+# ----------------------------------------------------------------------------
+- name: test idempotency
+  devopsarr.sonarr.sonarr_delay_profile:
+    preferred_protocol: torrent
+    usenet_delay: 10
+    torrent_delay: 0
+    order: 100
+    enable_usenet: true
+    enable_torrent: true
+    bypass_if_above_custom_format_score: true
+    bypass_if_highest_quality: false
+    tags: ["{{ tag.id }}"]
+    sonarr_api_key: "{{ sonarr_api_key }}"
+    sonarr_url: "{{ sonarr_url }}"
+  register: result
+- name: assert delay profile idempotency
+  assert:
+    that:
+      - result.changed == false
+      - result.usenet_delay == 10
+# ----------------------------------------------------------------------------
+- name: delete delay profile
+  devopsarr.sonarr.sonarr_delay_profile:
+    tags: ["{{ tag.id }}"]
+    sonarr_api_key: "{{ sonarr_api_key }}"
+    sonarr_url: "{{ sonarr_url }}"
+    state: 'absent'
+  register: result
+- name: assert delay profile deletion
+  assert:
+    that:
+      - result['id'] == 0

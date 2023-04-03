@@ -102,6 +102,7 @@ author:
 '''
 
 EXAMPLES = r'''
+---
 # update media management
 - name: Update media management
   devopsarr.sonarr.media_management:
@@ -265,7 +266,7 @@ def run_module():
 
     module = SonarrModule(
         argument_spec=module_args,
-        supports_check_mode=True
+        supports_check_mode=True,
     )
 
     client = sonarr.MediaManagementConfigApi(module.api)
@@ -276,7 +277,7 @@ def run_module():
     except Exception as e:
         module.fail_json('Error getting media managements: %s' % to_native(e.reason), **result)
 
-    result.update(media_management)
+    result.update(media_management.dict(by_alias=False))
 
     want = sonarr.MediaManagementConfigResource(**{
         'chmod_folder': module.params['chmod_folder'],
@@ -308,7 +309,7 @@ def run_module():
                 response = client.update_media_management_config(media_management_config_resource=want, id=str(want.id))
             except Exception as e:
                 module.fail_json('Error updating media management: %s' % to_native(e.reason), **result)
-        result.update(response)
+        result.update(response.dict(by_alias=False))
 
     module.exit_json(**result)
 

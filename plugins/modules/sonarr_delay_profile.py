@@ -19,7 +19,6 @@ description: Manages Sonarr delay profile.
 options:
     preferred_protocol:
         description: Preferred protocol.
-        required: true
         choices: [ "torrent", "usenet" ]
         type: str
     usenet_delay:
@@ -163,7 +162,7 @@ except ImportError:
 def run_module():
     # define available arguments/parameters a user can pass to the module
     module_args = dict(
-        preferred_protocol=dict(type='str', required=True, choices=['torrent', 'usenet']),
+        preferred_protocol=dict(type='str', choices=['torrent', 'usenet']),
         usenet_delay=dict(type='int'),
         torrent_delay=dict(type='int'),
         minimum_custom_format_score=dict(type='int', default=0),
@@ -183,7 +182,7 @@ def run_module():
 
     module = SonarrModule(
         argument_spec=module_args,
-        supports_check_mode=True
+        supports_check_mode=True,
     )
 
     client = sonarr.DelayProfileApi(module.api)
@@ -197,7 +196,7 @@ def run_module():
     # Check if a resource is present already.
     for profile in delay_profiles:
         if profile['tags'] == module.params['tags']:
-            result.update(profile)
+            result.update(profile.dict(by_alias=False))
             state = profile
 
     want = sonarr.DelayProfileResource(**{
@@ -222,7 +221,7 @@ def run_module():
                 response = client.create_delay_profile(delay_profile_resource=want)
             except Exception as e:
                 module.fail_json('Error creating delay profile: %s' % to_native(e.reason), **result)
-            result.update(response)
+            result.update(response.dict(by_alias=False))
 
     # Update an existing resource.
     elif module.params['state'] == 'present':
@@ -234,7 +233,7 @@ def run_module():
                     response = client.update_delay_profile(delay_profile_resource=want, id=str(want.id))
                 except Exception as e:
                     module.fail_json('Error updating delay profile: %s' % to_native(e.reason), **result)
-            result.update(response)
+            result.update(response.dict(by_alias=False))
 
     # Delete the resource.
     elif module.params['state'] == 'absent' and result['id'] != 0:

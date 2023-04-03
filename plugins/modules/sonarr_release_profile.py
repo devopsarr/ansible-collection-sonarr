@@ -140,7 +140,7 @@ def run_module():
 
     module = SonarrModule(
         argument_spec=module_args,
-        supports_check_mode=True
+        supports_check_mode=True,
     )
 
     client = sonarr.ReleaseProfileApi(module.api)
@@ -154,7 +154,7 @@ def run_module():
     # Check if a resource is present already.
     for profile in release_profiles:
         if profile['name'] == module.params['name']:
-            result.update(profile)
+            result.update(profile.dict(by_alias=False))
             state = profile
 
     want = sonarr.ReleaseProfileResource(**{
@@ -175,7 +175,7 @@ def run_module():
                 response = client.create_release_profile(release_profile_resource=want)
             except Exception as e:
                 module.fail_json('Error creating release profile: %s' % to_native(e.reason), **result)
-            result.update(response)
+            result.update(response.dict(by_alias=False))
 
     # Update an existing resource.
     elif module.params['state'] == 'present':
@@ -187,7 +187,7 @@ def run_module():
                     response = client.update_release_profile(release_profile_resource=want, id=str(want.id))
                 except Exception as e:
                     module.fail_json('Error updating release profile: %s' % to_native(e.reason), **result)
-            result.update(response)
+            result.update(response.dict(by_alias=False))
 
     # Delete the resource.
     elif module.params['state'] == 'absent' and result['id'] != 0:

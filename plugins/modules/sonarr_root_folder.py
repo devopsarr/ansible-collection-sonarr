@@ -36,6 +36,7 @@ author:
 '''
 
 EXAMPLES = r'''
+---
 # Create a root folder
 - name: Create a root folder
   devopsarr.sonarr.root_folder:
@@ -112,7 +113,7 @@ def run_module():
     # Check if a resource is present already.
     for root_folder in root_folders:
         if root_folder['path'] == module.params['path']:
-            result.update(root_folder)
+            result.update(root_folder.dict(by_alias=False))
 
     # Create a new resource.
     if module.params['state'] == 'present' and result['id'] == 0:
@@ -123,7 +124,7 @@ def run_module():
                 response = client.create_root_folder(root_folder_resource={'path': module.params['path']})
             except Exception as e:
                 module.fail_json('Error creating root folder: %s' % to_native(e.reason), **result)
-            result.update(response)
+            result.update(response.dict(by_alias=False))
 
     # Delete the resource.
     elif module.params['state'] == 'absent' and result['id'] != 0:

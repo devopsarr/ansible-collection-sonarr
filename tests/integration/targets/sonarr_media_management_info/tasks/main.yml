@@ -1,0 +1,10 @@
+---
+- name: get info
+  devopsarr.sonarr.sonarr_media_management_info:
+    sonarr_api_key: "{{ sonarr_api_key }}"
+    sonarr_url: "{{ sonarr_url }}"
+  register: result
+- name: assert info population
+  assert:
+    that:
+      - result['id'] == 1

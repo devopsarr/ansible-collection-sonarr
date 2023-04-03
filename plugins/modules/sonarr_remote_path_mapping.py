@@ -44,6 +44,7 @@ author:
 '''
 
 EXAMPLES = r'''
+---
 # Create a remote path mapping
 - name: Create a remote path mapping
   devopsarr.sonarr.remote_path_mapping:
@@ -112,7 +113,7 @@ def run_module():
 
     module = SonarrModule(
         argument_spec=module_args,
-        supports_check_mode=True
+        supports_check_mode=True,
     )
 
     client = sonarr.RemotePathMappingApi(module.api)
@@ -128,7 +129,7 @@ def run_module():
         if remote_path_mapping['host'] == module.params['host'] and \
            remote_path_mapping['remote_path'] == module.params['remote_path'] and \
            remote_path_mapping['local_path'] == module.params['local_path']:
-            result.update(remote_path_mapping)
+            result.update(remote_path_mapping.dict(by_alias=False))
 
     want = sonarr.RemotePathMappingResource(**{
         'host': module.params['host'],
@@ -145,7 +146,7 @@ def run_module():
                 response = client.create_remote_path_mapping(remote_path_mapping_resource=want)
             except Exception as e:
                 module.fail_json('Error creating remote path mapping: %s' % to_native(e.reason), **result)
-            result.update(response)
+            result.update(response.dict(by_alias=False))
 
     # Delete the resource.
     elif module.params['state'] == 'absent' and result['id'] != 0:
