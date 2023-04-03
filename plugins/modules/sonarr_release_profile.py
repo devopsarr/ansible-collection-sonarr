@@ -140,7 +140,7 @@ def run_module():
 
     module = SonarrModule(
         argument_spec=module_args,
-        supports_check_mode=True
+        supports_check_mode=True,
     )
 
     client = sonarr.ReleaseProfileApi(module.api)

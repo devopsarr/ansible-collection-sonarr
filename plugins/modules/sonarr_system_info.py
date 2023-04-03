@@ -186,7 +186,7 @@ def run_module():
 
     module = SonarrModule(
         argument_spec={},
-        supports_check_mode=True
+        supports_check_mode=True,
     )
 
     client = sonarr.SystemApi(module.api)

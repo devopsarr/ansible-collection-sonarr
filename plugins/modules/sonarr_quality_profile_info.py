@@ -106,7 +106,7 @@ def run_module():
     # define available arguments/parameters a user can pass to the module
     module_args = dict(
         name=dict(type='str'),
-   )
+    )
 
     result = dict(
         changed=False,
@@ -115,6 +115,7 @@ def run_module():
 
     module = SonarrModule(
         argument_spec=module_args,
+        supports_check_mode=True,
     )
 
     client = sonarr.QualityProfileApi(module.api)
@@ -133,7 +134,7 @@ def run_module():
                 profiles = [profile.dict(by_alias=False)]
         else:
             profiles.append(profile.dict(by_alias=False))
-    
+
     result.update(quality_profiles=profiles)
 
     module.exit_json(**result)

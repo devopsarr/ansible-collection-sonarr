@@ -1,0 +1,47 @@
+---
+- name: create remote path mapping
+  devopsarr.sonarr.sonarr_remote_path_mapping:
+    host: '{{ item }}'
+    remote_path: '/tmp/'
+    local_path: '/tmp/'
+    sonarr_api_key: "{{ sonarr_api_key }}"
+    sonarr_url: "{{ sonarr_url }}"
+  register: remote_path_mappings
+  with_items:
+    - 'info_test'
+    - 'info_test1'
+
+- name: list a single remote path mapping
+  devopsarr.sonarr.sonarr_remote_path_mapping_info:
+    id: "{{ remote_path_mappings['results'][0]['id'] }}"
+    sonarr_api_key: "{{ sonarr_api_key }}"
+    sonarr_url: "{{ sonarr_url }}"
+  register: result
+
+- name: assert single remote path mapping
+  assert:
+    that:
+      - result['remote_path_mappings'][0]['host'] == 'info_test'
+# ----------------------------------------------------------------------------
+- name: list all remote path mappings
+  devopsarr.sonarr.sonarr_remote_path_mapping_info:
+    sonarr_api_key: "{{ sonarr_api_key }}"
+    sonarr_url: "{{ sonarr_url }}"
+  register: result
+
+- name: assert multiple remote path mappings
+  assert:
+    that:
+      - result['remote_path_mappings'] | length > 1
+# ----------------------------------------------------------------------------
+- name: clean up remote path mapping
+  devopsarr.sonarr.sonarr_remote_path_mapping:
+    host: '{{ item }}'
+    remote_path: '/tmp/'
+    local_path: '/tmp/'
+    state: absent
+    sonarr_api_key: "{{ sonarr_api_key }}"
+    sonarr_url: "{{ sonarr_url }}"
+  with_items:
+    - 'info_test'
+    - 'info_test1'
