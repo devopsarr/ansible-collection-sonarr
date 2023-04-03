@@ -63,7 +63,7 @@ author:
 '''
 
 EXAMPLES = r'''
-# update media management
+# update naming
 - name: Update naming
   devopsarr.sonarr.naming:
     rename_episodes: true

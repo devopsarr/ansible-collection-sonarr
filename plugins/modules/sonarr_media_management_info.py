@@ -10,11 +10,11 @@ DOCUMENTATION = r'''
 ---
 module: sonarr_media_management_info
 
-short_description: Get information about Sonarr.
+short_description: Get information about Sonarr media management.
 
 version_added: "0.5.0"
 
-description: Get information about Sonarr.
+description: Get information about Sonarr media management.
 
 extends_documentation_fragment:
     - devopsarr.sonarr.sonarr_credentials
@@ -146,7 +146,7 @@ def run_module():
 
     module = SonarrModule(
         argument_spec={},
-        supports_check_mode=True
+        supports_check_mode=True,
     )
 
     client = sonarr.MediaManagementConfigApi(module.api)
