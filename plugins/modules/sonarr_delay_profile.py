@@ -196,7 +196,7 @@ def run_module():
     # Check if a resource is present already.
     for profile in delay_profiles:
         if profile['tags'] == module.params['tags']:
-            result.update(profile)
+            result.update(profile.dict(by_alias=False))
             state = profile
 
     want = sonarr.DelayProfileResource(**{
@@ -221,7 +221,7 @@ def run_module():
                 response = client.create_delay_profile(delay_profile_resource=want)
             except Exception as e:
                 module.fail_json('Error creating delay profile: %s' % to_native(e.reason), **result)
-            result.update(response)
+            result.update(response.dict(by_alias=False))
 
     # Update an existing resource.
     elif module.params['state'] == 'present':
@@ -233,7 +233,7 @@ def run_module():
                     response = client.update_delay_profile(delay_profile_resource=want, id=str(want.id))
                 except Exception as e:
                     module.fail_json('Error updating delay profile: %s' % to_native(e.reason), **result)
-            result.update(response)
+            result.update(response.dict(by_alias=False))
 
     # Delete the resource.
     elif module.params['state'] == 'absent' and result['id'] != 0:

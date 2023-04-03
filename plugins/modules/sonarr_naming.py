@@ -63,6 +63,7 @@ author:
 '''
 
 EXAMPLES = r'''
+---
 # update naming
 - name: Update naming
   devopsarr.sonarr.naming:
@@ -174,7 +175,7 @@ def run_module():
     except Exception as e:
         module.fail_json('Error getting naming: %s' % to_native(e.reason), **result)
 
-    result.update(naming)
+    result.update(naming.dict(by_alias=False))
 
     want = sonarr.NamingConfigResource(**{
         'standard_episode_format': module.params['standard_episode_format'],
@@ -204,7 +205,7 @@ def run_module():
                 response = client.update_naming_config(naming_config_resource=want, id=str(want.id))
             except Exception as e:
                 module.fail_json('Error updating naming: %s' % to_native(e.reason), **result)
-        result.update(response)
+        result.update(response.dict(by_alias=False))
 
     module.exit_json(**result)
 

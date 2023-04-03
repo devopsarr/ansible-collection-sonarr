@@ -24,6 +24,7 @@ author:
 '''
 
 EXAMPLES = r'''
+---
 # fetch media management
 - name: fetch media management info
   devopsarr.sonarr.media_management_info:
@@ -157,7 +158,7 @@ def run_module():
     except Exception as e:
         module.fail_json('Error getting media managements: %s' % to_native(e.reason), **result)
 
-    result.update(media_management)
+    result.update(media_management.dict(by_alias=False))
 
     module.exit_json(**result)
 

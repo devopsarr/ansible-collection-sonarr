@@ -22,6 +22,7 @@ author:
 '''
 
 EXAMPLES = r'''
+---
 # It will fetch the system info
 - name: Get system info
   devopsarr.sonarr.sonarr_system_info:
@@ -197,7 +198,7 @@ def run_module():
     except Exception as e:
         module.fail_json('Error retrieving system status: %s' % to_native(e.reason), **result)
 
-    result.update(response)
+    result.update(response.dict(by_alias=False))
 
     module.exit_json(**result)
 

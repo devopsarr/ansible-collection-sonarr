@@ -24,6 +24,7 @@ author:
 '''
 
 EXAMPLES = r'''
+---
 # fetch naming
 - name: Update naming
   devopsarr.sonarr.naming_info:
@@ -112,7 +113,7 @@ def run_module():
     except Exception as e:
         module.fail_json('Error getting naming: %s' % to_native(e.reason), **result)
 
-    result.update(naming)
+    result.update(naming.dict(by_alias=False))
 
     module.exit_json(**result)
 

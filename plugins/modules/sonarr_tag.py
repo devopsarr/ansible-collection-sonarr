@@ -36,6 +36,7 @@ author:
 '''
 
 EXAMPLES = r'''
+---
 # Create a tag
 - name: Create a tag
   devopsarr.sonarr.tag:
@@ -101,7 +102,7 @@ def run_module():
     # Check if a resource is present already.
     for tag in tags:
         if tag['label'] == module.params['label']:
-            result.update(tag)
+            result.update(tag.dict(by_alias=False))
 
     # Create a new resource.
     if module.params['state'] == 'present' and result['id'] == 0:
@@ -114,7 +115,7 @@ def run_module():
                 })
             except Exception as e:
                 module.fail_json('Error creating tag: %s' % to_native(e.reason), **result)
-            result.update(response)
+            result.update(response.dict(by_alias=False))
 
     # Delete the resource.
     elif module.params['state'] == 'absent' and result['id'] != 0:
