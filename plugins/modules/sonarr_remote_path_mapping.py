@@ -131,6 +131,19 @@ def run_module():
            remote_path_mapping['local_path'] == module.params['local_path']:
             result.update(remote_path_mapping.dict(by_alias=False))
 
+    # Delete the resource if needed.
+    if module.params['state'] == 'absent':
+        if result['id'] != 0:
+            result['changed'] = True
+            # Only without check mode.
+            if not module.check_mode:
+                try:
+                    response = client.delete_remote_path_mapping(result['id'])
+                except Exception as e:
+                    module.fail_json('Error deleting remote path mapping: %s' % to_native(e.reason), **result)
+                result['id'] = 0
+        module.exit_json(**result)
+
     want = sonarr.RemotePathMappingResource(**{
         'host': module.params['host'],
         'remote_path': module.params['remote_path'],
@@ -138,7 +151,7 @@ def run_module():
     })
 
     # Create a new resource.
-    if module.params['state'] == 'present' and result['id'] == 0:
+    if result['id'] == 0:
         result['changed'] = True
         # Only without check mode.
         if not module.check_mode:
@@ -147,17 +160,6 @@ def run_module():
             except Exception as e:
                 module.fail_json('Error creating remote path mapping: %s' % to_native(e.reason), **result)
             result.update(response.dict(by_alias=False))
-
-    # Delete the resource.
-    elif module.params['state'] == 'absent' and result['id'] != 0:
-        result['changed'] = True
-        # Only without check mode.
-        if not module.check_mode:
-            try:
-                response = client.delete_remote_path_mapping(result['id'])
-            except Exception as e:
-                module.fail_json('Error deleting remote path mapping: %s' % to_native(e.reason), **result)
-            result['id'] = 0
 
     module.exit_json(**result)
 
