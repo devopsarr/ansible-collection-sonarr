@@ -162,13 +162,13 @@ min_format_score:
     returned: always
     type: int
     sample: 0
-quality_groups:
+items:
     description: Quality groups
     returned: always
     type: list
     elements: dict
     sample: []
-formats:
+format_items:
     description: Format items list.
     returned: always
     type: list
