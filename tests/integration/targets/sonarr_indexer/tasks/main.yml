@@ -1,0 +1,143 @@
+---
+- name: create indexer
+  devopsarr.sonarr.sonarr_indexer:
+    name: "Example"
+    enable_automatic_search: false
+    enable_interactive_search: false
+    enable_rss: false
+    priority: 10
+    config_contract: "FanzubSettings"
+    implementation: "Fanzub"
+    protocol: "usenet"
+    anime_standard_format_search: true
+    base_url: "http://fanzub.com/rss/"
+    sonarr_api_key: "{{ sonarr_api_key }}"
+    sonarr_url: "{{ sonarr_url }}"
+  register: result
+- name: assert indexer creation
+  assert:
+    that:
+      - result['implementation'] == 'Fanzub'
+# ----------------------------------------------------------------------------
+- name: edit already present indexer
+  devopsarr.sonarr.sonarr_indexer:
+    name: "Example"
+    enable_automatic_search: false
+    enable_interactive_search: false
+    enable_rss: false
+    priority: 10
+    config_contract: "FanzubSettings"
+    implementation: "Fanzub"
+    protocol: "usenet"
+    anime_standard_format_search: false
+    base_url: "http://fanzub.com/rss/"
+    sonarr_api_key: "{{ sonarr_api_key }}"
+    sonarr_url: "{{ sonarr_url }}"
+  register: result
+- name: assert indexer changes
+  assert:
+    that:
+      - result.changed == true
+# ----------------------------------------------------------------------------
+- name: test idempotency
+  devopsarr.sonarr.sonarr_indexer:
+    name: "Example"
+    enable_automatic_search: false
+    enable_interactive_search: false
+    enable_rss: false
+    priority: 10
+    config_contract: "FanzubSettings"
+    implementation: "Fanzub"
+    protocol: "usenet"
+    anime_standard_format_search: false
+    base_url: "http://fanzub.com/rss/"
+    sonarr_api_key: "{{ sonarr_api_key }}"
+    sonarr_url: "{{ sonarr_url }}"
+  register: result
+- name: assert indexer idempotency
+  assert:
+    that:
+      - result.changed == false
+# ----------------------------------------------------------------------------
+- name: delete indexer
+  devopsarr.sonarr.sonarr_indexer:
+    name: "Example"
+    sonarr_api_key: "{{ sonarr_api_key }}"
+    sonarr_url: "{{ sonarr_url }}"
+    state: 'absent'
+  register: result
+- name: assert indexer deletion
+  assert:
+    that:
+      - result['id'] == 0
+# ----------------------------------------------------------------------------
+- name: create another indexer with sensitive values
+  devopsarr.sonarr.sonarr_indexer:
+    name: "Example"
+    enable_automatic_search: false
+    enable_interactive_search: false
+    enable_rss: false
+    priority: 10
+    config_contract: "BroadcastheNetSettings"
+    implementation: "BroadcastheNet"
+    protocol: "torrent"
+    api_key: "test"
+    minimum_seeders: 0
+    base_url: "https://api.broadcasthe.net/"
+    sonarr_api_key: "{{ sonarr_api_key }}"
+    sonarr_url: "{{ sonarr_url }}"
+  register: result
+- name: assert indexer creation
+  assert:
+    that:
+      - result['implementation'] == 'BroadcastheNet'
+# ----------------------------------------------------------------------------
+- name: test idempotency
+  devopsarr.sonarr.sonarr_indexer:
+    name: "Example"
+    enable_automatic_search: false
+    enable_interactive_search: false
+    enable_rss: false
+    priority: 10
+    config_contract: "BroadcastheNetSettings"
+    implementation: "BroadcastheNet"
+    protocol: "torrent"
+    api_key: "test1"
+    minimum_seeders: 0
+    base_url: "https://api.broadcasthe.net/"
+    sonarr_api_key: "{{ sonarr_api_key }}"
+    sonarr_url: "{{ sonarr_url }}"
+  register: result
+- name: assert indexer idempotency
+  assert:
+    that:
+      - result.changed == false
+# ----------------------------------------------------------------------------
+- name: test key change
+  devopsarr.sonarr.sonarr_indexer:
+    name: "Example"
+    enable_automatic_search: false
+    enable_interactive_search: false
+    enable_rss: false
+    priority: 10
+    config_contract: "BroadcastheNetSettings"
+    implementation: "BroadcastheNet"
+    protocol: "torrent"
+    api_key: "test1"
+    minimum_seeders: 0
+    update_secrets: true
+    base_url: "https://api.broadcasthe.net/"
+    sonarr_api_key: "{{ sonarr_api_key }}"
+    sonarr_url: "{{ sonarr_url }}"
+  register: result
+- name: assert indexer idempotency
+  assert:
+    that:
+      - result.changed == true
+# ----------------------------------------------------------------------------
+- name: clean up
+  devopsarr.sonarr.sonarr_indexer:
+    name: "Example"
+    state: absent
+    sonarr_api_key: "{{ sonarr_api_key }}"
+    sonarr_url: "{{ sonarr_url }}"
