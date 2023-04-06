@@ -31,7 +31,7 @@ author:
 EXAMPLES = r'''
 ---
 # Gather information about all quality profiles.
-- name: Gather information about all delay profiles
+- name: Gather information about all quality profiles
   devopsarr.sonarr.quality_profile_info:
 
 # Gather information about a single quality profile.

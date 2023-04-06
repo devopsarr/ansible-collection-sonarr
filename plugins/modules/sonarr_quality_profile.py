@@ -162,13 +162,13 @@ min_format_score:
     returned: always
     type: int
     sample: 0
-quality_groups:
+items:
     description: Quality groups
     returned: always
     type: list
     elements: dict
     sample: []
-formats:
+format_items:
     description: Format items list.
     returned: always
     type: list
@@ -222,6 +222,18 @@ def run_module():
         if profile['name'] == module.params['name']:
             result.update(profile.dict(by_alias=False))
             state = profile
+
+    # Delete the resource if needed.
+    if module.params['state'] == 'absent':
+        if result['id'] != 0:
+            result['changed'] = True
+            if not module.check_mode:
+                try:
+                    response = client.delete_quality_profile(result['id'])
+                except Exception as e:
+                    module.fail_json('Error deleting quality profile: %s' % to_native(e.reason), **result)
+                result['id'] = 0
+        module.exit_json(**result)
 
     # Populate quality groups.
     quality_groups = []
@@ -278,7 +290,7 @@ def run_module():
     })
 
     # Create a new resource.
-    if module.params['state'] == 'present' and result['id'] == 0:
+    if result['id'] == 0:
         result['changed'] = True
         # Only without check mode.
         if not module.check_mode:
@@ -287,28 +299,18 @@ def run_module():
             except Exception as e:
                 module.fail_json('Error creating quality profile: %s' % to_native(e.reason), **result)
             result.update(response.dict(by_alias=False))
+        module.exit_json(**result)
 
     # Update an existing resource.
-    elif module.params['state'] == 'present':
-        want.id = result['id']
-        if want != state:
-            result['changed'] = True
-            if not module.check_mode:
-                try:
-                    response = client.update_quality_profile(quality_profile_resource=want, id=str(want.id))
-                except Exception as e:
-                    module.fail_json('Error updating quality profile: %s' % to_native(e.reason), **result)
-            result.update(response.dict(by_alias=False))
-
-    # Delete the resource.
-    elif module.params['state'] == 'absent' and result['id'] != 0:
+    want.id = result['id']
+    if want != state:
         result['changed'] = True
         if not module.check_mode:
             try:
-                response = client.delete_quality_profile(result['id'])
+                response = client.update_quality_profile(quality_profile_resource=want, id=str(want.id))
             except Exception as e:
-                module.fail_json('Error deleting quality profile: %s' % to_native(e.reason), **result)
-            result['id'] = 0
+                module.fail_json('Error updating quality profile: %s' % to_native(e.reason), **result)
+        result.update(response.dict(by_alias=False))
 
     module.exit_json(**result)
 

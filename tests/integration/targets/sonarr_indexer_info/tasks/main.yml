@@ -1,0 +1,51 @@
+---
+- name: create indexer
+  devopsarr.sonarr.sonarr_indexer:
+    name: "{{ item }}"
+    enable_automatic_search: false
+    enable_interactive_search: false
+    enable_rss: false
+    priority: 10
+    config_contract: "FanzubSettings"
+    implementation: "Fanzub"
+    protocol: "usenet"
+    anime_standard_format_search: true
+    base_url: "http://fanzub.com/rss/"
+    sonarr_api_key: "{{ sonarr_api_key }}"
+    sonarr_url: "{{ sonarr_url }}"
+  with_items:
+    - 'info_test'
+    - 'info_test1'
+
+- name: list a single indexer
+  devopsarr.sonarr.sonarr_indexer_info:
+    name: "info_test"
+    sonarr_api_key: "{{ sonarr_api_key }}"
+    sonarr_url: "{{ sonarr_url }}"
+  register: result
+
+- name: assert single indexer
+  assert:
+    that:
+      - result['indexers'][0]['name'] == 'info_test'
+# ----------------------------------------------------------------------------
+- name: list all indexers
+  devopsarr.sonarr.sonarr_indexer_info:
+    sonarr_api_key: "{{ sonarr_api_key }}"
+    sonarr_url: "{{ sonarr_url }}"
+  register: result
+
+- name: assert multiple indexers
+  assert:
+    that:
+      - result['indexers'] | length > 1
+# ----------------------------------------------------------------------------
+- name: clean up indexer
+  devopsarr.sonarr.sonarr_indexer:
+    name: "{{ item }}"
+    state: absent
+    sonarr_api_key: "{{ sonarr_api_key }}"
+    sonarr_url: "{{ sonarr_url }}"
+  with_items:
+    - 'info_test'
+    - 'info_test1'
