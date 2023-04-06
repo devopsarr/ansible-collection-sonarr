@@ -225,7 +225,8 @@ except ImportError:
     HAS_SONARR_LIBRARY = False
 
 
-def changed(want, status) -> bool:
+def changed(want, status):
+    # type: (sonarr.IndexerResource,sonarr.IndexerResource) -> bool
     if (want.name != status.name or
             want.enable_automatic_search != status.enable_automatic_search or
             want.enable_interactive_search != status.enable_interactive_search or

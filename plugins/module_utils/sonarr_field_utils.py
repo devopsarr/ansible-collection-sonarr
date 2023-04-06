@@ -14,10 +14,8 @@ from ansible_collections.devopsarr.sonarr.plugins.module_utils.sonarr_module imp
 
 
 class FieldException():
-    api: str
-    py: str
-
-    def __init__(self, api: str, py: str) -> None:
+    def __init__(self, api, py):
+        # type: (str, str) -> None
         self.api = api
         self.py = py
 
@@ -26,36 +24,41 @@ class FieldException():
 
 
 class FieldHelper():
-    fields: list[str]
-    exceptions = [
-        FieldException(
-            api='seedCriteria.seasonPackSeedTime',
-            py='season_pack_seed_time',
-        ),
-        FieldException(
-            api='seedCriteria.seedRatio',
-            py='seed_ratio',
-        ),
-        FieldException(
-            api='seedCriteria.seedTime',
-            py='seed_time',
-        ),
-    ]
-
-    def __init__(self, fields: list[str]) -> None:
+    def __init__(self, fields):
+        # type: (list[str]) -> None
         self.fields = fields
+        self.exceptions = [
+            FieldException(
+                api='seedCriteria.seasonPackSeedTime',
+                py='season_pack_seed_time',
+            ),
+            FieldException(
+                api='seedCriteria.seedRatio',
+                py='seed_ratio',
+            ),
+            FieldException(
+                api='seedCriteria.seedTime',
+                py='seed_time',
+            ),
+        ]
 
-    def _to_camel_case(self, snake_str: str):
+    def __getitem__(self, item):
+        return getattr(self, item)
+
+    def _to_camel_case(self, snake_str):
+        # type: (str) -> str
         components = snake_str.split('_')
         return components[0] + ''.join(x.title() for x in components[1:])
 
-    def _api_value(self, py_value: str):
+    def _api_value(self, py_value):
+        # type: (str) -> str
         for field in self.exceptions:
             if py_value == field['py']:
                 return field['api']
         return self._to_camel_case(py_value)
 
-    def populate_fields(self, module: SonarrModule) -> list:
+    def populate_fields(self, module):
+        # type: (SonarrModule) -> list[sonarr.Field]
         fields = []
 
         for field in self.fields:
