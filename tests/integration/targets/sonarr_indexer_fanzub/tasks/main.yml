@@ -1,0 +1,63 @@
+---
+- name: create indexer
+  devopsarr.sonarr.sonarr_indexer_fanzub:
+    name: "Fanzub"
+    enable_automatic_search: false
+    enable_interactive_search: false
+    enable_rss: false
+    priority: 10
+    anime_standard_format_search: true
+    base_url: "http://fanzub.com/rss/"
+    sonarr_api_key: "{{ sonarr_api_key }}"
+    sonarr_url: "{{ sonarr_url }}"
+  register: result
+- name: assert indexer creation
+  assert:
+    that:
+      - result['implementation'] == 'Fanzub'
+# ----------------------------------------------------------------------------
+- name: edit already present indexer
+  devopsarr.sonarr.sonarr_indexer_fanzub:
+    name: "Fanzub"
+    enable_automatic_search: false
+    enable_interactive_search: false
+    enable_rss: false
+    priority: 10
+    anime_standard_format_search: false
+    base_url: "http://fanzub.com/rss/"
+    sonarr_api_key: "{{ sonarr_api_key }}"
+    sonarr_url: "{{ sonarr_url }}"
+  register: result
+- name: assert indexer changes
+  assert:
+    that:
+      - result.changed == true
+# ----------------------------------------------------------------------------
+- name: test idempotency
+  devopsarr.sonarr.sonarr_indexer_fanzub:
+    name: "Fanzub"
+    enable_automatic_search: false
+    enable_interactive_search: false
+    enable_rss: false
+    priority: 10
+    anime_standard_format_search: false
+    base_url: "http://fanzub.com/rss/"
+    sonarr_api_key: "{{ sonarr_api_key }}"
+    sonarr_url: "{{ sonarr_url }}"
+  register: result
+- name: assert indexer idempotency
+  assert:
+    that:
+      - result.changed == false
+# ----------------------------------------------------------------------------
+- name: delete indexer
+  devopsarr.sonarr.sonarr_indexer_fanzub:
+    name: "Fanzub"
+    sonarr_api_key: "{{ sonarr_api_key }}"
+    sonarr_url: "{{ sonarr_url }}"
+    state: 'absent'
+  register: result
+- name: assert indexer deletion
+  assert:
+    that:
+      - result['id'] == 0

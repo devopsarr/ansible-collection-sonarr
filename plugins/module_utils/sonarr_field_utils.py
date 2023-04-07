@@ -71,3 +71,49 @@ class FieldHelper():
                 )
 
         return fields
+
+
+class IndexerHelper():
+    def __init__(self, status):
+        # type: (sonarr.IndexerResource) -> None
+        self.status = status
+        self.indexer_fields = [
+            'anime_standard_format_search',
+            'allow_zero_size',
+            'ranked_only',
+            'api_key',
+            'additional_parameters',
+            'api_path',
+            'base_url',
+            'captcha_token',
+            'cookie',
+            'passkey',
+            'username',
+            'seed_ratio',
+            'delay',
+            'seed_time',
+            'minimum_seeders',
+            'season_pack_seed_time',
+            'categories',
+            'anime_categories',
+        ]
+
+    def is_changed(self, want):
+        # type: (sonarr.IndexerResource) -> bool
+        if (want.name != self.status.name or
+                want.enable_automatic_search != self.status.enable_automatic_search or
+                want.enable_interactive_search != self.status.enable_interactive_search or
+                want.enable_rss != self.status.enable_rss or
+                want.priority != self.status.priority or
+                want.download_client_id != self.status.download_client_id or
+                want.config_contract != self.status.config_contract or
+                want.implementation != self.status.implementation or
+                want.protocol != self.status.protocol or
+                want.tags != self.status.tags):
+            return True
+
+        for status_field in self.status.fields:
+            for want_field in want.fields:
+                if want_field.name == status_field.name and want_field.value != status_field.value and status_field.value != "********":
+                    return True
+        return False
