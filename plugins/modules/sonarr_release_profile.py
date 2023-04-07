@@ -59,7 +59,7 @@ EXAMPLES = r'''
 ---
 # Create a release profile
 - name: Create a release profile
-  devopsarr.sonarr.release_profile:
+  devopsarr.sonarr.sonarr_release_profile:
     enabled: true
     name: "Example"
     required: ["proper"]
@@ -69,7 +69,7 @@ EXAMPLES = r'''
 
 # Delete a release profile
 - name: Delete a release_profile
-  devopsarr.sonarr.release_profile:
+  devopsarr.sonarr.sonarr_release_profile:
     name: Example
     state: absent
 '''

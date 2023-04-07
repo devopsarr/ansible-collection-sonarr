@@ -69,7 +69,7 @@ EXAMPLES = r'''
 ---
 # Create a delay profile
 - name: Create a delay profile
-  devopsarr.sonarr.delay_profile:
+  devopsarr.sonarr.sonarr_delay_profile:
     preferred_protocol: torrent
     usenet_delay: 0
     torrent_delay: 0
@@ -83,7 +83,7 @@ EXAMPLES = r'''
 
 # Delete a delay profile
 - name: Delete a delay_profile
-  devopsarr.sonarr.delay_profile:
+  devopsarr.sonarr.sonarr_delay_profile:
     preferred_protocol: torrent
     tags: [1,2]
     state: absent

@@ -93,22 +93,25 @@ EXAMPLES = r'''
 ---
 # Create a indexer
 - name: Create a indexer
-  devopsarr.sonarr.indexer:
-    name: "Example"
+  devopsarr.sonarr.sonarr_indexer_filelist:
+    name: "Filelist"
     enable_automatic_search: false
     enable_interactive_search: false
     enable_rss: false
     priority: 10
-    config_contract: "FanzubSettings"
-    implementation: "Fanzub"
-    protocol: "usenet"
-    anime_standard_format_search: true
+    username: 'User'
+    passkey: 'test'
+    base_url: "https://filelist.io"
+    categories: [23, 21, 27]
+    anime_categories: []
+    minimum_seeders: 1
+    seed_ratio: 0.5
     base_url: "http://fanzub.com/rss/"
     tags: [1,2]
 
 # Delete a indexer
 - name: Delete a indexer
-  devopsarr.sonarr.indexer:
+  devopsarr.sonarr.sonarr_indexer_filelist:
     name: Example
     state: absent
 '''

@@ -27,7 +27,7 @@ EXAMPLES = r'''
 ---
 # fetch indexer config
 - name: Update indexer config
-  devopsarr.sonarr.indexer_config_info:
+  devopsarr.sonarr.sonarr_indexer_config_info:
 '''
 
 RETURN = r'''

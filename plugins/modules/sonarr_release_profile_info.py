@@ -32,11 +32,11 @@ EXAMPLES = r'''
 ---
 # Gather information about all release profiles.
 - name: Gather information about all release profiles
-  devopsarr.sonarr.release_profile_info:
+  devopsarr.sonarr.sonarr_release_profile_info:
 
 # Gather information about a single release profile.
 - name: Gather information about a single release profile
-  devopsarr.sonarr.release_profile_info:
+  devopsarr.sonarr.sonarr_release_profile_info:
     name: test
 '''
 

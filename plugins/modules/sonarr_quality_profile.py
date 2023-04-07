@@ -98,7 +98,7 @@ EXAMPLES = r'''
 ---
 # Create a quality profile
 - name: Create a quality profile
-  devopsarr.sonarr.quality_profile:
+  devopsarr.sonarr.sonarr_quality_profile:
     name: "Example"
     upgrade_allowed: true
     cutoff: 1
@@ -125,7 +125,7 @@ EXAMPLES = r'''
 
 # Delete a quality profile
 - name: Delete a quality_profile
-  devopsarr.sonarr.quality_profile:
+  devopsarr.sonarr.sonarr_quality_profile:
     name: Example
     state: absent
 '''

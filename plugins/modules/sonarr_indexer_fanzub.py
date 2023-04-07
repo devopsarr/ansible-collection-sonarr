@@ -66,7 +66,7 @@ EXAMPLES = r'''
 ---
 # Create a indexer
 - name: Create a indexer
-  devopsarr.sonarr.indexer_fanzub:
+  devopsarr.sonarr.sonarr_indexer_fanzub:
     name: "Example"
     enable_automatic_search: false
     enable_interactive_search: false
@@ -78,7 +78,7 @@ EXAMPLES = r'''
 
 # Delete a indexer
 - name: Delete a indexer
-  devopsarr.sonarr.indexer:
+  devopsarr.sonarr.sonarr_indexer_fanzub:
     name: Example
     state: absent
 '''

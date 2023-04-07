@@ -66,7 +66,7 @@ EXAMPLES = r'''
 ---
 # update naming
 - name: Update naming
-  devopsarr.sonarr.naming:
+  devopsarr.sonarr.sonarr_naming:
     rename_episodes: true
     replace_illegal_characters: true
     multi_episode_style: 0

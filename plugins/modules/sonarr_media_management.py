@@ -105,7 +105,7 @@ EXAMPLES = r'''
 ---
 # update media management
 - name: Update media management
-  devopsarr.sonarr.media_management:
+  devopsarr.sonarr.sonarr_media_management:
     chmod_folder: "755"
     rescan_after_refresh: "always"
     recycle_bin: ""

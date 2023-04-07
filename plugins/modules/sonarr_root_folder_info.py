@@ -32,11 +32,11 @@ EXAMPLES = r'''
 ---
 # Gather information about all root folders.
 - name: Gather information about all root folders
-  devopsarr.sonarr.root_folder_info:
+  devopsarr.sonarr.sonarr_root_folder_info:
 
 # Gather information about a single root folder.
 - name: Gather information about a single root folder
-  devopsarr.sonarr.root_folder_info:
+  devopsarr.sonarr.sonarr_root_folder_info:
     name: test
 '''
 

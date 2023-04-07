@@ -32,11 +32,11 @@ EXAMPLES = r'''
 ---
 # Gather information about all remote path mappings.
 - name: Gather information about all remote path mappings
-  devopsarr.sonarr.remote_path_mapping_info:
+  devopsarr.sonarr.sonarr_remote_path_mapping_info:
 
 # Gather information about a single remote path mapping.
 - name: Gather information about a single remote path mapping
-  devopsarr.sonarr.remote_path_mapping_info:
+  devopsarr.sonarr.sonarr_remote_path_mapping_info:
     id: 1
 '''
 

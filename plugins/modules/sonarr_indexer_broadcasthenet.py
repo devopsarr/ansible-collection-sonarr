@@ -82,22 +82,21 @@ EXAMPLES = r'''
 ---
 # Create a indexer
 - name: Create a indexer
-  devopsarr.sonarr.indexer:
-    name: "Example"
+  devopsarr.sonarr.sonarr_indexer_broadcasthenet:
+    name: "BroadcastheNet"
     enable_automatic_search: false
     enable_interactive_search: false
     enable_rss: false
     priority: 10
-    config_contract: "FanzubSettings"
-    implementation: "Fanzub"
-    protocol: "usenet"
-    anime_standard_format_search: true
-    base_url: "http://fanzub.com/rss/"
+    api_key: 'test'
+    base_url: "https://api.broadcasthe.net/"
+    minimum_seeders: 10
+    seed_ratio: 0.5
     tags: [1,2]
 
 # Delete a indexer
 - name: Delete a indexer
-  devopsarr.sonarr.indexer:
+  devopsarr.sonarr.sonarr_indexer_broadcasthenet:
     name: Example
     state: absent
 '''

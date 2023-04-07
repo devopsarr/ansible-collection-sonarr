@@ -27,7 +27,7 @@ EXAMPLES = r'''
 ---
 # fetch media management
 - name: fetch media management info
-  devopsarr.sonarr.media_management_info:
+  devopsarr.sonarr.sonarr_media_management_info:
 '''
 
 RETURN = r'''

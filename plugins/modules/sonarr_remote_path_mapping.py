@@ -47,7 +47,7 @@ EXAMPLES = r'''
 ---
 # Create a remote path mapping
 - name: Create a remote path mapping
-  devopsarr.sonarr.remote_path_mapping:
+  devopsarr.sonarr.sonarr_remote_path_mapping:
     host: 'transmission-host'
     remote_path: '/download/complete/'
     local_path: '/series-download/'
@@ -55,7 +55,7 @@ EXAMPLES = r'''
 
 # Delete a remote path mapping
 - name: Delete a remote_path_mapping
-  devopsarr.sonarr.remote_path_mapping:
+  devopsarr.sonarr.sonarr_remote_path_mapping:
     host: 'transmission-host'
     remote_path: '/download/complete/'
     local_path: '/series-download/'
