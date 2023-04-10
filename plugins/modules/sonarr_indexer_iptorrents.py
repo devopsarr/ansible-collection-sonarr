@@ -8,13 +8,13 @@ __metaclass__ = type
 
 DOCUMENTATION = r'''
 ---
-module: sonarr_indexer_broadcasthenet
+module: sonarr_indexer_iptorrents
 
-short_description: Manages Sonarr indexer BroadcastheNet.
+short_description: Manages Sonarr indexer IP Torrents.
 
 version_added: "0.5.0"
 
-description: Manages Sonarr indexer BroadcastheNet.
+description: Manages Sonarr indexer IP Torrents.
 
 options:
     name:
@@ -37,13 +37,6 @@ options:
         description: Download client ID.
         type: int
         default: 0
-    update_secrets:
-        description: Flag to force update of secret fields.
-        type: bool
-        default: false
-    api_key:
-        description: API key.
-        type: str
     base_url:
         description: Base URL.
         type: str
@@ -82,21 +75,20 @@ EXAMPLES = r'''
 ---
 # Create a indexer
 - name: Create a indexer
-  devopsarr.sonarr.sonarr_indexer_broadcasthenet:
-    name: "BroadcastheNet"
+  devopsarr.sonarr.sonarr_indexer_iptorrents:
+    name: "Iptorrents"
     enable_automatic_search: false
     enable_interactive_search: false
     enable_rss: false
     priority: 10
-    api_key: 'test'
-    base_url: "https://api.broadcasthe.net/"
+    base_url: "https://test.iptorrents.net/"
     minimum_seeders: 10
     seed_ratio: 0.5
     tags: [1,2]
 
 # Delete a indexer
 - name: Delete a indexer
-  devopsarr.sonarr.sonarr_indexer_broadcasthenet:
+  devopsarr.sonarr.sonarr_indexer_iptorrents:
     name: Example
     state: absent
 '''
@@ -142,12 +134,12 @@ config_contract:
     description: Config contract.
     returned: always
     type: str
-    sample: "BroadcastheNetSettings"
+    sample: "IptorrentsSettings"
 implementation:
     description: Implementation.
     returned: always
     type: str
-    sample: "BroadcastheNet"
+    sample: "Iptorrents"
 protocol:
     description: Protocol.
     returned: always
@@ -187,10 +179,7 @@ def run_module():
         download_client_id=dict(type='int', default=0),
         tags=dict(type='list', elements='int', default=[]),
         state=dict(default='present', type='str', choices=['present', 'absent']),
-        # Needed to manage obfuscate response from api "********"
-        update_secrets=dict(type='bool', default=False),
         # Field values
-        api_key=dict(type='str', no_log=True),
         base_url=dict(type='str'),
         seed_ratio=dict(type='float'),
         seed_time=dict(type='int'),
@@ -244,8 +233,8 @@ def run_module():
         'enable_rss': module.params['enable_rss'],
         'priority': module.params['priority'],
         'download_client_id': module.params['download_client_id'],
-        'config_contract': 'BroadcastheNetSettings',
-        'implementation': 'BroadcasTheNet',
+        'config_contract': 'IPTorrentsSettings',
+        'implementation': 'IPTorrents',
         'protocol': 'torrent',
         'tags': module.params['tags'],
         'fields': field_helper.populate_fields(module),
@@ -265,7 +254,7 @@ def run_module():
 
     # Update an existing resource.
     want.id = result['id']
-    if indexer_helper.is_changed(want) or module.params['update_secrets']:
+    if indexer_helper.is_changed(want):
         result['changed'] = True
         if not module.check_mode:
             try:
