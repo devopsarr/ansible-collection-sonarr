@@ -1,0 +1,75 @@
+---
+- name: create indexer
+  devopsarr.sonarr.sonarr_indexer_newznab:
+    name: "Newznab"
+    enable_automatic_search: false
+    enable_interactive_search: false
+    enable_rss: false
+    priority: 10
+    anime_standard_format_search: true
+    base_url: "http://newznab.com/rss/"
+    api_path: "/api"
+    api_key: "test"
+    categories: [5030, 5040]
+    anime_categories: []
+    sonarr_api_key: "{{ sonarr_api_key }}"
+    sonarr_url: "{{ sonarr_url }}"
+  register: result
+- name: assert indexer creation
+  assert:
+    that:
+      - result['implementation'] == 'Newznab'
+# ----------------------------------------------------------------------------
+- name: edit already present indexer
+  devopsarr.sonarr.sonarr_indexer_newznab:
+    name: "Newznab"
+    enable_automatic_search: false
+    enable_interactive_search: false
+    enable_rss: false
+    priority: 10
+    anime_standard_format_search: true
+    base_url: "http://newznab.com/rss/"
+    api_path: "/api"
+    api_key: "test"
+    categories: [5030, 5050]
+    anime_categories: []
+    sonarr_api_key: "{{ sonarr_api_key }}"
+    sonarr_url: "{{ sonarr_url }}"
+  register: result
+- name: assert indexer changes
+  assert:
+    that:
+      - result.changed == true
+# ----------------------------------------------------------------------------
+- name: test idempotency
+  devopsarr.sonarr.sonarr_indexer_newznab:
+    name: "Newznab"
+    enable_automatic_search: false
+    enable_interactive_search: false
+    enable_rss: false
+    priority: 10
+    anime_standard_format_search: true
+    base_url: "http://newznab.com/rss/"
+    api_path: "/api"
+    api_key: "test"
+    categories: [5030, 5050]
+    anime_categories: []
+    sonarr_api_key: "{{ sonarr_api_key }}"
+    sonarr_url: "{{ sonarr_url }}"
+  register: result
+- name: assert indexer idempotency
+  assert:
+    that:
+      - result.changed == false
+# ----------------------------------------------------------------------------
+- name: delete indexer
+  devopsarr.sonarr.sonarr_indexer_newznab:
+    name: "Newznab"
+    sonarr_api_key: "{{ sonarr_api_key }}"
+    sonarr_url: "{{ sonarr_url }}"
+    state: 'absent'
+  register: result
+- name: assert indexer deletion
+  assert:
+    that:
+      - result['id'] == 0
