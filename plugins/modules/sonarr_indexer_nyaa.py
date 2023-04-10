@@ -8,13 +8,13 @@ __metaclass__ = type
 
 DOCUMENTATION = r'''
 ---
-module: sonarr_indexer_filelist
+module: sonarr_indexer_nyaa
 
-short_description: Manages Sonarr indexer Filelist.
+short_description: Manages Sonarr indexer Nyaa.
 
 version_added: "0.5.0"
 
-description: Manages Sonarr indexer Filelist.
+description: Manages Sonarr indexer Nyaa.
 
 options:
     name:
@@ -37,18 +37,14 @@ options:
         description: Download client ID.
         type: int
         default: 0
-    update_secrets:
-        description: Flag to force update of secret fields.
+    anime_standard_format_search:
+        description: Anime standard format search.
         type: bool
-        default: false
     base_url:
         description: Base URL.
         type: str
-    passkey:
-        description: Passkey.
-        type: str
-    username:
-        description: Username.
+    additional_parameters:
+        description: Additional parameters.
         type: str
     seed_ratio:
         description: Seed ratio.
@@ -62,14 +58,6 @@ options:
     season_pack_seed_time:
         description: Season pack seed time.
         type: int
-    categories:
-        description: Categories.
-        type: list
-        elements: int
-    anime_categories:
-        description: Anime categories.
-        type: list
-        elements: int
     tags:
         description: Tag list.
         type: list
@@ -93,24 +81,21 @@ EXAMPLES = r'''
 ---
 # Create a indexer
 - name: Create a indexer
-  devopsarr.sonarr.sonarr_indexer_filelist:
-    name: "Filelist"
+  devopsarr.sonarr.sonarr_indexer_nyaa:
+    name: "Nyaa"
     enable_automatic_search: false
     enable_interactive_search: false
     enable_rss: false
     priority: 10
-    username: 'User'
-    passkey: 'test'
-    base_url: "https://filelist.io"
-    categories: [23, 21, 27]
-    anime_categories: []
-    minimum_seeders: 1
+    api_key: 'test'
+    base_url: "https://api.broadcasthe.net/"
+    minimum_seeders: 10
     seed_ratio: 0.5
     tags: [1,2]
 
 # Delete a indexer
 - name: Delete a indexer
-  devopsarr.sonarr.sonarr_indexer_filelist:
+  devopsarr.sonarr.sonarr_indexer_nyaa:
     name: Example
     state: absent
 '''
@@ -156,12 +141,12 @@ config_contract:
     description: Config contract.
     returned: always
     type: str
-    sample: "BroadcastheNetSettings"
+    sample: "NyaaSettings"
 implementation:
     description: Implementation.
     returned: always
     type: str
-    sample: "BroadcastheNet"
+    sample: "Nyaa"
 protocol:
     description: Protocol.
     returned: always
@@ -201,18 +186,14 @@ def run_module():
         download_client_id=dict(type='int', default=0),
         tags=dict(type='list', elements='int', default=[]),
         state=dict(default='present', type='str', choices=['present', 'absent']),
-        # Needed to manage obfuscate response from api "********"
-        update_secrets=dict(type='bool', default=False),
         # Field values
+        anime_standard_format_search=dict(type='bool'),
+        additional_parameters=dict(type='str'),
         base_url=dict(type='str'),
-        passkey=dict(type='str', no_log=True),
-        username=dict(type='str'),
         seed_ratio=dict(type='float'),
         seed_time=dict(type='int'),
         minimum_seeders=dict(type='int'),
         season_pack_seed_time=dict(type='int'),
-        categories=dict(type='list', elements='int'),
-        anime_categories=dict(type='list', elements='int'),
     )
 
     result = dict(
@@ -261,8 +242,8 @@ def run_module():
         'enable_rss': module.params['enable_rss'],
         'priority': module.params['priority'],
         'download_client_id': module.params['download_client_id'],
-        'config_contract': 'FileListSettings',
-        'implementation': 'FileList',
+        'config_contract': 'NyaaSettings',
+        'implementation': 'Nyaa',
         'protocol': 'torrent',
         'tags': module.params['tags'],
         'fields': field_helper.populate_fields(module),
@@ -282,7 +263,7 @@ def run_module():
 
     # Update an existing resource.
     want.id = result['id']
-    if indexer_helper.is_changed(want) or module.params['update_secrets']:
+    if indexer_helper.is_changed(want):
         result['changed'] = True
         if not module.check_mode:
             try:
