@@ -45,7 +45,7 @@ EXAMPLES = r'''
 ---
 # update indexer config
 - name: Update indexer config
-  devopsarr.sonarr.indexer_config:
+  devopsarr.sonarr.sonarr_indexer_config:
     maximum_size: 0
     minimum_age: 0
     retention: 0

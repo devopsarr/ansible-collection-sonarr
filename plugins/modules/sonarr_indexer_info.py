@@ -32,11 +32,11 @@ EXAMPLES = r'''
 ---
 # Gather information about all indexers.
 - name: Gather information about all indexers
-  devopsarr.sonarr.indexer_info:
+  devopsarr.sonarr.sonarr_indexer_info:
 
 # Gather information about a single indexer.
 - name: Gather information about a single indexer
-  devopsarr.sonarr.indexer_info:
+  devopsarr.sonarr.sonarr_indexer_info:
     name: test
 '''
 

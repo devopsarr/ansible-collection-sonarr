@@ -25,7 +25,7 @@ EXAMPLES = r'''
 ---
 # It will fetch the system info
 - name: Get system info
-  devopsarr.sonarr.sonarr_system_info:
+  devopsarr.sonarr.sonarr_sonarr_system_info:
 '''
 
 RETURN = r'''

@@ -8,7 +8,7 @@ __metaclass__ = type
 
 DOCUMENTATION = r'''
 ---
-module: sonarr_indexer
+module: sonarr_indexer_torznab
 
 short_description: Manages Sonarr indexer.
 
@@ -17,28 +17,12 @@ version_added: "0.5.0"
 description: Manages Sonarr indexer.
 
 options:
-    config_contract:
-        description: Config contract.
-        type: str
-    implementation:
-        description: Implementation.
-        type: str
-    protocol:
-        description: Protocol.
-        choices: [ "torrent", "usenet" ]
-        type: str
     update_secrets:
         description: Flag to force update of secret fields.
         type: bool
         default: false
     anime_standard_format_search:
         description: Anime standard format search.
-        type: bool
-    allow_zero_size:
-        description: Allow zero size.
-        type: bool
-    ranked_only:
-        description: Ranked only.
         type: bool
     api_key:
         description: API key.
@@ -52,24 +36,9 @@ options:
     base_url:
         description: Base URL.
         type: str
-    captcha_token:
-        description: Captcha token.
-        type: str
-    cookie:
-        description: Cookie.
-        type: str
-    passkey:
-        description: Passkey.
-        type: str
-    username:
-        description: Username.
-        type: str
     seed_ratio:
         description: Seed ratio.
         type: float
-    delay:
-        description: Delay.
-        type: int
     seed_time:
         description: Seed time.
         type: int
@@ -100,22 +69,23 @@ EXAMPLES = r'''
 ---
 # Create a indexer
 - name: Create a indexer
-  devopsarr.sonarr.sonarr_indexer:
+  devopsarr.sonarr.sonarr_indexer_torznab:
     name: "Example"
     enable_automatic_search: false
     enable_interactive_search: false
     enable_rss: false
     priority: 10
-    config_contract: "FanzubSettings"
-    implementation: "Fanzub"
-    protocol: "usenet"
+    api_path: '/api'
+    api_key: 'example'
+    categories: [5030, 5040]
+    anime_categories: []
     anime_standard_format_search: true
-    base_url: "http://fanzub.com/rss/"
+    base_url: "http://hd4free.xyz"
     tags: [1,2]
 
 # Delete a indexer
 - name: Delete a indexer
-  devopsarr.sonarr.sonarr_indexer:
+  devopsarr.sonarr.sonarr_indexer_torznab:
     name: Example
     state: absent
 '''
@@ -204,27 +174,17 @@ def run_module():
         enable_rss=dict(type='bool'),
         priority=dict(type='int'),
         download_client_id=dict(type='int', default=0),
-        config_contract=dict(type='str'),
-        implementation=dict(type='str'),
-        protocol=dict(type='str', choices=['usenet', 'torrent']),
         tags=dict(type='list', elements='int', default=[]),
         state=dict(default='present', type='str', choices=['present', 'absent']),
         # Needed to manage obfuscate response from api "********"
         update_secrets=dict(type='bool', default=False),
         # Field values
         anime_standard_format_search=dict(type='bool'),
-        allow_zero_size=dict(type='bool'),
-        ranked_only=dict(type='bool'),
         api_key=dict(type='str', no_log=True),
         additional_parameters=dict(type='str'),
         api_path=dict(type='str'),
         base_url=dict(type='str'),
-        captcha_token=dict(type='str', no_log=True),
-        cookie=dict(type='str', no_log=True),
-        passkey=dict(type='str', no_log=True),
-        username=dict(type='str'),
         seed_ratio=dict(type='float'),
-        delay=dict(type='int'),
         seed_time=dict(type='int'),
         minimum_seeders=dict(type='int'),
         season_pack_seed_time=dict(type='int'),
@@ -278,9 +238,9 @@ def run_module():
         'enable_rss': module.params['enable_rss'],
         'priority': module.params['priority'],
         'download_client_id': module.params['download_client_id'],
-        'config_contract': module.params['config_contract'],
-        'implementation': module.params['implementation'],
-        'protocol': module.params['protocol'],
+        'config_contract': 'TorznabSettings',
+        'implementation': 'Torznab',
+        'protocol': 'torrent',
         'tags': module.params['tags'],
         'fields': field_helper.populate_fields(module),
     })

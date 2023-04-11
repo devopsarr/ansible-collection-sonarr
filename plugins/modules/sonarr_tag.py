@@ -39,12 +39,12 @@ EXAMPLES = r'''
 ---
 # Create a tag
 - name: Create a tag
-  devopsarr.sonarr.tag:
+  devopsarr.sonarr.sonarr_tag:
     label: default
 
 # Delete a tag
 - name: Delete a tag
-  devopsarr.sonarr.tag:
+  devopsarr.sonarr.sonarr_tag:
     label: wrong
     state: absent
 '''

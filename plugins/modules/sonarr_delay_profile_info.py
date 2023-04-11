@@ -32,11 +32,11 @@ EXAMPLES = r'''
 ---
 # Gather information about all delay profiles.
 - name: Gather information about all delay profiles
-  devopsarr.sonarr.delay_profile_info:
+  devopsarr.sonarr.sonarr_delay_profile_info:
 
 # Gather information about a single delay profile.
 - name: Gather information about a single delay profile
-  devopsarr.sonarr.delay_profile_info:
+  devopsarr.sonarr.sonarr_delay_profile_info:
     tag: test
 '''
 

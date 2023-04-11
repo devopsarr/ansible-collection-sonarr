@@ -27,7 +27,7 @@ EXAMPLES = r'''
 ---
 # fetch naming
 - name: Update naming
-  devopsarr.sonarr.naming_info:
+  devopsarr.sonarr.sonarr_naming_info:
 '''
 
 RETURN = r'''

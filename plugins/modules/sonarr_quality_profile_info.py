@@ -32,11 +32,11 @@ EXAMPLES = r'''
 ---
 # Gather information about all quality profiles.
 - name: Gather information about all quality profiles
-  devopsarr.sonarr.quality_profile_info:
+  devopsarr.sonarr.sonarr_quality_profile_info:
 
 # Gather information about a single quality profile.
 - name: Gather information about a single quality profile
-  devopsarr.sonarr.quality_profile_info:
+  devopsarr.sonarr.sonarr_quality_profile_info:
     name: test
 '''
 
