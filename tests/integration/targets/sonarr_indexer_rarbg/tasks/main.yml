@@ -1,0 +1,72 @@
+---
+- name: create indexer
+  devopsarr.sonarr.sonarr_indexer_rarbg:
+    name: "Rarbg"
+    enable_automatic_search: false
+    enable_interactive_search: false
+    enable_rss: false
+    priority: 10
+    captcha_token: 'test'
+    ranked_only: true
+    base_url: "https://torrentapi.org"
+    minimum_seeders: 10
+    seed_ratio: 0.5
+    sonarr_api_key: "{{ sonarr_api_key }}"
+    sonarr_url: "{{ sonarr_url }}"
+  register: result
+- name: assert indexer creation
+  assert:
+    that:
+      - result['implementation'] == 'Rarbg'
+# ----------------------------------------------------------------------------
+- name: edit already present indexer
+  devopsarr.sonarr.sonarr_indexer_rarbg:
+    name: "Rarbg"
+    enable_automatic_search: false
+    enable_interactive_search: false
+    enable_rss: false
+    priority: 10
+    captcha_token: 'test'
+    ranked_only: false
+    base_url: "https://torrentapi.org"
+    minimum_seeders: 10
+    seed_ratio: 0.5
+    sonarr_api_key: "{{ sonarr_api_key }}"
+    sonarr_url: "{{ sonarr_url }}"
+  register: result
+- name: assert indexer changes
+  assert:
+    that:
+      - result.changed == true
+# ----------------------------------------------------------------------------
+- name: test idempotency
+  devopsarr.sonarr.sonarr_indexer_rarbg:
+    name: "Rarbg"
+    enable_automatic_search: false
+    enable_interactive_search: false
+    enable_rss: false
+    priority: 10
+    captcha_token: 'test'
+    ranked_only: false
+    base_url: "https://torrentapi.org"
+    minimum_seeders: 10
+    seed_ratio: 0.5
+    sonarr_api_key: "{{ sonarr_api_key }}"
+    sonarr_url: "{{ sonarr_url }}"
+  register: result
+- name: assert indexer idempotency
+  assert:
+    that:
+      - result.changed == false
+# ----------------------------------------------------------------------------
+- name: delete indexer
+  devopsarr.sonarr.sonarr_indexer_rarbg:
+    name: "Rarbg"
+    sonarr_api_key: "{{ sonarr_api_key }}"
+    sonarr_url: "{{ sonarr_url }}"
+    state: 'absent'
+  register: result
+- name: assert indexer deletion
+  assert:
+    that:
+      - result['id'] == 0
