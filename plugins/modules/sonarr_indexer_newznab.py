@@ -17,26 +17,6 @@ version_added: "0.5.0"
 description: Manages Sonarr indexer Newznab.
 
 options:
-    name:
-        description: Name.
-        required: true
-        type: str
-    enable_automatic_search:
-        description: Enable automatic search flag.
-        type: bool
-    enable_interactive_search:
-        description: Enable interactive search flag.
-        type: bool
-    enable_rss:
-        description: Enable RSS flag.
-        type: bool
-    priority:
-        description: Priority.
-        type: int
-    download_client_id:
-        description: Download client ID.
-        type: int
-        default: 0
     update_secrets:
         description: Flag to force update of secret fields.
         type: bool
@@ -64,20 +44,10 @@ options:
         description: Anime categories.
         type: list
         elements: int
-    tags:
-        description: Tag list.
-        type: list
-        elements: int
-        default: []
-    state:
-        description: Create or delete a indexer.
-        required: false
-        default: 'present'
-        choices: [ "present", "absent" ]
-        type: str
 
 extends_documentation_fragment:
     - devopsarr.sonarr.sonarr_credentials
+    - devopsarr.sonarr.sonarr_indexer
 
 author:
     - Fuochi (@Fuochi)
