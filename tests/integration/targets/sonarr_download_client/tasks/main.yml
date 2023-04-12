@@ -1,0 +1,143 @@
+---
+- name: create download client
+  devopsarr.sonarr.sonarr_download_client:
+    remove_completed_downloads: false
+    remove_failed_downloads: false
+    enable: false
+    priority: 1
+    name: "Hadouken"
+    host: "hadouken.lcl"
+    url_base: "/hadouken/"
+    port: 9091
+    category: "sonarr-tv"
+    username: "username"
+    password: "password"
+    protocol: "torrent"
+    config_contract: "HadoukenSettings"
+    implementation: "Hadouken"
+    use_ssl: false
+    tags: []
+    sonarr_api_key: "{{ sonarr_api_key }}"
+    sonarr_url: "{{ sonarr_url }}"
+  register: result
+- name: assert download client creation
+  assert:
+    that:
+      - result['implementation'] == 'Hadouken'
+# ----------------------------------------------------------------------------
+- name: edit already present download client
+  devopsarr.sonarr.sonarr_download_client:
+    remove_completed_downloads: false
+    remove_failed_downloads: false
+    enable: false
+    priority: 1
+    name: "Hadouken"
+    host: "hadouken.lcl"
+    url_base: "/hadouken/"
+    port: 9091
+    category: "sonarr-tv"
+    username: "username"
+    password: "password"
+    protocol: "torrent"
+    config_contract: "HadoukenSettings"
+    implementation: "Hadouken"
+    use_ssl: true
+    tags: []
+    sonarr_api_key: "{{ sonarr_api_key }}"
+    sonarr_url: "{{ sonarr_url }}"
+  register: result
+- name: assert download client changes
+  assert:
+    that:
+      - result.changed == true
+# ----------------------------------------------------------------------------
+- name: test idempotency
+  devopsarr.sonarr.sonarr_download_client:
+    remove_completed_downloads: false
+    remove_failed_downloads: false
+    enable: false
+    priority: 1
+    name: "Hadouken"
+    host: "hadouken.lcl"
+    url_base: "/hadouken/"
+    port: 9091
+    category: "sonarr-tv"
+    username: "username"
+    password: "password"
+    protocol: "torrent"
+    config_contract: "HadoukenSettings"
+    implementation: "Hadouken"
+    use_ssl: true
+    tags: []
+    sonarr_api_key: "{{ sonarr_api_key }}"
+    sonarr_url: "{{ sonarr_url }}"
+  register: result
+- name: assert download client idempotency
+  assert:
+    that:
+      - result.changed == false
+# ----------------------------------------------------------------------------
+- name: test sensitive un-change
+  devopsarr.sonarr.sonarr_download_client:
+    remove_completed_downloads: false
+    remove_failed_downloads: false
+    enable: false
+    priority: 1
+    name: "Hadouken"
+    host: "hadouken.lcl"
+    url_base: "/hadouken/"
+    port: 9091
+    category: "sonarr-tv"
+    username: "username"
+    password: "password123"
+    protocol: "torrent"
+    config_contract: "HadoukenSettings"
+    implementation: "Hadouken"
+    use_ssl: true
+    tags: []
+    sonarr_api_key: "{{ sonarr_api_key }}"
+    sonarr_url: "{{ sonarr_url }}"
+  register: result
+- name: assert download client idempotency
+  assert:
+    that:
+      - result.changed == false
+# ----------------------------------------------------------------------------
+- name: test key change
+  devopsarr.sonarr.sonarr_download_client:
+    remove_completed_downloads: false
+    remove_failed_downloads: false
+    enable: false
+    priority: 1
+    name: "Hadouken"
+    host: "hadouken.lcl"
+    url_base: "/hadouken/"
+    port: 9091
+    category: "sonarr-tv"
+    username: "username"
+    password: "password123"
+    protocol: "torrent"
+    config_contract: "HadoukenSettings"
+    implementation: "Hadouken"
+    use_ssl: true
+    tags: []
+    update_secrets: true
+    sonarr_api_key: "{{ sonarr_api_key }}"
+    sonarr_url: "{{ sonarr_url }}"
+  register: result
+- name: assert download client idempotency
+  assert:
+    that:
+      - result.changed == true
+# ----------------------------------------------------------------------------
+- name: delete download client
+  devopsarr.sonarr.sonarr_download_client:
+    name: "Hadouken"
+    sonarr_api_key: "{{ sonarr_api_key }}"
+    sonarr_url: "{{ sonarr_url }}"
+    state: 'absent'
+  register: result
+- name: assert download client deletion
+  assert:
+    that:
+      - result['id'] == 0

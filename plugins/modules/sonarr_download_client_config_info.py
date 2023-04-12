@@ -50,7 +50,7 @@ enable_completed_download_handling:
 download_client_working_folders:
     description: Retention.
     returned: always
-    type: string
+    type: str
     sample: '_UNPACK_|_FAILED_'
 '''
 

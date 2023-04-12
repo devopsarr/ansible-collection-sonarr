@@ -40,6 +40,10 @@ class FieldHelper():
                 api='seedCriteria.seedTime',
                 py='seed_time',
             ),
+            FieldException(
+                api='tags',
+                py='field_tags',
+            ),
         ]
 
     def __getitem__(self, item):
@@ -106,6 +110,66 @@ class IndexerHelper():
                 want.enable_rss != self.status.enable_rss or
                 want.priority != self.status.priority or
                 want.download_client_id != self.status.download_client_id or
+                want.config_contract != self.status.config_contract or
+                want.implementation != self.status.implementation or
+                want.protocol != self.status.protocol or
+                want.tags != self.status.tags):
+            return True
+
+        for status_field in self.status.fields:
+            for want_field in want.fields:
+                if want_field.name == status_field.name and want_field.value != status_field.value and status_field.value != "********":
+                    return True
+        return False
+
+
+class DownloadClientHelper():
+    def __init__(self, status):
+        # type: (sonarr.DownloadClientResource) -> None
+        self.status = status
+        self.download_client_fields = [
+            'add_paused',
+            'use_ssl',
+            'start_on_add',
+            'sequential_order',
+            'first_and_last',
+            'add_stopped',
+            'save_magnet_files',
+            'read_only',
+            'host',
+            'api_key',
+            'rpc_path',
+            'url_base',
+            'secret_token',
+            'username',
+            'password',
+            'tv_category',
+            'tv_imported_category',
+            'tv_directory',
+            'destination',
+            'category',
+            'nzb_folder',
+            'strm_folder',
+            'torrent_folder',
+            'watch_folder',
+            'magnet_file_extension',
+            'port',
+            'recent_tv_priority',
+            'older_tv_priority',
+            'initial_state',
+            'intial_state',
+            'additional_tags',
+            'field_tags',
+            'post_import_tags',
+        ]
+
+    def is_changed(self, want):
+        # type: (sonarr.DownloadClientResource) -> bool
+        if (want.name != self.status.name or
+                want.remove_completed_downloads != self.status.remove_completed_downloads or
+                want.remove_failed_downloads != self.status.remove_failed_downloads or
+                want.enable != self.status.enable or
+                want.priority != self.status.priority or
                 want.config_contract != self.status.config_contract or
                 want.implementation != self.status.implementation or
                 want.protocol != self.status.protocol or
