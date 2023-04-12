@@ -1,0 +1,23 @@
+---
+- name: list a single quality
+  devopsarr.sonarr.sonarr_quality_info:
+    name: "SDTV"
+    sonarr_api_key: "{{ sonarr_api_key }}"
+    sonarr_url: "{{ sonarr_url }}"
+  register: result
+
+- name: assert single quality
+  assert:
+    that:
+      - result['qualities'][0]['quality']['name'] == 'SDTV'
+# ----------------------------------------------------------------------------
+- name: list all qualitys
+  devopsarr.sonarr.sonarr_quality_info:
+    sonarr_api_key: "{{ sonarr_api_key }}"
+    sonarr_url: "{{ sonarr_url }}"
+  register: result
+
+- name: assert multiple qualitys
+  assert:
+    that:
+      - result['qualities'] | length > 1
