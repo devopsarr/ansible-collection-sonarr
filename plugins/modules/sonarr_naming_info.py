@@ -14,7 +14,7 @@ short_description: Get information about Sonarr naming.
 
 version_added: "0.5.0"
 
-description: Manages Sonarr naming.
+description: Get information about Sonarr naming.
 
 extends_documentation_fragment:
     - devopsarr.sonarr.sonarr_credentials
@@ -26,7 +26,7 @@ author:
 EXAMPLES = r'''
 ---
 # fetch naming
-- name: Update naming
+- name: fetch naming
   devopsarr.sonarr.sonarr_naming_info:
 '''
 
