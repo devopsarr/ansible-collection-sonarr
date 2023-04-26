@@ -12,12 +12,6 @@ If you encounter abusive behavior, please refer to the [policy violations](https
 
 <!--TODO: add devopsarr-->
 
-We announce releases and important changes through Ansible's [The Bullhorn newsletter](https://github.com/ansible/community/wiki/News#the-bullhorn). Be sure you are [subscribed](https://eepurl.com/gZmiEP).
-
-Join us in the `#ansible` (general use questions and support), `#ansible-community` (community and collection development questions), and other [IRC channels](https://docs.ansible.com/ansible/devel/community/communication.html#irc-channels).
-
-We take part in the global quarterly [Ansible Contributor Summit](https://github.com/ansible/community/wiki/Contributor-Summit) virtually or in-person. Track [The Bullhorn newsletter](https://eepurl.com/gZmiEP) and join us.
-
 For more information about communication, refer to the [Ansible Communication guide](https://docs.ansible.com/ansible/devel/community/communication.html).
 
 ## Contributing to this collection
@@ -50,24 +44,17 @@ The process of decision making in this collection is based on discussing and fin
 
 Every voice is important. If you have something on your mind, create an issue or dedicated discussion and let's discuss it!
 
-## Tested with Ansible
 
-<!-- List the versions of Ansible the collection has been tested with. Must match what is in galaxy.yml. -->
+## Ansible version compatibility
 
-## External requirements
+Tested with the Ansible Core 2.12, 2.13 and 2.14 releases, and the current development version of Ansible. Ansible Core versions before 2.11.0 are not supported.
 
-<!-- List any external resources the collection depends on, for example minimum versions of an OS, libraries, or utilities. Do not list other Ansible collections here. -->
+## Python version compatibility
 
-### Supported connections
-<!-- Optional. If your collection supports only specific connection types (such as HTTPAPI, netconf, or others), list them here. -->
+Tested with Python 3.9, 3.10 and 3.11.
 
 ## Included content
-
-<!-- Galaxy will eventually list the module docs within the UI, but until that is ready, you may need to either describe your plugins etc here, or point to an external docsite to cover that information. -->
-
-## Using this collection
-
-<!--Include some quick examples that cover the most common use cases for your collection content. It can include the following examples of installation and upgrade (change devopsarr.sonarr correspondingly):-->
+See the complete list of collection content in the [Plugin Index](https://devopsarr.github.io/ansible-doc/collections/devopsarr/sonarr/index.html#plugins-in-devopsarr-sonarr).
 
 ### Installing the Collection from Ansible Galaxy
 
@@ -96,9 +83,38 @@ ansible-galaxy collection install devopsarr.sonarr:==0.1.0
 
 See [Ansible Using collections](https://docs.ansible.com/ansible/devel/user_guide/collections_using.html) for more details.
 
+The python module dependencies are not installed by `ansible-galaxy`.  They can
+be manually installed using pip:
+
+    pip install -r requirements.txt
+
+or:
+
+    pip install sonarr-py
+
+## Using this collection
+
+You can either call modules by their Fully Qualified Collection Name (FQCN), such as `devopsarr.sonarr.sonarr_tag`, or you can call modules by their short name if you list the `devopsarr.sonarr` collection in the playbook's `collections` keyword:
+
+```yaml
+---
+  - name: Create tag with FQCN
+    devopsarr.sonarr.sonarr_tag:
+      label: example
+      sonarr_api_key: "{{ sonarr_api_key }}"
+      sonarr_url: "{{ sonarr_url }}"
+
+---
+  - name: Create tag with short name
+    sonarr_tag:
+      label: example
+      sonarr_api_key: "{{ sonarr_api_key }}"
+      sonarr_url: "{{ sonarr_url }}"
+```
+
 ## Release notes
 
-See the [changelog](https://github.com/ansible-collections/REPONAMEHERE/tree/main/CHANGELOG.rst).
+See the [changelog](https://github.com/devopsarr/ansible-collection-sonarr/tree/main/CHANGELOG.rst).
 
 ## More information
 

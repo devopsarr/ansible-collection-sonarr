@@ -12,7 +12,7 @@ module: sonarr_tag
 
 short_description: Manages Sonarr tag.
 
-version_added: "1.0.0"
+version_added: "0.0.1"
 
 description: Manages Sonarr tag.
 
