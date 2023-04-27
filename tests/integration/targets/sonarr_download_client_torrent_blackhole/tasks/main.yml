@@ -1,0 +1,72 @@
+---
+- name: create download client
+  devopsarr.sonarr.sonarr_download_client_torrent_blackhole:
+    remove_completed_downloads: false
+    remove_failed_downloads: false
+    enable: false
+    priority: 1
+    name: "TorrentBlackhole"
+    torrent_folder: "/torrentblackhole"
+    watch_folder: "/strm"
+    save_magnet_files: false
+    read_only: true
+    magnet_file_extension: ".magnet"
+    sonarr_api_key: "{{ sonarr_api_key }}"
+    sonarr_url: "{{ sonarr_url }}"
+  register: result
+- name: assert download client creation
+  assert:
+    that:
+      - result['implementation'] == 'TorrentBlackhole'
+# ----------------------------------------------------------------------------
+- name: edit already present download client
+  devopsarr.sonarr.sonarr_download_client_torrent_blackhole:
+    remove_completed_downloads: false
+    remove_failed_downloads: false
+    enable: false
+    priority: 1
+    name: "TorrentBlackhole"
+    torrent_folder: "/torrentblackhole"
+    watch_folder: "/strm1"
+    save_magnet_files: false
+    read_only: true
+    magnet_file_extension: ".magnet"
+    sonarr_api_key: "{{ sonarr_api_key }}"
+    sonarr_url: "{{ sonarr_url }}"
+  register: result
+- name: assert download client changes
+  assert:
+    that:
+      - result.changed == true
+# ----------------------------------------------------------------------------
+- name: test idempotency
+  devopsarr.sonarr.sonarr_download_client_torrent_blackhole:
+    remove_completed_downloads: false
+    remove_failed_downloads: false
+    enable: false
+    priority: 1
+    name: "TorrentBlackhole"
+    torrent_folder: "/torrentblackhole"
+    watch_folder: "/strm1"
+    save_magnet_files: false
+    read_only: true
+    magnet_file_extension: ".magnet"
+    sonarr_api_key: "{{ sonarr_api_key }}"
+    sonarr_url: "{{ sonarr_url }}"
+  register: result
+- name: assert download client idempotency
+  assert:
+    that:
+      - result.changed == false
+# ----------------------------------------------------------------------------
+- name: delete download client
+  devopsarr.sonarr.sonarr_download_client_torrent_blackhole:
+    name: "TorrentBlackhole"
+    sonarr_api_key: "{{ sonarr_api_key }}"
+    sonarr_url: "{{ sonarr_url }}"
+    state: 'absent'
+  register: result
+- name: assert download client deletion
+  assert:
+    that:
+      - result['id'] == 0
