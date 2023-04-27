@@ -8,13 +8,13 @@ __metaclass__ = type
 
 DOCUMENTATION = r'''
 ---
-module: sonarr_indexer_config_info
+module: sonarr_download_client_config_info
 
-short_description: Get information about Sonarr indexer config.
+short_description: Get information about Sonarr download client config.
 
 version_added: "0.5.0"
 
-description: Get information about Sonarr indexer config.
+description: Get information about Sonarr download client config.
 
 extends_documentation_fragment:
     - devopsarr.sonarr.sonarr_credentials
@@ -25,38 +25,33 @@ author:
 
 EXAMPLES = r'''
 ---
-# fetch indexer config
-- name: fetch indexer config
-  devopsarr.sonarr.sonarr_indexer_config_info:
+# fetch download client config
+- name: fetch download client config
+  devopsarr.sonarr.sonarr_download_client_config_info:
 '''
 
 RETURN = r'''
 # These are examples of possible return values, and in general should use other names for return values.
 id:
-    description: Indexer config ID.
+    description: Download client config ID.
     type: int
     returned: always
     sample: '1'
-maximum_size:
+auto_redownload_failed:
     description: Maximum size.
     returned: always
-    type: int
-    sample: '0'
-minimum_age:
+    type: bool
+    sample: true
+enable_completed_download_handling:
     description: Minimum age.
     returned: always
-    type: int
-    sample: '0'
-retention:
+    type: bool
+    sample: true
+download_client_working_folders:
     description: Retention.
     returned: always
-    type: int
-    sample: '0'
-rss_sync_interval:
-    description: RSS sync interval.
-    returned: always
-    type: int
-    sample: '100'
+    type: str
+    sample: '_UNPACK_|_FAILED_'
 '''
 
 from ansible_collections.devopsarr.sonarr.plugins.module_utils.sonarr_module import SonarrModule
@@ -80,15 +75,15 @@ def run_module():
         supports_check_mode=True
     )
 
-    client = sonarr.IndexerConfigApi(module.api)
+    client = sonarr.DownloadClientConfigApi(module.api)
 
     # Get resource.
     try:
-        indexer_config = client.get_indexer_config()
+        client_config = client.get_download_client_config()
     except Exception as e:
-        module.fail_json('Error getting indexer config: %s' % to_native(e.reason), **result)
+        module.fail_json('Error getting download client config: %s' % to_native(e.reason), **result)
 
-    result.update(indexer_config.dict(by_alias=False))
+    result.update(client_config.dict(by_alias=False))
 
     module.exit_json(**result)
 

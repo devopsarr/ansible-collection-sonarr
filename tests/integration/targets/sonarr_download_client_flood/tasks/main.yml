@@ -1,0 +1,87 @@
+---
+- name: create download client
+  devopsarr.sonarr.sonarr_download_client_flood:
+    remove_completed_downloads: false
+    remove_failed_downloads: false
+    enable: false
+    priority: 1
+    name: "Flood"
+    host: "localhost"
+    url_base: "/flood"
+    port: 3000
+    use_ssl: false
+    start_on_add: true
+    field_tags: ["sonarr"]
+    username: "user"
+    password: "password"
+    post_import_tags: []
+    additional_tags: []
+    sonarr_api_key: "{{ sonarr_api_key }}"
+    sonarr_url: "{{ sonarr_url }}"
+  register: result
+- name: assert download client creation
+  assert:
+    that:
+      - result['implementation'] == 'Flood'
+# ----------------------------------------------------------------------------
+- name: edit already present download client
+  devopsarr.sonarr.sonarr_download_client_flood:
+    remove_completed_downloads: false
+    remove_failed_downloads: false
+    enable: false
+    priority: 1
+    name: "Flood"
+    host: "localhost"
+    url_base: "/flood"
+    port: 3000
+    use_ssl: false
+    start_on_add: true
+    field_tags: ["tv-sonarr"]
+    post_import_tags: []
+    additional_tags: []
+    username: "user"
+    password: "password"
+    sonarr_api_key: "{{ sonarr_api_key }}"
+    sonarr_url: "{{ sonarr_url }}"
+  register: result
+- name: assert download client changes
+  assert:
+    that:
+      - result.changed == true
+# ----------------------------------------------------------------------------
+- name: test idempotency
+  devopsarr.sonarr.sonarr_download_client_flood:
+    remove_completed_downloads: false
+    remove_failed_downloads: false
+    enable: false
+    priority: 1
+    name: "Flood"
+    host: "localhost"
+    url_base: "/flood"
+    port: 3000
+    use_ssl: false
+    start_on_add: true
+    field_tags: ["tv-sonarr"]
+    post_import_tags: []
+    additional_tags: []
+    username: "user"
+    password: "password"
+    sonarr_api_key: "{{ sonarr_api_key }}"
+    sonarr_url: "{{ sonarr_url }}"
+  register: result
+- name: assert download client idempotency
+  assert:
+    that:
+      - result.changed == false
+# ----------------------------------------------------------------------------
+- name: delete download client
+  devopsarr.sonarr.sonarr_download_client_flood:
+    name: "Flood"
+    sonarr_api_key: "{{ sonarr_api_key }}"
+    sonarr_url: "{{ sonarr_url }}"
+    state: 'absent'
+  register: result
+- name: assert download client deletion
+  assert:
+    that:
+      - result['id'] == 0

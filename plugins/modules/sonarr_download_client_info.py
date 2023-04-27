@@ -8,13 +8,13 @@ __metaclass__ = type
 
 DOCUMENTATION = r'''
 ---
-module: sonarr_indexer_info
+module: sonarr_download_client_info
 
-short_description: Get information about Sonarr indexer.
+short_description: Get information about Sonarr download client.
 
-version_added: "0.5.0"
+version_added: "0.6.0"
 
-description: Get information about Sonarr indexer.
+description: Get information about Sonarr download client.
 
 options:
     name:
@@ -30,26 +30,26 @@ author:
 
 EXAMPLES = r'''
 ---
-# Gather information about all indexers.
-- name: Gather information about all indexers
-  devopsarr.sonarr.sonarr_indexer_info:
+# Gather information about all download clients.
+- name: Gather information about all download clients
+  devopsarr.sonarr.sonarr_download_client_info:
 
-# Gather information about a single indexer.
-- name: Gather information about a single indexer
-  devopsarr.sonarr.sonarr_indexer_info:
+# Gather information about a single download client.
+- name: Gather information about a single download client
+  devopsarr.sonarr.sonarr_download_client_info:
     name: test
 '''
 
 RETURN = r'''
 # These are examples of possible return values, and in general should use other names for return values.
-indexers:
-    description: A list of indexers.
+download_clients:
+    description: A list of download clients.
     returned: always
     type: list
     elements: dict
     contains:
         id:
-            description: indexer ID.
+            description: download clientID.
             type: int
             returned: always
             sample: 1
@@ -58,18 +58,18 @@ indexers:
             returned: always
             type: str
             sample: "Example"
-        enable_automatic_search:
-            description: Enable automatic search flag.
+        remove_completed_downloads:
+            description: Remove completed downloads flag.
             returned: always
             type: bool
             sample: true
-        enable_interactive_search:
-            description: Enable interactive search flag.
+        remove_failed_downloads:
+            description: Remove failed downloads flag.
             returned: always
             type: bool
             sample: false
-        enable_rss:
-            description: Enable RSS flag.
+        enable:
+            description: Enable flag.
             returned: always
             type: bool
             sample: true
@@ -78,11 +78,6 @@ indexers:
             returned: always
             type: int
             sample: 1
-        download_client_id:
-            description: Download client ID.
-            returned: always
-            type: int
-            sample: 0
         config_contract:
             description: Config contract.
             returned: always
@@ -128,7 +123,7 @@ def run_module():
 
     result = dict(
         changed=False,
-        indexers=[],
+        download_clients=[],
     )
 
     module = SonarrModule(
@@ -136,24 +131,24 @@ def run_module():
         supports_check_mode=True
     )
 
-    client = sonarr.IndexerApi(module.api)
+    client = sonarr.DownloadClientApi(module.api)
 
     # List resources.
     try:
-        indexer_list = client.list_indexer()
+        clients = client.list_download_client()
     except Exception as e:
-        module.fail_json('Error listing indexers: %s' % to_native(e.reason), **result)
+        module.fail_json('Error listing download clients: %s' % to_native(e.reason), **result)
 
-    indexers = []
+    download_clients = []
     # Check if a resource is present already.
-    for indexer in indexer_list:
+    for download_client in clients:
         if module.params['name']:
-            if indexer['name'] == module.params['name']:
-                indexers = [indexer.dict(by_alias=False)]
+            if download_client['name'] == module.params['name']:
+                download_clients = [download_client.dict(by_alias=False)]
         else:
-            indexers.append(indexer.dict(by_alias=False))
+            download_clients.append(download_client.dict(by_alias=False))
 
-    result.update(indexers=indexers)
+    result.update(download_clients=download_clients)
 
     module.exit_json(**result)
 

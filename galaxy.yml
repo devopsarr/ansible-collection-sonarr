@@ -1,7 +1,7 @@
 namespace: devopsarr
 name: sonarr
 # Version will be updated by workflow
-version: 0.0.1
+version: 0.5.0
 readme: README.md
 authors:
   - Fuochi (github.com/Fuochi)
@@ -12,7 +12,7 @@ tags:
   - arr
   - series
 repository: https://github.com/devopsarr/ansible-collection-sonarr
-#documentation: https://github.com/ansible-collection-migration/devopsarr.sonarr/tree/main/docs
+documentation: https://devopsarr.github.io/ansible-doc/collections/devopsarr/sonarr/
 homepage: https://github.com/devopsarr/ansible-collection-sonarr
 issues: https://github.com/devopsarr/ansible-collection-sonarr/issues
 build_ignore:

@@ -1,0 +1,63 @@
+---
+- name: create download client
+  devopsarr.sonarr.sonarr_download_client_usenet_blackhole:
+    remove_completed_downloads: false
+    remove_failed_downloads: false
+    enable: false
+    priority: 1
+    name: "UsenetBlackhole"
+    nzb_folder: "/usenetblackhole"
+    watch_folder: "/strm"
+    sonarr_api_key: "{{ sonarr_api_key }}"
+    sonarr_url: "{{ sonarr_url }}"
+  register: result
+- name: assert download client creation
+  assert:
+    that:
+      - result['implementation'] == 'UsenetBlackhole'
+# ----------------------------------------------------------------------------
+- name: edit already present download client
+  devopsarr.sonarr.sonarr_download_client_usenet_blackhole:
+    remove_completed_downloads: false
+    remove_failed_downloads: false
+    enable: false
+    priority: 1
+    name: "UsenetBlackhole"
+    nzb_folder: "/usenetblackhole"
+    watch_folder: "/strm1"
+    sonarr_api_key: "{{ sonarr_api_key }}"
+    sonarr_url: "{{ sonarr_url }}"
+  register: result
+- name: assert download client changes
+  assert:
+    that:
+      - result.changed == true
+# ----------------------------------------------------------------------------
+- name: test idempotency
+  devopsarr.sonarr.sonarr_download_client_usenet_blackhole:
+    remove_completed_downloads: false
+    remove_failed_downloads: false
+    enable: false
+    priority: 1
+    name: "UsenetBlackhole"
+    nzb_folder: "/usenetblackhole"
+    watch_folder: "/strm1"
+    sonarr_api_key: "{{ sonarr_api_key }}"
+    sonarr_url: "{{ sonarr_url }}"
+  register: result
+- name: assert download client idempotency
+  assert:
+    that:
+      - result.changed == false
+# ----------------------------------------------------------------------------
+- name: delete download client
+  devopsarr.sonarr.sonarr_download_client_usenet_blackhole:
+    name: "UsenetBlackhole"
+    sonarr_api_key: "{{ sonarr_api_key }}"
+    sonarr_url: "{{ sonarr_url }}"
+    state: 'absent'
+  register: result
+- name: assert download client deletion
+  assert:
+    that:
+      - result['id'] == 0

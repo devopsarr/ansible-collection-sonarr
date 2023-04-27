@@ -1,0 +1,87 @@
+---
+- name: create download client
+  devopsarr.sonarr.sonarr_download_client_transmission:
+    remove_completed_downloads: false
+    remove_failed_downloads: false
+    enable: false
+    priority: 1
+    name: "Transmission"
+    host: "localhost"
+    url_base: "/transmission/"
+    port: 8112
+    use_ssl: false
+    add_paused: true
+    tv_category: "tv-sonarr"
+    older_tv_priority: 0
+    recent_tv_priority: 0
+    username: "user"
+    password: "password"
+    sonarr_api_key: "{{ sonarr_api_key }}"
+    sonarr_url: "{{ sonarr_url }}"
+  register: result
+- name: assert download client creation
+  assert:
+    that:
+      - result['implementation'] == 'Transmission'
+# ----------------------------------------------------------------------------
+- name: edit already present download client
+  devopsarr.sonarr.sonarr_download_client_transmission:
+    remove_completed_downloads: false
+    remove_failed_downloads: false
+    enable: false
+    priority: 1
+    name: "Transmission"
+    host: "localhost"
+    url_base: "/transmission/"
+    port: 8112
+    use_ssl: false
+    add_paused: true
+    tv_category: "tv-sonarr"
+    older_tv_priority: 1
+    recent_tv_priority: 0
+    username: "user"
+    password: "password"
+    sonarr_api_key: "{{ sonarr_api_key }}"
+    sonarr_url: "{{ sonarr_url }}"
+  register: result
+- name: assert download client changes
+  assert:
+    that:
+      - result.changed == true
+# ----------------------------------------------------------------------------
+- name: test idempotency
+  devopsarr.sonarr.sonarr_download_client_transmission:
+    remove_completed_downloads: false
+    remove_failed_downloads: false
+    enable: false
+    priority: 1
+    name: "Transmission"
+    host: "localhost"
+    url_base: "/transmission/"
+    port: 8112
+    use_ssl: false
+    add_paused: true
+    tv_category: "tv-sonarr"
+    older_tv_priority: 1
+    recent_tv_priority: 0
+    username: "user"
+    password: "password"
+    sonarr_api_key: "{{ sonarr_api_key }}"
+    sonarr_url: "{{ sonarr_url }}"
+  register: result
+- name: assert download client idempotency
+  assert:
+    that:
+      - result.changed == false
+# ----------------------------------------------------------------------------
+- name: delete download client
+  devopsarr.sonarr.sonarr_download_client_transmission:
+    name: "Transmission"
+    sonarr_api_key: "{{ sonarr_api_key }}"
+    sonarr_url: "{{ sonarr_url }}"
+    state: 'absent'
+  register: result
+- name: assert download client deletion
+  assert:
+    that:
+      - result['id'] == 0
