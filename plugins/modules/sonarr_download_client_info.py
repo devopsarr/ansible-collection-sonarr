@@ -106,7 +106,6 @@ download_clients:
 '''
 
 from ansible_collections.devopsarr.sonarr.plugins.module_utils.sonarr_module import SonarrModule
-from ansible_collections.devopsarr.sonarr.plugins.module_utils.sonarr_field_utils import FieldHelper, DownloadClientHelper
 from ansible.module_utils.common.text.converters import to_native
 
 try:
