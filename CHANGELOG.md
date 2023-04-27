@@ -1,5 +1,15 @@
 # Changelog
 
+## 0.6.0 (2023-04-27)
+
+## What's Changed
+* chore(deps): update hotio/sonarr docker tag to v4-4.0.0.439 by @renovate in https://github.com/devopsarr/ansible-collection-sonarr/pull/32
+* feat: quality by @Fuochi in https://github.com/devopsarr/ansible-collection-sonarr/pull/33
+* feat: download client by @Fuochi in https://github.com/devopsarr/ansible-collection-sonarr/pull/35
+
+
+**Full Changelog**: https://github.com/devopsarr/ansible-collection-sonarr/compare/v0.5.0...v0.6.0
+
 ## [0.5.0](https://github.com/devopsarr/ansible-collection-sonarr/compare/v0.4.0...v0.5.0) (2023-04-11)
 
 
