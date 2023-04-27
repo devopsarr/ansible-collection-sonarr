@@ -8,137 +8,49 @@ __metaclass__ = type
 
 DOCUMENTATION = r'''
 ---
-module: sonarr_download_client
+module: sonarr_download_client_freebox
 
-short_description: Manages Sonarr download client.
+short_description: Manages Sonarr download client Freebox.
 
 version_added: "0.6.0"
 
-description: Manages Sonarr download client.
+description: Manages Sonarr download client Freebox.
 
 options:
-    config_contract:
-        description: Config contract.
-        type: str
-    implementation:
-        description: Implementation.
-        type: str
-    protocol:
-        description: Protocol.
-        choices: [ "torrent", "usenet" ]
-        type: str
     update_secrets:
         description: Flag to force update of secret fields.
         type: bool
         default: false
-    add_paused:
-        description: Add paused.
-        type: bool
     use_ssl:
         description: Use SSL.
         type: bool
-    start_on_add:
-        description: Start on add on.
-        type: bool
-    sequential_order:
-        description: Secuential order.
-        type: bool
-    first_and_last:
-        description: First and last.
-        type: bool
-    add_stopped:
-        description: Add stopped.
-        type: bool
-    save_magnet_files:
-        description: Save magnet files.
-        type: bool
-    read_only:
-        description: Read only.
-        type: bool
-    api_key:
-        description: API key.
-        type: str
     host:
         description: Host.
         type: str
-    rpc_path:
-        description: RPC path.
+    api_url:
+        description: API URL.
         type: str
-    url_base:
-        description: Base URL.
+    app_id:
+        description: App ID.
         type: str
-    secret_token:
-        description: Secret token.
-        type: str
-    username:
-        description: Username.
-        type: str
-    password:
-        description: Password.
-        type: str
-    tv_category:
-        description: TV category.
-        type: str
-    tv_imported_category:
-        description: TV imported category.
-        type: str
-    tv_directory:
-        description: TV directory.
-        type: str
-    destination:
-        description: Destination.
+    app_token:
+        description: App token.
         type: str
     category:
-        description: Category.
+        description: TV category.
         type: str
-    nzb_folder:
-        description: NZB folder.
+    destination_directory:
+        description: Destination directory.
         type: str
-    strm_folder:
-        description: Strm folder.
-        type: str
-    torrent_folder:
-        description: Torrent folder.
-        type: str
-    watch_folder:
-        description: Watch folder.
-        type: str
-    magnet_file_extension:
-        description: Magnet file extension.
-        type: str
+    recent_priority:
+        description: Recent TV priority.
+        type: int
+    older_priority:
+        description: Older TV priority.
+        type: int
     port:
         description: Port.
         type: int
-    recent_tv_priority:
-        description: Recent TV priority.
-        type: int
-    older_tv_priority:
-        description: Older TV priority.
-        type: int
-    recent_priority:
-        description: Recent TV priority (Freebox).
-        type: int
-    older_priority:
-        description: Older TV priority (Freebox).
-        type: int
-    initial_state:
-        description: Initial state.
-        type: int
-    intial_state:
-        description: Intial state.
-        type: int
-    additional_tags:
-        description: Additional Tags.
-        type: list
-        elements: int
-    field_tags:
-        description: Field Tags.
-        type: list
-        elements: str
-    post_import_tags:
-        description: Post import Tags.
-        type: list
-        elements: str
 
 extends_documentation_fragment:
     - devopsarr.sonarr.sonarr_credentials
@@ -152,26 +64,26 @@ EXAMPLES = r'''
 ---
 # Create a download client
 - name: Create a download client
-  devopsarr.sonarr.sonarr_download_client:
+  devopsarr.sonarr.sonarr_download_client_freebox:
     remove_completed_downloads: false
     remove_failed_downloads: false
     enable: false
     priority: 1
-    name: "Hadouken"
-    host: "hadouken.lcl"
-    url_base: "/hadouken/"
-    port: 9091
-    category: "sonarr-tv"
-    username: "username"
-    password: "password"
-    protocol: "torrent"
-    config_contract: "HadoukenSettings"
-    implementation: "Hadouken"
+    name: "Freebox"
+    host: "mafreebox.freebox.fr"
+    api_url: "/api/v1/"
+    port: 443
+    use_ssl: false
+    category: "tv-sonarr"
+    older_priority: 1
+    recent_priority: 0
+    app_id: "user"
+    app_token: "app_token"
     tags: [1,2]
 
 # Delete a download client
 - name: Delete a download client
-  devopsarr.sonarr.sonarr_download_client:
+  devopsarr.sonarr.sonarr_download_client_freebox:
     name: Example
     state: absent
 '''
@@ -254,49 +166,21 @@ def run_module():
         remove_failed_downloads=dict(type='bool'),
         enable=dict(type='bool'),
         priority=dict(type='int'),
-        config_contract=dict(type='str'),
-        implementation=dict(type='str'),
-        protocol=dict(type='str', choices=['usenet', 'torrent']),
         tags=dict(type='list', elements='int', default=[]),
         state=dict(default='present', type='str', choices=['present', 'absent']),
         # Needed to manage obfuscate response from api "********"
         update_secrets=dict(type='bool', default=False),
         # Field values
-        add_paused=dict(type='bool'),
         use_ssl=dict(type='bool'),
-        start_on_add=dict(type='bool'),
-        sequential_order=dict(type='bool'),
-        first_and_last=dict(type='bool'),
-        add_stopped=dict(type='bool'),
-        save_magnet_files=dict(type='bool'),
-        read_only=dict(type='bool'),
         host=dict(type='str'),
-        api_key=dict(type='str', no_log=True),
-        rpc_path=dict(type='str'),
-        url_base=dict(type='str'),
-        secret_token=dict(type='str', no_log=True),
-        username=dict(type='str'),
-        password=dict(type='str', no_log=True),
-        tv_category=dict(type='str'),
-        tv_imported_category=dict(type='str'),
-        tv_directory=dict(type='str'),
-        destination=dict(type='str'),
+        api_url=dict(type='str'),
         category=dict(type='str'),
-        nzb_folder=dict(type='str'),
-        strm_folder=dict(type='str'),
-        torrent_folder=dict(type='str'),
-        watch_folder=dict(type='str'),
-        magnet_file_extension=dict(type='str'),
+        destination_directory=dict(type='str'),
+        app_id=dict(type='str'),
+        app_token=dict(type='str', no_log=True),
         port=dict(type='int'),
-        recent_tv_priority=dict(type='int'),
-        older_tv_priority=dict(type='int'),
         recent_priority=dict(type='int'),
         older_priority=dict(type='int'),
-        initial_state=dict(type='int'),
-        intial_state=dict(type='int'),
-        additional_tags=dict(type='list', elements='int'),
-        field_tags=dict(type='list', elements='str'),
-        post_import_tags=dict(type='list', elements='str'),
     )
 
     result = dict(
@@ -344,9 +228,9 @@ def run_module():
         'remove_failed_downloads': module.params['remove_failed_downloads'],
         'enable': module.params['enable'],
         'priority': module.params['priority'],
-        'config_contract': module.params['config_contract'],
-        'implementation': module.params['implementation'],
-        'protocol': module.params['protocol'],
+        'config_contract': 'FreeboxDownloadSettings',
+        'implementation': 'TorrentFreeboxDownload',
+        'protocol': 'torrent',
         'tags': module.params['tags'],
         'fields': field_helper.populate_fields(module),
     })

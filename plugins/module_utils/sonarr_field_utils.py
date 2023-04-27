@@ -156,6 +156,8 @@ class DownloadClientHelper():
             'port',
             'recent_tv_priority',
             'older_tv_priority',
+            'recent_priority',
+            'older_priority',
             'initial_state',
             'intial_state',
             'additional_tags',
