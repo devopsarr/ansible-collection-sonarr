@@ -1,5 +1,35 @@
 # Changelog
 
+## [0.6.0](https://github.com/devopsarr/ansible-collection-sonarr/compare/v0.5.0...v0.6.0) (2023-05-01)
+
+
+### Features
+
+* add download client aria2 module ([5d1f539](https://github.com/devopsarr/ansible-collection-sonarr/commit/5d1f5393e26bbfe595622e420770d4c4edf50184))
+* add download client config info module ([0fc1dea](https://github.com/devopsarr/ansible-collection-sonarr/commit/0fc1deab2cf061f9abf3e8828177f83943605c6b))
+* add download client config module ([abe7066](https://github.com/devopsarr/ansible-collection-sonarr/commit/abe7066af02d0cb4d5fcd23046ec8928a1d8a864))
+* add download client module ([4a3b599](https://github.com/devopsarr/ansible-collection-sonarr/commit/4a3b5990a342ab29739c3161d6ae64e5538f84a6))
+* add quality info module ([531c6cc](https://github.com/devopsarr/ansible-collection-sonarr/commit/531c6cc3646f66932f71d1ec7e61dda1b2cbb9fe))
+* add quality module ([040a760](https://github.com/devopsarr/ansible-collection-sonarr/commit/040a760c19d3aeed504002fbabfccfa95d659d0f))
+* add sonarr download client deluge module ([21ef957](https://github.com/devopsarr/ansible-collection-sonarr/commit/21ef9571dd530d990a42a3fc1f9b2648cae94766))
+* add sonarr download client flood module ([0b3a1ce](https://github.com/devopsarr/ansible-collection-sonarr/commit/0b3a1ce0da7b3b65e4f532b5f2ab0beedc79c08b))
+* add sonarr download client freebox module ([c29f080](https://github.com/devopsarr/ansible-collection-sonarr/commit/c29f0804cc12a95f405edb4b8f234c8868510776))
+* add sonarr download client hadouken module ([e6c1b82](https://github.com/devopsarr/ansible-collection-sonarr/commit/e6c1b8276453f1402702a565aec49962944bcb7a))
+* add sonarr download client info module ([0e0c63b](https://github.com/devopsarr/ansible-collection-sonarr/commit/0e0c63b695f33014066499a4e9be7c5ef1444798))
+* add sonarr download client nzbget module ([b1c2a02](https://github.com/devopsarr/ansible-collection-sonarr/commit/b1c2a0201b834de3515faa3738406bedf6b2fe69))
+* add sonarr download client nzbvortex module ([0f59261](https://github.com/devopsarr/ansible-collection-sonarr/commit/0f59261ba9441f2a68f8eff287db42aca18aa6ac))
+* add sonarr download client pneumatic module ([1e3943c](https://github.com/devopsarr/ansible-collection-sonarr/commit/1e3943c58a422c2bfea439732bc568b056120a28))
+* add sonarr download client qbittorrent module ([e613df7](https://github.com/devopsarr/ansible-collection-sonarr/commit/e613df788b32f73452d56c3cfb593393a0675656))
+* add sonarr download client rtorrent module ([2bfec9c](https://github.com/devopsarr/ansible-collection-sonarr/commit/2bfec9cc7ea7b0c48d1cdfbe3767b3ee80eaf711))
+* add sonarr download client sabnzb module ([e75ee0a](https://github.com/devopsarr/ansible-collection-sonarr/commit/e75ee0a18188a2a5b84d45502d29759104bdffc0))
+* add sonarr download client torent blackhole module ([e61d687](https://github.com/devopsarr/ansible-collection-sonarr/commit/e61d687e25585e78a5eea1743b9d90f8ccf5add2))
+* add sonarr download client torrent download station module ([aec096f](https://github.com/devopsarr/ansible-collection-sonarr/commit/aec096ff3861925ebd8d1cc0af6510e4f681f22f))
+* add sonarr download client transmission module ([ab18d0c](https://github.com/devopsarr/ansible-collection-sonarr/commit/ab18d0cf1da57d43c9595f8b0e575c487bcdd1f2))
+* add sonarr download client usenet blackhole module ([2622474](https://github.com/devopsarr/ansible-collection-sonarr/commit/2622474f76d90e3e2b4b466327c59df84daad870))
+* add sonarr download client usenet download station module ([79eaea3](https://github.com/devopsarr/ansible-collection-sonarr/commit/79eaea3155ef41f8fb81b45238ebe219de12610d))
+* add sonarr download client utorrent module ([507fef2](https://github.com/devopsarr/ansible-collection-sonarr/commit/507fef21ff7342f334b8b724be0edd93536f672c))
+* add sonarr download client vuze module ([a611590](https://github.com/devopsarr/ansible-collection-sonarr/commit/a61159050d33cbcd1b2bdd609f5ba75b882b9d4f))
+
 ## [0.5.0](https://github.com/devopsarr/ansible-collection-sonarr/compare/v0.4.0...v0.5.0) (2023-04-11)
 
 
