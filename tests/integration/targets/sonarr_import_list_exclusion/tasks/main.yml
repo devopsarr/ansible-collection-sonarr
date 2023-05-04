@@ -1,0 +1,37 @@
+---
+- name: create import list exclusion
+  devopsarr.sonarr.sonarr_import_list_exclusion:
+    title: 'breaking bad'
+    tvdb_id: 12345
+    sonarr_api_key: "{{ sonarr_api_key }}"
+    sonarr_url: "{{ sonarr_url }}"
+  register: result
+- name: assert import list exclusion creation
+  assert:
+    that:
+      - result['tvdb_id'] == 12345
+# ----------------------------------------------------------------------------
+- name: check idempotency
+  devopsarr.sonarr.sonarr_import_list_exclusion:
+    title: 'breaking bad'
+    tvdb_id: 12345
+    sonarr_api_key: "{{ sonarr_api_key }}"
+    sonarr_url: "{{ sonarr_url }}"
+  register: result
+- name: assert import list exclusion idempotency
+  assert:
+    that:
+      - result.changed == false
+# ----------------------------------------------------------------------------
+- name: delete import list exclusion
+  devopsarr.sonarr.sonarr_import_list_exclusion:
+    title: 'breaking bad'
+    tvdb_id: 12345
+    state: absent
+    sonarr_api_key: "{{ sonarr_api_key }}"
+    sonarr_url: "{{ sonarr_url }}"
+  register: result
+- name: assert import list exclusion deletion
+  assert:
+    that:
+      - result['id'] == 0
