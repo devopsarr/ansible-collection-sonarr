@@ -46,6 +46,13 @@ options:
         required: true
         type: int
         choices: [0, 1, 2, 3, 4, 5]
+    colon_replacement_format:
+        description: >
+            Colon replacement format.
+            0 - 'Delete' 1 - 'Replace with Dash' 2 - 'Replace with Space Dash' 3 - 'Replace with Space Dash Space' 4 - 'Smart Replace'.
+        required: true
+        type: int
+        choices: [0, 1, 2, 3, 4]
     rename_episodes:
         description: Rename episodes.
         required: true
@@ -70,6 +77,7 @@ EXAMPLES = r'''
     rename_episodes: true
     replace_illegal_characters: true
     multi_episode_style: 0
+    colon_replacement_format: 0
     daily_episode_format: '{Series Title} - {Air-Date} - {Episode Title} {Quality Full}'
     anime_episode_format: '{Series Title} - S{season:00}E{episode:00} - {Episode Title} {Quality Full}'
     series_folder_format: '{Series Title}'
@@ -120,6 +128,13 @@ multi_episode_style:
     returned: always
     type: int
     sample: 2
+colon_replacement_format:
+    description: >
+        Colon replacement format.
+        0 - 'Delete' 1 - 'Replace with Dash' 2 - 'Replace with Space Dash' 3 - 'Replace with Space Dash Space' 4 - 'Smart Replace'.
+    returned: always
+    type: int
+    sample: 2
 rename_episodes:
     description: Rename episodes.
     returned: always
@@ -153,6 +168,7 @@ def run_module():
         season_folder_format=dict(type='str', required=True),
         specials_folder_format=dict(type='str', required=True),
         multi_episode_style=dict(type='int', required=True, choices=[0, 1, 2, 3, 4, 5]),
+        colon_replacement_format=dict(type='int', required=True, choices=[0, 1, 2, 3, 4]),
         rename_episodes=dict(type='bool', required=True),
         replace_illegal_characters=dict(type='bool', required=True),
     )
@@ -185,6 +201,7 @@ def run_module():
         'season_folder_format': module.params['season_folder_format'],
         'specials_folder_format': module.params['specials_folder_format'],
         'multi_episode_style': module.params['multi_episode_style'],
+        'colon_replacement_format': module.params['colon_replacement_format'],
         'rename_episodes': module.params['rename_episodes'],
         'replace_illegal_characters': module.params['replace_illegal_characters'],
         'id': 1,

@@ -72,6 +72,13 @@ multi_episode_style:
     returned: always
     type: int
     sample: 2
+colon_replacement_format:
+    description: >
+        Colon replacement format.
+        0 - 'Delete' 1 - 'Replace with Dash' 2 - 'Replace with Space Dash' 3 - 'Replace with Space Dash Space' 4 - 'Smart Replace'.
+    returned: always
+    type: int
+    sample: 2
 rename_episodes:
     description: Rename episodes.
     returned: always
