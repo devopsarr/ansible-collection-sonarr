@@ -44,6 +44,10 @@ class FieldHelper():
                 api='tags',
                 py='field_tags',
             ),
+            FieldException(
+                api='profileIds',
+                py='quality_profile_ids',
+            ),
         ]
 
     def __getitem__(self, item):
@@ -175,6 +179,51 @@ class DownloadClientHelper():
                 want.config_contract != self.status.config_contract or
                 want.implementation != self.status.implementation or
                 want.protocol != self.status.protocol or
+                want.tags != self.status.tags):
+            return True
+
+        for status_field in self.status.fields:
+            for want_field in want.fields:
+                if want_field.name == status_field.name and want_field.value != status_field.value and status_field.value != "********":
+                    return True
+        return False
+
+
+class ImportListHelper():
+    def __init__(self, status):
+        # type: (sonarr.ImportListResource) -> None
+        self.status = status
+        self.import_list_fields = [
+            'access_token',
+            'refresh_token',
+            'api_key',
+            'username',
+            'auth_user',
+            'rating',
+            'base_url',
+            'expires',
+            'listname',
+            'genres',
+            'years',
+            'trakt_additional_parameters',
+            'limit',
+            'trakt_list_type',
+            'list_type',
+            'language_profile_ids',
+            'quality_profile_ids',
+            'tag_ids',
+        ]
+
+    def is_changed(self, want):
+        # type: (sonarr.ImportListResource) -> bool
+        if (want.name != self.status.name or
+                want.enable_automatic_add != self.status.enable_automatic_add or
+                want.should_monitor != self.status.should_monitor or
+                want.quality_profile_id != self.status.quality_profile_id or
+                want.season_folder != self.status.season_folder or
+                want.config_contract != self.status.config_contract or
+                want.implementation != self.status.implementation or
+                want.series_type != self.status.series_type or
                 want.tags != self.status.tags):
             return True
 

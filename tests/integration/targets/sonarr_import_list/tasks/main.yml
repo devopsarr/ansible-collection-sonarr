@@ -1,0 +1,137 @@
+---
+- name: create import list
+  devopsarr.sonarr.sonarr_import_list:
+    enable_automatic_add: false
+    should_monitor: "unknown"
+    quality_profile_id: 1
+    root_folder_path: "/config"
+    season_folder: false
+    name: "SonarrImport"
+    base_url: "localhost"
+    api_key: "Key"
+    series_type: "standard"
+    language_profile_ids: [1]
+    config_contract: "SonarrSettings"
+    implementation: "SonarrImport"
+    tags: []
+    sonarr_api_key: "{{ sonarr_api_key }}"
+    sonarr_url: "{{ sonarr_url }}"
+  register: result
+- name: assert import list creation
+  assert:
+    that:
+      - result['implementation'] == 'SonarrImport'
+# ----------------------------------------------------------------------------
+- name: edit already present import list
+  devopsarr.sonarr.sonarr_import_list:
+    enable_automatic_add: false
+    should_monitor: "unknown"
+    quality_profile_id: 1
+    root_folder_path: "/config"
+    season_folder: false
+    name: "SonarrImport"
+    base_url: "localhost:123"
+    api_key: "Key"
+    series_type: "standard"
+    language_profile_ids: [1]
+    config_contract: "SonarrSettings"
+    implementation: "SonarrImport"
+    tags: []
+    sonarr_api_key: "{{ sonarr_api_key }}"
+    sonarr_url: "{{ sonarr_url }}"
+  register: result
+- name: assert import list changes
+  assert:
+    that:
+      - result.changed == true
+# ----------------------------------------------------------------------------
+- name: test idempotency
+  devopsarr.sonarr.sonarr_import_list:
+    enable_automatic_add: false
+    should_monitor: "unknown"
+    quality_profile_id: 1
+    root_folder_path: "/config"
+    season_folder: false
+    name: "SonarrImport"
+    base_url: "localhost:123"
+    api_key: "Key"
+    series_type: "standard"
+    language_profile_ids: [1]
+    quality_profile_ids: []
+    root_folder_paths: []
+    tag_ids: []
+    config_contract: "SonarrSettings"
+    implementation: "SonarrImport"
+    tags: []
+    sonarr_api_key: "{{ sonarr_api_key }}"
+    sonarr_url: "{{ sonarr_url }}"
+  register: result
+- name: assert import list idempotency
+  assert:
+    that:
+      - result.changed == false
+## Commented because api_key isn't considered as sensitive yet from API
+# # ----------------------------------------------------------------------------
+# - name: test sensitive un-change
+#   devopsarr.sonarr.sonarr_import_list:
+#     enable_automatic_add: false
+#     should_monitor: "unknown"
+#     quality_profile_id: 1
+#     root_folder_path: "/config"
+#     season_folder: false
+#     name: "SonarrImport"
+#     base_url: "localhost:123"
+#     api_key: "Key"
+#     series_type: "standard"
+#     language_profile_ids: [1]
+#     quality_profile_ids: []
+#     root_folder_paths: []
+#     tag_ids: []
+#     config_contract: "SonarrSettings"
+#     implementation: "SonarrImport"
+#     tags: []
+#     sonarr_api_key: "{{ sonarr_api_key }}"
+#     sonarr_url: "{{ sonarr_url }}"
+#   register: result
+# - name: assert import list idempotency
+#   assert:
+#     that:
+#       - result.changed == false
+# # ----------------------------------------------------------------------------
+# - name: test key change
+#   devopsarr.sonarr.sonarr_import_list:
+#     enable_automatic_add: false
+#     should_monitor: "unknown"
+#     quality_profile_id: 1
+#     root_folder_path: "/config"
+#     season_folder: false
+#     name: "SonarrImport"
+#     base_url: "localhost:123"
+#     api_key: "Key123"
+#     series_type: "standard"
+#     language_profile_ids: [1]
+#     quality_profile_ids: []
+#     root_folder_paths: []
+#     tag_ids: []
+#     config_contract: "SonarrSettings"
+#     implementation: "SonarrImport"
+#     update_secrets: true
+#     sonarr_api_key: "{{ sonarr_api_key }}"
+#     sonarr_url: "{{ sonarr_url }}"
+#   register: result
+# - name: assert import list idempotency
+#   assert:
+#     that:
+#       - result.changed == true
+# ----------------------------------------------------------------------------
+- name: delete import list
+  devopsarr.sonarr.sonarr_import_list:
+    name: "SonarrImport"
+    sonarr_api_key: "{{ sonarr_api_key }}"
+    sonarr_url: "{{ sonarr_url }}"
+    state: 'absent'
+  register: result
+- name: assert import list deletion
+  assert:
+    that:
+      - result['id'] == 0
