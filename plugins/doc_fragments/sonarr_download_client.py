@@ -13,10 +13,10 @@ options:
     required: true
     type: str
   remove_completed_downloads:
-    description: remove_completed_downloads flag.
+    description: Remove completed downloads flag.
     type: bool
   remove_failed_downloads:
-    description: remove_failed_downloads flag.
+    description: Remove failed downloads flag.
     type: bool
   enable:
     description: Enable flag.

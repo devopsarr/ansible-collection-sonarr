@@ -17,12 +17,6 @@ version_added: "0.6.0"
 description: Manages Sonarr download client.
 
 options:
-    config_contract:
-        description: Config contract.
-        type: str
-    implementation:
-        description: Implementation.
-        type: str
     protocol:
         description: Protocol.
         choices: [ "torrent", "usenet" ]
@@ -142,6 +136,7 @@ options:
 
 extends_documentation_fragment:
     - devopsarr.sonarr.sonarr_credentials
+    - devopsarr.sonarr.sonarr_implementation
     - devopsarr.sonarr.sonarr_download_client
 
 author:
