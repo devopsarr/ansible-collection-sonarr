@@ -17,12 +17,6 @@ version_added: "0.5.0"
 description: Manages Sonarr indexer.
 
 options:
-    config_contract:
-        description: Config contract.
-        type: str
-    implementation:
-        description: Implementation.
-        type: str
     protocol:
         description: Protocol.
         choices: [ "torrent", "usenet" ]
@@ -90,6 +84,7 @@ options:
 
 extends_documentation_fragment:
     - devopsarr.sonarr.sonarr_credentials
+    - devopsarr.sonarr.sonarr_implementation
     - devopsarr.sonarr.sonarr_indexer
 
 author:

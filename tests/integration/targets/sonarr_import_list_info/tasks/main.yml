@@ -1,0 +1,54 @@
+---
+- name: create import list
+  devopsarr.sonarr.sonarr_import_list:
+    name: "{{ item }}"
+    enable_automatic_add: false
+    should_monitor: "unknown"
+    quality_profile_id: 1
+    root_folder_path: "/config"
+    season_folder: false
+    base_url: "localhost"
+    api_key: "Key"
+    series_type: "standard"
+    language_profile_ids: [1]
+    config_contract: "SonarrSettings"
+    implementation: "SonarrImport"
+    tags: []
+    sonarr_api_key: "{{ sonarr_api_key }}"
+    sonarr_url: "{{ sonarr_url }}"
+  with_items:
+    - 'info_test'
+    - 'info_test1'
+
+- name: list a single import list
+  devopsarr.sonarr.sonarr_import_list_info:
+    name: "info_test"
+    sonarr_api_key: "{{ sonarr_api_key }}"
+    sonarr_url: "{{ sonarr_url }}"
+  register: result
+
+- name: assert single import list
+  assert:
+    that:
+      - result['import_lists'][0]['name'] == 'info_test'
+# ----------------------------------------------------------------------------
+- name: list all import lists
+  devopsarr.sonarr.sonarr_import_list_info:
+    sonarr_api_key: "{{ sonarr_api_key }}"
+    sonarr_url: "{{ sonarr_url }}"
+  register: result
+
+- name: assert multiple import lists
+  assert:
+    that:
+      - result['import_lists'] | length > 1
+# ----------------------------------------------------------------------------
+- name: clean up import list
+  devopsarr.sonarr.sonarr_import_list:
+    name: "{{ item }}"
+    state: absent
+    sonarr_api_key: "{{ sonarr_api_key }}"
+    sonarr_url: "{{ sonarr_url }}"
+  with_items:
+    - 'info_test'
+    - 'info_test1'

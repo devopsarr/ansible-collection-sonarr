@@ -12,18 +12,24 @@ options:
     description: Name.
     required: true
     type: str
-  remove_completed_downloads:
-    description: Remove completed downloads flag.
+  season_folder:
+    description: Season folder flag.
     type: bool
-  remove_failed_downloads:
-    description: Remove failed downloads flag.
+  enable_automatic_add:
+    description: Enable autometic add flag.
     type: bool
-  enable:
-    description: Enable flag.
-    type: bool
-  priority:
-    description: Priority.
+  quality_profile_id:
+    description: Quality profile ID.
     type: int
+  should_monitor:
+    description: Should monitor.
+    type: str
+  root_folder_path:
+    description: Root folder path.
+    type: str
+  series_type:
+    description: Series type.
+    type: str
   tags:
     description: Tag list.
     type: list
