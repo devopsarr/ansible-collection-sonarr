@@ -291,7 +291,7 @@ def run_module():
         'tags': module.params['tags'],
         'fields': field_helper.populate_fields(module),
     })
-    # module.fail_json(want.to_json())
+
     # Create a new resource.
     if result['id'] == 0:
         result['changed'] = True
