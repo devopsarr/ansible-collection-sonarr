@@ -1,5 +1,46 @@
 # Changelog
 
+## [1.0.0](https://github.com/devopsarr/ansible-collection-sonarr/compare/v0.6.0...v1.0.0) (2023-08-26)
+
+
+### ⚠ BREAKING CHANGES
+
+* migrate specific field resources to generic
+
+### Features
+
+* add auto tag info module ([b1e5189](https://github.com/devopsarr/ansible-collection-sonarr/commit/b1e5189741ed6108f48f5e7cc3f07c4b47204bef))
+* add auto tag module ([1652c64](https://github.com/devopsarr/ansible-collection-sonarr/commit/1652c642b268d738879ccd0cf5d81f49e00f763a))
+* add auto tag schema info module ([4d2a9df](https://github.com/devopsarr/ansible-collection-sonarr/commit/4d2a9dfd6e117ddabc40f46d1bc801d9864e541f))
+* add custom format info module ([fbd756e](https://github.com/devopsarr/ansible-collection-sonarr/commit/fbd756ee659387a02a694ef0cc533504314df6db))
+* add custom format module ([4d5872b](https://github.com/devopsarr/ansible-collection-sonarr/commit/4d5872b67817d4728c16fe139b8c8d72b46dc210))
+* add custom format schema info module ([ca4a8ea](https://github.com/devopsarr/ansible-collection-sonarr/commit/ca4a8ead08aef9b4b1b8235f576eff854fec243a))
+* add download client schema info module ([cddf9f1](https://github.com/devopsarr/ansible-collection-sonarr/commit/cddf9f10014786e848c42f6cf91ae8049d62f70a))
+* add import list exclusion info module ([6de1816](https://github.com/devopsarr/ansible-collection-sonarr/commit/6de18163c5fd9f896aefee191ae2524cc41684ee))
+* add import list exclusion module ([d2fcbb9](https://github.com/devopsarr/ansible-collection-sonarr/commit/d2fcbb907bbbc7775706a0fc548d59fb331a41a3))
+* add import list info module ([0a78547](https://github.com/devopsarr/ansible-collection-sonarr/commit/0a78547659a5ecafeb8b77aa9f271d12113efcfc))
+* add import list module ([e25d456](https://github.com/devopsarr/ansible-collection-sonarr/commit/e25d4568f2ebe707e8c81518297cbf6cae834f5d))
+* add import list schema info module ([dd6e36b](https://github.com/devopsarr/ansible-collection-sonarr/commit/dd6e36b2f8ebd264be587040db47cd0b83cb1170))
+* add import script to media management ([0ae1858](https://github.com/devopsarr/ansible-collection-sonarr/commit/0ae1858acf81fdd9ab79ae20ba1819ed484881f2))
+* add indexer schema info module ([40e237c](https://github.com/devopsarr/ansible-collection-sonarr/commit/40e237c7b2c24611fce5606bdad3fde1138b3833))
+* add language info module ([9592264](https://github.com/devopsarr/ansible-collection-sonarr/commit/95922643485af49679965be69fe97926cad6bba3))
+* add metadata info module ([25926db](https://github.com/devopsarr/ansible-collection-sonarr/commit/25926db1b879b70c3f713fb0c5a92f3604a91acc))
+* add metadata module ([33c5617](https://github.com/devopsarr/ansible-collection-sonarr/commit/33c5617e88c50ebe97a1a9cb3cd2b97ddbf33dac))
+* add metadata schema info module ([c9bcfbd](https://github.com/devopsarr/ansible-collection-sonarr/commit/c9bcfbdefce82a4c6b979b2102497bb41bcc0134))
+* add naming colon_replacement_format ([2a9ac2e](https://github.com/devopsarr/ansible-collection-sonarr/commit/2a9ac2eec45363836295e257097032e857e5d3de))
+* add notification info module ([bc9a511](https://github.com/devopsarr/ansible-collection-sonarr/commit/bc9a5112f72318ebae15d765a0d27cb29d5cd69a))
+* add notification module ([86ee0dc](https://github.com/devopsarr/ansible-collection-sonarr/commit/86ee0dc2bda64e7fa388051f0944e7508734c191))
+* add notification schema info module ([77789b8](https://github.com/devopsarr/ansible-collection-sonarr/commit/77789b85b93c4ff125fe817528dd81e663b2a17c))
+* add series info module ([33cb19c](https://github.com/devopsarr/ansible-collection-sonarr/commit/33cb19cb93dfbba53b8b97d7f51424ebdd9ea0dd))
+* add series module ([c3b38f8](https://github.com/devopsarr/ansible-collection-sonarr/commit/c3b38f849e082605e0f709ddbfd9f343af0a2c13))
+* add specification utils ([63470ec](https://github.com/devopsarr/ansible-collection-sonarr/commit/63470ecba0190cc0fd819788685647da15f48fca))
+* migrate specific field resources to generic ([ba7823f](https://github.com/devopsarr/ansible-collection-sonarr/commit/ba7823f80e0c6681a97db7d8b045b0f68261ff7d))
+
+
+### Bug Fixes
+
+* import list schema check implementation instead of name ([3e586b0](https://github.com/devopsarr/ansible-collection-sonarr/commit/3e586b02fc544cab5f3618bb066aeba1a4f37d23))
+
 ## [0.6.0](https://github.com/devopsarr/ansible-collection-sonarr/compare/v0.5.0...v0.6.0) (2023-05-01)
 
 

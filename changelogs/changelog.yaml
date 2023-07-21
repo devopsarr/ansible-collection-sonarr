@@ -1,1 +1,62 @@
-releases: {}
+ancestor: null
+releases:
+  1.0.0:
+    modules:
+    - description: Manages Sonarr auto tag.
+      name: sonarr_auto_tag
+      namespace: ''
+    - description: Get information about Sonarr auto tag.
+      name: sonarr_auto_tag_info
+      namespace: ''
+    - description: Get information about Sonarr auto tag schema.
+      name: sonarr_auto_tag_schema_info
+      namespace: ''
+    - description: Manages Sonarr custom format.
+      name: sonarr_custom_format
+      namespace: ''
+    - description: Get information about Sonarr custom format.
+      name: sonarr_custom_format_info
+      namespace: ''
+    - description: Get information about Sonarr custom format schema.
+      name: sonarr_custom_format_schema_info
+      namespace: ''
+    - description: Get information about Sonarr download client schema.
+      name: sonarr_download_client_schema_info
+      namespace: ''
+    - description: Manages Sonarr import list.
+      name: sonarr_import_list
+      namespace: ''
+    - description: Get information about Sonarr import list schema.
+      name: sonarr_import_list_schema_info
+      namespace: ''
+    - description: Get information about Sonarr indexer schema.
+      name: sonarr_indexer_schema_info
+      namespace: ''
+    - description: Get information about Sonarr language.
+      name: sonarr_language_info
+      namespace: ''
+    - description: Manages Sonarr metadata.
+      name: sonarr_metadata
+      namespace: ''
+    - description: Get information about Sonarr metadata.
+      name: sonarr_metadata_info
+      namespace: ''
+    - description: Get information about Sonarr metadata schema.
+      name: sonarr_metadata_schema_info
+      namespace: ''
+    - description: Manages Sonarr notification.
+      name: sonarr_notification
+      namespace: ''
+    - description: Get information about Sonarr notification.
+      name: sonarr_notification_info
+      namespace: ''
+    - description: Get information about Sonarr notification schema.
+      name: sonarr_notification_schema_info
+      namespace: ''
+    - description: Manages Sonarr series.
+      name: sonarr_series
+      namespace: ''
+    - description: Get information about Sonarr series.
+      name: sonarr_series_info
+      namespace: ''
+    release_date: '2023-07-31'
