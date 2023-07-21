@@ -49,6 +49,10 @@ options:
         required: true
         type: str
         choices: ["preferAndUpgrade", "doNotUpgrade", "doNotPrefer"]
+    script_import_path:
+        description: Import sctipt path.
+        type: str
+        default: ""
     chown_group:
         description: Linux group.
         required: true
@@ -61,6 +65,10 @@ options:
         description: Recycle bin days.
         required: true
         type: int
+    use_script_import:
+        description: Use import script flag.
+        type: bool
+        default: false
     auto_unmonitor_previously_downloaded_episodes:
         description: Auto unmonitor previously downloaded episodes.
         required: true
@@ -168,6 +176,11 @@ download_propers_and_repacks:
     returned: always
     type: str
     sample: 'preferAndUpgrade'
+script_import_path:
+    description: Import sctipt path.
+    returned: always
+    type: str
+    sample: ""
 chown_group:
     description: Linux group.
     returned: always
@@ -183,6 +196,11 @@ recycle_bin_cleanup_days:
     returned: always
     type: int
     sample: '7'
+use_script_import:
+    description: Use import script flag.
+    returned: always
+    type: bool
+    sample: false
 auto_unmonitor_previously_downloaded_episodes:
     description: Auto unmonitor previously downloaded episodes.
     returned: always
@@ -247,9 +265,11 @@ def run_module():
         episode_title_required=dict(type='str', required=True, choices=["always", "bulkSeasonReleases", "never"]),
         download_propers_and_repacks=dict(type='str', required=True, choices=["preferAndUpgrade", "doNotUpgrade", "doNotPrefer"]),
         chown_group=dict(type='str', required=True),
+        script_import_path=dict(type='str', default=""),
         minimum_free_space_when_importing=dict(type='int', required=True),
         recycle_bin_cleanup_days=dict(type='int', required=True),
         auto_unmonitor_previously_downloaded_episodes=dict(type='bool', required=True),
+        use_script_import=dict(type='bool', default=False),
         skip_free_space_check_when_importing=dict(type='bool', required=True),
         set_permissions_linux=dict(type='bool', required=True),
         import_extra_files=dict(type='bool', required=True),
@@ -283,6 +303,7 @@ def run_module():
         'chmod_folder': module.params['chmod_folder'],
         'rescan_after_refresh': module.params['rescan_after_refresh'],
         'recycle_bin': module.params['recycle_bin'],
+        'script_import_path': module.params['script_import_path'],
         'file_date': module.params['file_date'],
         'extra_file_extensions': module.params['extra_file_extensions'],
         'episode_title_required': module.params['episode_title_required'],
@@ -291,6 +312,7 @@ def run_module():
         'id': 1,
         'minimum_free_space_when_importing': module.params['minimum_free_space_when_importing'],
         'recycle_bin_cleanup_days': module.params['recycle_bin_cleanup_days'],
+        'use_script_import': module.params['use_script_import'],
         'auto_unmonitor_previously_downloaded_episodes': module.params['auto_unmonitor_previously_downloaded_episodes'],
         'skip_free_space_check_when_importing': module.params['skip_free_space_check_when_importing'],
         'set_permissions_linux': module.params['set_permissions_linux'],
