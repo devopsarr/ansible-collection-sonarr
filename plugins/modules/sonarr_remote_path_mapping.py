@@ -29,15 +29,10 @@ options:
         description: Local path.
         required: true
         type: str
-    state:
-        description: Create or delete a remote_path_mapping.
-        required: false
-        default: 'present'
-        choices: [ "present", "absent" ]
-        type: str
 
 extends_documentation_fragment:
     - devopsarr.sonarr.sonarr_credentials
+    - devopsarr.sonarr.sonarr_state
 
 author:
     - Fuochi (@Fuochi)

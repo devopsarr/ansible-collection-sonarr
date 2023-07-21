@@ -51,15 +51,10 @@ options:
         required: true
         type: list
         elements: int
-    state:
-        description: Create or delete a delay profile.
-        required: false
-        default: 'present'
-        choices: [ "present", "absent" ]
-        type: str
 
 extends_documentation_fragment:
     - devopsarr.sonarr.sonarr_credentials
+    - devopsarr.sonarr.sonarr_state
 
 author:
     - Fuochi (@Fuochi)

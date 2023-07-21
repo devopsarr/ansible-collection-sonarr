@@ -6,16 +6,24 @@
     enable: false
     priority: 1
     name: "Hadouken"
-    host: "hadouken.lcl"
-    url_base: "/hadouken/"
-    port: 9091
-    category: "sonarr-tv"
-    username: "username"
-    password: "password"
+    fields:
+    - name: "host"
+      value: "hadouken.lcl"
+    - name: "urlBase"
+      value: "/hadouken/"
+    - name: "port"
+      value: 9091
+    - name: "category"
+      value: "sonarr-tv"
+    - name: "username"
+      value: "username"
+    - name: "password"
+      value: "password"
+    - name: "useSsl"
+      value: false
     protocol: "torrent"
     config_contract: "HadoukenSettings"
     implementation: "Hadouken"
-    use_ssl: false
     tags: []
     sonarr_api_key: "{{ sonarr_api_key }}"
     sonarr_url: "{{ sonarr_url }}"
@@ -32,16 +40,24 @@
     enable: false
     priority: 1
     name: "Hadouken"
-    host: "hadouken.lcl"
-    url_base: "/hadouken/"
-    port: 9091
-    category: "sonarr-tv"
-    username: "username"
-    password: "password"
+    fields:
+    - name: "host"
+      value: "hadouken.lcl"
+    - name: "urlBase"
+      value: "/hadouken/"
+    - name: "port"
+      value: 9091
+    - name: "category"
+      value: "sonarr-tv"
+    - name: "username"
+      value: "username"
+    - name: "password"
+      value: "password"
+    - name: "useSsl"
+      value: true
     protocol: "torrent"
     config_contract: "HadoukenSettings"
     implementation: "Hadouken"
-    use_ssl: true
     tags: []
     sonarr_api_key: "{{ sonarr_api_key }}"
     sonarr_url: "{{ sonarr_url }}"
@@ -58,16 +74,24 @@
     enable: false
     priority: 1
     name: "Hadouken"
-    host: "hadouken.lcl"
-    url_base: "/hadouken/"
-    port: 9091
-    category: "sonarr-tv"
-    username: "username"
-    password: "password"
+    fields:
+    - name: "host"
+      value: "hadouken.lcl"
+    - name: "urlBase"
+      value: "/hadouken/"
+    - name: "port"
+      value: 9091
+    - name: "category"
+      value: "sonarr-tv"
+    - name: "username"
+      value: "username"
+    - name: "password"
+      value: "password"
+    - name: "useSsl"
+      value: true
     protocol: "torrent"
     config_contract: "HadoukenSettings"
     implementation: "Hadouken"
-    use_ssl: true
     tags: []
     sonarr_api_key: "{{ sonarr_api_key }}"
     sonarr_url: "{{ sonarr_url }}"
@@ -84,16 +108,24 @@
     enable: false
     priority: 1
     name: "Hadouken"
-    host: "hadouken.lcl"
-    url_base: "/hadouken/"
-    port: 9091
-    category: "sonarr-tv"
-    username: "username"
-    password: "password123"
+    fields:
+    - name: "host"
+      value: "hadouken.lcl"
+    - name: "urlBase"
+      value: "/hadouken/"
+    - name: "port"
+      value: 9091
+    - name: "category"
+      value: "sonarr-tv"
+    - name: "username"
+      value: "username"
+    - name: "password"
+      value: "password123"
+    - name: "useSsl"
+      value: true
     protocol: "torrent"
     config_contract: "HadoukenSettings"
     implementation: "Hadouken"
-    use_ssl: true
     tags: []
     sonarr_api_key: "{{ sonarr_api_key }}"
     sonarr_url: "{{ sonarr_url }}"
@@ -110,16 +142,24 @@
     enable: false
     priority: 1
     name: "Hadouken"
-    host: "hadouken.lcl"
-    url_base: "/hadouken/"
-    port: 9091
-    category: "sonarr-tv"
-    username: "username"
-    password: "password123"
+    fields:
+    - name: "host"
+      value: "hadouken.lcl"
+    - name: "urlBase"
+      value: "/hadouken/"
+    - name: "port"
+      value: 9091
+    - name: "category"
+      value: "sonarr-tv"
+    - name: "username"
+      value: "username"
+    - name: "password"
+      value: "password123"
+    - name: "useSsl"
+      value: true
     protocol: "torrent"
     config_contract: "HadoukenSettings"
     implementation: "Hadouken"
-    use_ssl: true
     tags: []
     update_secrets: true
     sonarr_api_key: "{{ sonarr_api_key }}"

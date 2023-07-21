@@ -36,20 +36,11 @@ options:
     enabled:
         description: Enabled.
         type: bool
-    tags:
-        description: Tag list.
-        type: list
-        elements: int
-        default: []
-    state:
-        description: Create or delete a release profile.
-        required: false
-        default: 'present'
-        choices: [ "present", "absent" ]
-        type: str
 
 extends_documentation_fragment:
     - devopsarr.sonarr.sonarr_credentials
+    - devopsarr.sonarr.sonarr_taggable
+    - devopsarr.sonarr.sonarr_state
 
 author:
     - Fuochi (@Fuochi)

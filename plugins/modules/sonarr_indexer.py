@@ -17,6 +17,26 @@ version_added: "0.5.0"
 description: Manages Sonarr indexer.
 
 options:
+    name:
+        description: Name.
+        required: true
+        type: str
+    enable_automatic_search:
+        description: Enable automatic search flag.
+        type: bool
+    enable_interactive_search:
+        description: Enable interactive search flag.
+        type: bool
+    enable_rss:
+        description: Enable RSS flag.
+        type: bool
+    priority:
+        description: Priority.
+        type: int
+    download_client_id:
+        description: Download client ID.
+        type: int
+        default: 0
     protocol:
         description: Protocol.
         choices: [ "torrent", "usenet" ]
@@ -25,67 +45,12 @@ options:
         description: Flag to force update of secret fields.
         type: bool
         default: false
-    anime_standard_format_search:
-        description: Anime standard format search.
-        type: bool
-    allow_zero_size:
-        description: Allow zero size.
-        type: bool
-    ranked_only:
-        description: Ranked only.
-        type: bool
-    api_key:
-        description: API key.
-        type: str
-    additional_parameters:
-        description: Additional parameters.
-        type: str
-    api_path:
-        description: API path.
-        type: str
-    base_url:
-        description: Base URL.
-        type: str
-    captcha_token:
-        description: Captcha token.
-        type: str
-    cookie:
-        description: Cookie.
-        type: str
-    passkey:
-        description: Passkey.
-        type: str
-    username:
-        description: Username.
-        type: str
-    seed_ratio:
-        description: Seed ratio.
-        type: float
-    delay:
-        description: Delay.
-        type: int
-    seed_time:
-        description: Seed time.
-        type: int
-    minimum_seeders:
-        description: Minimum seeders.
-        type: int
-    season_pack_seed_time:
-        description: Season pack seed time.
-        type: int
-    categories:
-        description: Categories.
-        type: list
-        elements: int
-    anime_categories:
-        description: Anime categories.
-        type: list
-        elements: int
 
 extends_documentation_fragment:
     - devopsarr.sonarr.sonarr_credentials
     - devopsarr.sonarr.sonarr_implementation
-    - devopsarr.sonarr.sonarr_indexer
+    - devopsarr.sonarr.sonarr_taggable
+    - devopsarr.sonarr.sonarr_state
 
 author:
     - Fuochi (@Fuochi)
@@ -104,8 +69,11 @@ EXAMPLES = r'''
     config_contract: "FanzubSettings"
     implementation: "Fanzub"
     protocol: "usenet"
-    anime_standard_format_search: true
-    base_url: "http://fanzub.com/rss/"
+    fields:
+    - name: "baseUrl"
+      value: "http://fanzub.com/rss/"
+    - name: "animeStandardFormatSearch"
+      value: true
     tags: [1,2]
 
 # Delete a indexer
@@ -180,7 +148,7 @@ fields:
 '''
 
 from ansible_collections.devopsarr.sonarr.plugins.module_utils.sonarr_module import SonarrModule
-from ansible_collections.devopsarr.sonarr.plugins.module_utils.sonarr_field_utils import FieldHelper, IndexerHelper
+from ansible_collections.devopsarr.sonarr.plugins.module_utils.sonarr_field_utils import FieldHelper
 from ansible.module_utils.common.text.converters import to_native
 
 try:
@@ -190,7 +158,29 @@ except ImportError:
     HAS_SONARR_LIBRARY = False
 
 
+def is_changed(status, want):
+    if (want.name != status.name or
+            want.enable_automatic_search != status.enable_automatic_search or
+            want.enable_interactive_search != status.enable_interactive_search or
+            want.enable_rss != status.enable_rss or
+            want.priority != status.priority or
+            want.download_client_id != status.download_client_id or
+            want.config_contract != status.config_contract or
+            want.implementation != status.implementation or
+            want.protocol != status.protocol or
+            want.tags != status.tags):
+        return True
+
+    for status_field in status.fields:
+        for want_field in want.fields:
+            if want_field.name == status_field.name and want_field.value != status_field.value and status_field.value != "********":
+                return True
+    return False
+
+
 def run_module():
+    field_helper = FieldHelper()
+
     # define available arguments/parameters a user can pass to the module
     module_args = dict(
         name=dict(type='str', required=True),
@@ -203,28 +193,10 @@ def run_module():
         implementation=dict(type='str'),
         protocol=dict(type='str', choices=['usenet', 'torrent']),
         tags=dict(type='list', elements='int', default=[]),
+        fields=dict(type='list', elements='dict', options=field_helper.field_args),
         state=dict(default='present', type='str', choices=['present', 'absent']),
         # Needed to manage obfuscate response from api "********"
         update_secrets=dict(type='bool', default=False),
-        # Field values
-        anime_standard_format_search=dict(type='bool'),
-        allow_zero_size=dict(type='bool'),
-        ranked_only=dict(type='bool'),
-        api_key=dict(type='str', no_log=True),
-        additional_parameters=dict(type='str'),
-        api_path=dict(type='str'),
-        base_url=dict(type='str'),
-        captcha_token=dict(type='str', no_log=True),
-        cookie=dict(type='str', no_log=True),
-        passkey=dict(type='str', no_log=True),
-        username=dict(type='str'),
-        seed_ratio=dict(type='float'),
-        delay=dict(type='int'),
-        seed_time=dict(type='int'),
-        minimum_seeders=dict(type='int'),
-        season_pack_seed_time=dict(type='int'),
-        categories=dict(type='list', elements='int'),
-        anime_categories=dict(type='list', elements='int'),
     )
 
     result = dict(
@@ -264,8 +236,6 @@ def run_module():
                 result['id'] = 0
         module.exit_json(**result)
 
-    indexer_helper = IndexerHelper(state)
-    field_helper = FieldHelper(fields=indexer_helper.indexer_fields)
     want = sonarr.IndexerResource(**{
         'name': module.params['name'],
         'enable_automatic_search': module.params['enable_automatic_search'],
@@ -294,7 +264,7 @@ def run_module():
 
     # Update an existing resource.
     want.id = result['id']
-    if indexer_helper.is_changed(want) or module.params['update_secrets']:
+    if is_changed(state, want) or module.params['update_secrets']:
         result['changed'] = True
         if not module.check_mode:
             try:
