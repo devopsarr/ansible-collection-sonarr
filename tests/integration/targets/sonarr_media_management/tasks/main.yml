@@ -54,7 +54,7 @@
     sonarr_api_key: "{{ sonarr_api_key }}"
     sonarr_url: "{{ sonarr_url }}"
   register: result
-- name: assert delay profile idempotency
+- name: assert media management idempotency
   assert:
     that:
       - result.changed == false
