@@ -21,15 +21,10 @@ options:
         description: Actual root folder.
         required: true
         type: str
-    state:
-        description: Create or delete a root_folder.
-        required: false
-        default: 'present'
-        choices: [ "present", "absent" ]
-        type: str
 
 extends_documentation_fragment:
     - devopsarr.sonarr.sonarr_credentials
+    - devopsarr.sonarr.sonarr_state
 
 author:
     - Fuochi (@Fuochi)

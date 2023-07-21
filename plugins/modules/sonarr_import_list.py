@@ -12,81 +12,43 @@ module: sonarr_import_list
 
 short_description: Manages Sonarr import list.
 
-version_added: "0.7.0"
+version_added: "1.0.0"
 
 description: Manages Sonarr import list.
 
 options:
+    name:
+        description: Name.
+        required: true
+        type: str
+    season_folder:
+        description: Season folder flag.
+        type: bool
+    enable_automatic_add:
+        description: Enable autometic add flag.
+        type: bool
+    quality_profile_id:
+        description: Quality profile ID.
+        type: int
+    should_monitor:
+        description: Should monitor.
+        type: str
+    root_folder_path:
+        description: Root folder path.
+        type: str
+    series_type:
+        description: Series type.
+        type: str
     update_secrets:
         description: Flag to force update of secret fields.
         type: bool
         default: false
-    access_token:
-        description: Access token.
-        type: str
-    refresh_token:
-        description: Refresh token.
-        type: str
-    api_key:
-        description: API key.
-        type: str
-    auth_user:
-        description: Auth user.
-        type: str
-    username:
-        description: Username.
-        type: str
-    rating:
-        description: Rating.
-        type: str
-    base_url:
-        description: Base URL.
-        type: str
-    expires:
-        description: Expires.
-        type: str
-    listname:
-        description: List name.
-        type: str
-    genres:
-        description: Genres.
-        type: str
-    years:
-        description: Years.
-        type: str
-    trakt_additional_parameters:
-        description: Trakt additional parameters.
-        type: str
-    limit:
-        description: Limit.
-        type: int
-    trakt_list_type:
-        description: Trakt list type.
-        type: int
-    list_type:
-        description: Simkl list type.
-        type: int
-    tag_ids:
-        description: Tag IDs.
-        type: list
-        elements: int
-    language_profile_ids:
-        description: Language profile IDs.
-        type: list
-        elements: int
-    quality_profile_ids:
-        description: Quality profile IDs.
-        type: list
-        elements: int
-    root_folder_paths:
-        description: Root folder paths.
-        type: list
-        elements: int
 
 extends_documentation_fragment:
     - devopsarr.sonarr.sonarr_credentials
     - devopsarr.sonarr.sonarr_implementation
-    - devopsarr.sonarr.sonarr_import_list
+    - devopsarr.sonarr.sonarr_taggable
+    - devopsarr.sonarr.sonarr_state
 
 author:
     - Fuochi (@Fuochi)
@@ -102,14 +64,15 @@ EXAMPLES = r'''
     quality_profile_id: 1
     root_folder_path: "/config"
     season_folder: false
+    fields:
+    - name: "apiKey"
+      value: "Key"
+    - name: "baseUrl"
+      value: "localhost"
+    - name: "languageProfileIds"
+      value: [1]
     name: "SonarrImport"
-    base_url: "localhost:123"
-    api_key: "Key"
     series_type: "standard"
-    language_profile_ids: [1]
-    quality_profile_ids: []
-    root_folder_paths: []
-    tag_ids: []
     config_contract: "SonarrSettings"
     implementation: "SonarrImport"
     tags: []
@@ -191,7 +154,7 @@ fields:
 '''
 
 from ansible_collections.devopsarr.sonarr.plugins.module_utils.sonarr_module import SonarrModule
-from ansible_collections.devopsarr.sonarr.plugins.module_utils.sonarr_field_utils import FieldHelper, ImportListHelper
+from ansible_collections.devopsarr.sonarr.plugins.module_utils.sonarr_field_utils import FieldHelper
 from ansible.module_utils.common.text.converters import to_native
 
 try:
@@ -201,7 +164,28 @@ except ImportError:
     HAS_SONARR_LIBRARY = False
 
 
+def is_changed(status, want):
+    if (want.name != status.name or
+            want.enable_automatic_add != status.enable_automatic_add or
+            want.should_monitor != status.should_monitor or
+            want.quality_profile_id != status.quality_profile_id or
+            want.season_folder != status.season_folder or
+            want.config_contract != status.config_contract or
+            want.implementation != status.implementation or
+            want.series_type != status.series_type or
+            want.tags != status.tags):
+        return True
+
+    for status_field in status.fields:
+        for want_field in want.fields:
+            if want_field.name == status_field.name and want_field.value != status_field.value and status_field.value != "********":
+                return True
+    return False
+
+
 def run_module():
+    field_helper = FieldHelper()
+
     # define available arguments/parameters a user can pass to the module
     module_args = dict(
         name=dict(type='str', required=True),
@@ -214,29 +198,10 @@ def run_module():
         root_folder_path=dict(type='str'),
         series_type=dict(type='str'),
         tags=dict(type='list', elements='int', default=[]),
+        fields=dict(type='list', elements='dict', options=field_helper.field_args),
         state=dict(default='present', type='str', choices=['present', 'absent']),
         # Needed to manage obfuscate response from api "********"
         update_secrets=dict(type='bool', default=False),
-        # Field values
-        access_token=dict(type='str', no_log=True),
-        refresh_token=dict(type='str', no_log=True),
-        api_key=dict(type='str', no_log=True),
-        username=dict(type='str'),
-        auth_user=dict(type='str'),
-        rating=dict(type='str'),
-        base_url=dict(type='str'),
-        expires=dict(type='str'),
-        listname=dict(type='str'),
-        genres=dict(type='str'),
-        years=dict(type='str'),
-        trakt_additional_parameters=dict(type='str'),
-        limit=dict(type='int'),
-        trakt_list_type=dict(type='int'),
-        list_type=dict(type='int'),
-        language_profile_ids=dict(type='list', elements='int'),
-        quality_profile_ids=dict(type='list', elements='int'),
-        root_folder_paths=dict(type='list', elements='int'),
-        tag_ids=dict(type='list', elements='int'),
     )
 
     result = dict(
@@ -276,8 +241,6 @@ def run_module():
                 result['id'] = 0
         module.exit_json(**result)
 
-    list_helper = ImportListHelper(state)
-    field_helper = FieldHelper(fields=list_helper.import_list_fields)
     want = sonarr.ImportListResource(**{
         'name': module.params['name'],
         'season_folder': module.params['season_folder'],
@@ -306,7 +269,7 @@ def run_module():
 
     # Update an existing resource.
     want.id = result['id']
-    if list_helper.is_changed(want) or module.params['update_secrets']:
+    if is_changed(state, want) or module.params['update_secrets']:
         result['changed'] = True
         if not module.check_mode:
             try:

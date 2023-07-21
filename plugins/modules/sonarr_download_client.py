@@ -17,6 +17,22 @@ version_added: "0.6.0"
 description: Manages Sonarr download client.
 
 options:
+    name:
+        description: Name.
+        required: true
+        type: str
+    remove_completed_downloads:
+        description: Remove completed downloads flag.
+        type: bool
+    remove_failed_downloads:
+        description: Remove failed downloads flag.
+        type: bool
+    enable:
+        description: Enable flag.
+        type: bool
+    priority:
+        description: Priority.
+        type: int
     protocol:
         description: Protocol.
         choices: [ "torrent", "usenet" ]
@@ -25,119 +41,12 @@ options:
         description: Flag to force update of secret fields.
         type: bool
         default: false
-    add_paused:
-        description: Add paused.
-        type: bool
-    use_ssl:
-        description: Use SSL.
-        type: bool
-    start_on_add:
-        description: Start on add on.
-        type: bool
-    sequential_order:
-        description: Secuential order.
-        type: bool
-    first_and_last:
-        description: First and last.
-        type: bool
-    add_stopped:
-        description: Add stopped.
-        type: bool
-    save_magnet_files:
-        description: Save magnet files.
-        type: bool
-    read_only:
-        description: Read only.
-        type: bool
-    api_key:
-        description: API key.
-        type: str
-    host:
-        description: Host.
-        type: str
-    rpc_path:
-        description: RPC path.
-        type: str
-    url_base:
-        description: Base URL.
-        type: str
-    secret_token:
-        description: Secret token.
-        type: str
-    username:
-        description: Username.
-        type: str
-    password:
-        description: Password.
-        type: str
-    tv_category:
-        description: TV category.
-        type: str
-    tv_imported_category:
-        description: TV imported category.
-        type: str
-    tv_directory:
-        description: TV directory.
-        type: str
-    destination:
-        description: Destination.
-        type: str
-    category:
-        description: Category.
-        type: str
-    nzb_folder:
-        description: NZB folder.
-        type: str
-    strm_folder:
-        description: Strm folder.
-        type: str
-    torrent_folder:
-        description: Torrent folder.
-        type: str
-    watch_folder:
-        description: Watch folder.
-        type: str
-    magnet_file_extension:
-        description: Magnet file extension.
-        type: str
-    port:
-        description: Port.
-        type: int
-    recent_tv_priority:
-        description: Recent TV priority.
-        type: int
-    older_tv_priority:
-        description: Older TV priority.
-        type: int
-    recent_priority:
-        description: Recent TV priority (Freebox).
-        type: int
-    older_priority:
-        description: Older TV priority (Freebox).
-        type: int
-    initial_state:
-        description: Initial state.
-        type: int
-    intial_state:
-        description: Intial state.
-        type: int
-    additional_tags:
-        description: Additional Tags.
-        type: list
-        elements: int
-    field_tags:
-        description: Field Tags.
-        type: list
-        elements: str
-    post_import_tags:
-        description: Post import Tags.
-        type: list
-        elements: str
 
 extends_documentation_fragment:
     - devopsarr.sonarr.sonarr_credentials
     - devopsarr.sonarr.sonarr_implementation
-    - devopsarr.sonarr.sonarr_download_client
+    - devopsarr.sonarr.sonarr_taggable
+    - devopsarr.sonarr.sonarr_state
 
 author:
     - Fuochi (@Fuochi)
@@ -153,12 +62,21 @@ EXAMPLES = r'''
     enable: false
     priority: 1
     name: "Hadouken"
-    host: "hadouken.lcl"
-    url_base: "/hadouken/"
-    port: 9091
-    category: "sonarr-tv"
-    username: "username"
-    password: "password"
+    fields:
+    - name: "host"
+      value: "hadouken.lcl"
+    - name: "urlBase"
+      value: "/hadouken/"
+    - name: "port"
+      value: 9091
+    - name: "category"
+      value: "sonarr-tv"
+    - name: "username"
+      value: "username"
+    - name: "password"
+      value: "password"
+    - name: "useSsl"
+      value: true
     protocol: "torrent"
     config_contract: "HadoukenSettings"
     implementation: "Hadouken"
@@ -231,7 +149,7 @@ fields:
 '''
 
 from ansible_collections.devopsarr.sonarr.plugins.module_utils.sonarr_module import SonarrModule
-from ansible_collections.devopsarr.sonarr.plugins.module_utils.sonarr_field_utils import FieldHelper, DownloadClientHelper
+from ansible_collections.devopsarr.sonarr.plugins.module_utils.sonarr_field_utils import FieldHelper
 from ansible.module_utils.common.text.converters import to_native
 
 try:
@@ -241,7 +159,28 @@ except ImportError:
     HAS_SONARR_LIBRARY = False
 
 
+def is_changed(status, want):
+    if (want.name != status.name or
+            want.remove_completed_downloads != status.remove_completed_downloads or
+            want.remove_failed_downloads != status.remove_failed_downloads or
+            want.enable != status.enable or
+            want.priority != status.priority or
+            want.config_contract != status.config_contract or
+            want.implementation != status.implementation or
+            want.protocol != status.protocol or
+            want.tags != status.tags):
+        return True
+
+    for status_field in status.fields:
+        for want_field in want.fields:
+            if want_field.name == status_field.name and want_field.value != status_field.value and status_field.value != "********":
+                return True
+    return False
+
+
 def run_module():
+    field_helper = FieldHelper()
+
     # define available arguments/parameters a user can pass to the module
     module_args = dict(
         name=dict(type='str', required=True),
@@ -253,45 +192,10 @@ def run_module():
         implementation=dict(type='str'),
         protocol=dict(type='str', choices=['usenet', 'torrent']),
         tags=dict(type='list', elements='int', default=[]),
+        fields=dict(type='list', elements='dict', options=field_helper.field_args),
         state=dict(default='present', type='str', choices=['present', 'absent']),
         # Needed to manage obfuscate response from api "********"
         update_secrets=dict(type='bool', default=False),
-        # Field values
-        add_paused=dict(type='bool'),
-        use_ssl=dict(type='bool'),
-        start_on_add=dict(type='bool'),
-        sequential_order=dict(type='bool'),
-        first_and_last=dict(type='bool'),
-        add_stopped=dict(type='bool'),
-        save_magnet_files=dict(type='bool'),
-        read_only=dict(type='bool'),
-        host=dict(type='str'),
-        api_key=dict(type='str', no_log=True),
-        rpc_path=dict(type='str'),
-        url_base=dict(type='str'),
-        secret_token=dict(type='str', no_log=True),
-        username=dict(type='str'),
-        password=dict(type='str', no_log=True),
-        tv_category=dict(type='str'),
-        tv_imported_category=dict(type='str'),
-        tv_directory=dict(type='str'),
-        destination=dict(type='str'),
-        category=dict(type='str'),
-        nzb_folder=dict(type='str'),
-        strm_folder=dict(type='str'),
-        torrent_folder=dict(type='str'),
-        watch_folder=dict(type='str'),
-        magnet_file_extension=dict(type='str'),
-        port=dict(type='int'),
-        recent_tv_priority=dict(type='int'),
-        older_tv_priority=dict(type='int'),
-        recent_priority=dict(type='int'),
-        older_priority=dict(type='int'),
-        initial_state=dict(type='int'),
-        intial_state=dict(type='int'),
-        additional_tags=dict(type='list', elements='int'),
-        field_tags=dict(type='list', elements='str'),
-        post_import_tags=dict(type='list', elements='str'),
     )
 
     result = dict(
@@ -331,8 +235,6 @@ def run_module():
                 result['id'] = 0
         module.exit_json(**result)
 
-    client_helper = DownloadClientHelper(state)
-    field_helper = FieldHelper(fields=client_helper.download_client_fields)
     want = sonarr.DownloadClientResource(**{
         'name': module.params['name'],
         'remove_completed_downloads': module.params['remove_completed_downloads'],
@@ -360,7 +262,7 @@ def run_module():
 
     # Update an existing resource.
     want.id = result['id']
-    if client_helper.is_changed(want) or module.params['update_secrets']:
+    if is_changed(state, want) or module.params['update_secrets']:
         result['changed'] = True
         if not module.check_mode:
             try:

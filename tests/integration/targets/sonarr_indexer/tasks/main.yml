@@ -9,8 +9,11 @@
     config_contract: "FanzubSettings"
     implementation: "Fanzub"
     protocol: "usenet"
-    anime_standard_format_search: true
-    base_url: "http://fanzub.com/rss/"
+    fields:
+    - name: "baseUrl"
+      value: "http://fanzub.com/rss/"
+    - name: "animeStandardFormatSearch"
+      value: true
     sonarr_api_key: "{{ sonarr_api_key }}"
     sonarr_url: "{{ sonarr_url }}"
   register: result
@@ -29,8 +32,11 @@
     config_contract: "FanzubSettings"
     implementation: "Fanzub"
     protocol: "usenet"
-    anime_standard_format_search: false
-    base_url: "http://fanzub.com/rss/"
+    fields:
+    - name: "baseUrl"
+      value: "http://fanzub.com/rss/"
+    - name: "animeStandardFormatSearch"
+      value: false
     sonarr_api_key: "{{ sonarr_api_key }}"
     sonarr_url: "{{ sonarr_url }}"
   register: result
@@ -49,8 +55,11 @@
     config_contract: "FanzubSettings"
     implementation: "Fanzub"
     protocol: "usenet"
-    anime_standard_format_search: false
-    base_url: "http://fanzub.com/rss/"
+    fields:
+    - name: "baseUrl"
+      value: "http://fanzub.com/rss/"
+    - name: "animeStandardFormatSearch"
+      value: false
     sonarr_api_key: "{{ sonarr_api_key }}"
     sonarr_url: "{{ sonarr_url }}"
   register: result
@@ -81,9 +90,13 @@
     config_contract: "BroadcastheNetSettings"
     implementation: "BroadcastheNet"
     protocol: "torrent"
-    api_key: "test"
-    minimum_seeders: 0
-    base_url: "https://api.broadcasthe.net/"
+    fields:
+    - name: "baseUrl"
+      value: "https://api.broadcasthe.net/"
+    - name: "apiKey"
+      value: "test"
+    - name: "minimumSeeders"
+      value: 0
     sonarr_api_key: "{{ sonarr_api_key }}"
     sonarr_url: "{{ sonarr_url }}"
   register: result
@@ -102,9 +115,13 @@
     config_contract: "BroadcastheNetSettings"
     implementation: "BroadcastheNet"
     protocol: "torrent"
-    api_key: "test1"
-    minimum_seeders: 0
-    base_url: "https://api.broadcasthe.net/"
+    fields:
+    - name: "baseUrl"
+      value: "https://api.broadcasthe.net/"
+    - name: "apiKey"
+      value: "test1"
+    - name: "minimumSeeders"
+      value: 0
     sonarr_api_key: "{{ sonarr_api_key }}"
     sonarr_url: "{{ sonarr_url }}"
   register: result
@@ -123,10 +140,14 @@
     config_contract: "BroadcastheNetSettings"
     implementation: "BroadcastheNet"
     protocol: "torrent"
-    api_key: "test1"
-    minimum_seeders: 0
+    fields:
+    - name: "baseUrl"
+      value: "https://api.broadcasthe.net/"
+    - name: "apiKey"
+      value: "test1"
+    - name: "minimumSeeders"
+      value: 0
     update_secrets: true
-    base_url: "https://api.broadcasthe.net/"
     sonarr_api_key: "{{ sonarr_api_key }}"
     sonarr_url: "{{ sonarr_url }}"
   register: result

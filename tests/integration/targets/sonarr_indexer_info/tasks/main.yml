@@ -9,8 +9,11 @@
     config_contract: "FanzubSettings"
     implementation: "Fanzub"
     protocol: "usenet"
-    anime_standard_format_search: true
-    base_url: "http://fanzub.com/rss/"
+    fields:
+    - name: "baseUrl"
+      value: "http://fanzub.com/rss/"
+    - name: "animeStandardFormatSearch"
+      value: true
     sonarr_api_key: "{{ sonarr_api_key }}"
     sonarr_url: "{{ sonarr_url }}"
   with_items:

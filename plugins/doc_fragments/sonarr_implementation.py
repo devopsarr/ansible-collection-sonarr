@@ -6,12 +6,24 @@ __metaclass__ = type
 
 class ModuleDocFragment(object):
 
+    # Plugin options for Sonarr objects with implementation
     DOCUMENTATION = r'''
 options:
   config_contract:
-      description: Config contract.
-      type: str
+    description: Config contract.
+    type: str
   implementation:
-      description: Implementation.
-      type: str
+    description: Implementation.
+    type: str
+  fields:
+    description: Configuration field list.
+    type: list
+    elements: dict
+    suboptions:
+      name:
+        description: Field name.
+        type: str
+      value:
+        description: Field value.
+        type: raw
 '''

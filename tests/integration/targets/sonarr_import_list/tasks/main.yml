@@ -6,11 +6,15 @@
     quality_profile_id: 1
     root_folder_path: "/config"
     season_folder: false
+    fields:
+    - name: "apiKey"
+      value: "Key"
+    - name: "baseUrl"
+      value: "localhost"
+    - name: "languageProfileIds"
+      value: [1]
     name: "SonarrImport"
-    base_url: "localhost"
-    api_key: "Key"
     series_type: "standard"
-    language_profile_ids: [1]
     config_contract: "SonarrSettings"
     implementation: "SonarrImport"
     tags: []
@@ -29,11 +33,15 @@
     quality_profile_id: 1
     root_folder_path: "/config"
     season_folder: false
+    fields:
+    - name: "apiKey"
+      value: "KeyEdited"
+    - name: "baseUrl"
+      value: "localhost"
+    - name: "languageProfileIds"
+      value: [1]
     name: "SonarrImport"
-    base_url: "localhost:123"
-    api_key: "Key"
     series_type: "standard"
-    language_profile_ids: [1]
     config_contract: "SonarrSettings"
     implementation: "SonarrImport"
     tags: []
@@ -52,14 +60,15 @@
     quality_profile_id: 1
     root_folder_path: "/config"
     season_folder: false
+    fields:
+      - name: "apiKey"
+        value: "KeyEdited"
+      - name: "baseUrl"
+        value: "localhost"
+      - name: "languageProfileIds"
+        value: [1]
     name: "SonarrImport"
-    base_url: "localhost:123"
-    api_key: "Key"
     series_type: "standard"
-    language_profile_ids: [1]
-    quality_profile_ids: []
-    root_folder_paths: []
-    tag_ids: []
     config_contract: "SonarrSettings"
     implementation: "SonarrImport"
     tags: []
