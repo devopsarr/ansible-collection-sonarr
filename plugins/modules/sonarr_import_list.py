@@ -252,7 +252,7 @@ def run_module():
         'series_type': module.params['series_type'],
         'enable_automatic_add': module.params['enable_automatic_add'],
         'tags': module.params['tags'],
-        'fields': field_helper.populate_fields(module),
+        'fields': field_helper.populate_fields(module.params['fields']),
     })
 
     # Create a new resource.

@@ -245,7 +245,7 @@ def run_module():
         'implementation': module.params['implementation'],
         'protocol': module.params['protocol'],
         'tags': module.params['tags'],
-        'fields': field_helper.populate_fields(module),
+        'fields': field_helper.populate_fields(module.params['fields']),
     })
 
     # Create a new resource.

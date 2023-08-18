@@ -311,7 +311,7 @@ def run_module():
         'config_contract': module.params['config_contract'],
         'implementation': module.params['implementation'],
         'tags': module.params['tags'],
-        'fields': field_helper.populate_fields(module),
+        'fields': field_helper.populate_fields(module.params['fields']),
     })
 
     # Create a new resource.

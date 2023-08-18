@@ -10,8 +10,6 @@ try:
 except ImportError:
     HAS_SONARR_LIBRARY = False
 
-from ansible_collections.devopsarr.sonarr.plugins.module_utils.sonarr_module import SonarrModule
-
 
 class FieldHelper():
     def __init__(self):
@@ -21,11 +19,11 @@ class FieldHelper():
             value=dict(type='raw'),
         )
 
-    def populate_fields(self, module):
-        # type: (SonarrModule) -> list[sonarr.Field]
+    def populate_fields(self, field_list):
+        # type: (list) -> list[sonarr.Field]
         fields = []
 
-        for field in module.params['fields']:
+        for field in field_list:
             fields.append(
                 sonarr.Field(**{
                     'name': field['name'],
