@@ -37,7 +37,7 @@ EXAMPLES = r'''
 # Gather information about a single download client.
 - name: Gather information about a single download client
   devopsarr.sonarr.sonarr_download_client_info:
-    name: test
+    name: Example
 '''
 
 RETURN = r'''

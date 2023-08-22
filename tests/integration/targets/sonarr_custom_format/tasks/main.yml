@@ -1,0 +1,72 @@
+---
+- name: create custom format
+  devopsarr.sonarr.sonarr_custom_format:
+    include_custom_format_when_renaming: false
+    name: "Language"
+    specifications:
+    - name: "arabic"
+      implementation: "LanguageSpecification"
+      negate: false
+      required: true
+      fields:
+      - name: "value"
+        value: 26
+    sonarr_api_key: "{{ sonarr_api_key }}"
+    sonarr_url: "{{ sonarr_url }}"
+  register: result
+- name: assert custom format creation
+  assert:
+    that:
+      - result['name'] == 'Language'
+# ----------------------------------------------------------------------------
+- name: edit already present custom format
+  devopsarr.sonarr.sonarr_custom_format:
+    include_custom_format_when_renaming: false
+    name: "Language"
+    specifications:
+    - name: "singleLanguage"
+      implementation: "LanguageSpecification"
+      negate: false
+      required: true
+      fields:
+      - name: "value"
+        value: 25
+    sonarr_api_key: "{{ sonarr_api_key }}"
+    sonarr_url: "{{ sonarr_url }}"
+  register: result
+- name: assert custom format changes
+  assert:
+    that:
+      - result.changed == true
+# ----------------------------------------------------------------------------
+- name: test idempotency
+  devopsarr.sonarr.sonarr_custom_format:
+    include_custom_format_when_renaming: false
+    name: "Language"
+    specifications:
+    - name: "singleLanguage"
+      implementation: "LanguageSpecification"
+      negate: false
+      required: true
+      fields:
+      - name: "value"
+        value: 25
+    sonarr_api_key: "{{ sonarr_api_key }}"
+    sonarr_url: "{{ sonarr_url }}"
+  register: result
+- name: assert custom format idempotency
+  assert:
+    that:
+      - result.changed == false
+# ----------------------------------------------------------------------------
+- name: delete custom format
+  devopsarr.sonarr.sonarr_custom_format:
+    name: "Language"
+    sonarr_api_key: "{{ sonarr_api_key }}"
+    sonarr_url: "{{ sonarr_url }}"
+    state: 'absent'
+  register: result
+- name: assert custom format deletion
+  assert:
+    that:
+      - result['id'] == 0
