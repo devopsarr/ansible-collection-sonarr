@@ -1,0 +1,66 @@
+---
+- name: create tag
+  devopsarr.sonarr.sonarr_tag:
+    label: 'autotaginfotest'
+    sonarr_api_key: "{{ sonarr_api_key }}"
+    sonarr_url: "{{ sonarr_url }}"
+  register: tag
+
+- name: create auto tag
+  devopsarr.sonarr.sonarr_auto_tag:
+    remove_tags_automatically: false
+    name: "{{ item }}"
+    tags: ["{{ tag['id'] }}"]
+    specifications:
+    - name: "anime"
+      implementation: "SeriesTypeSpecification"
+      negate: true
+      required: false
+      fields:
+      - name: "value"
+        value: 2
+    sonarr_api_key: "{{ sonarr_api_key }}"
+    sonarr_url: "{{ sonarr_url }}"
+  with_items:
+    - 'info_test'
+    - 'info_test1'
+
+- name: list a single auto tag
+  devopsarr.sonarr.sonarr_auto_tag_info:
+    name: "info_test"
+    sonarr_api_key: "{{ sonarr_api_key }}"
+    sonarr_url: "{{ sonarr_url }}"
+  register: result
+
+- name: assert single auto tag
+  assert:
+    that:
+      - result['auto_tags'][0]['name'] == 'info_test'
+# ----------------------------------------------------------------------------
+- name: list all auto tags
+  devopsarr.sonarr.sonarr_auto_tag_info:
+    sonarr_api_key: "{{ sonarr_api_key }}"
+    sonarr_url: "{{ sonarr_url }}"
+  register: result
+- name: assert multiple auto tags
+  assert:
+    that:
+      - result['auto_tags'] | length > 1
+# ----------------------------------------------------------------------------
+- name: clean up auto tag
+  devopsarr.sonarr.sonarr_auto_tag:
+    name: "{{ item }}"
+    state: absent
+    sonarr_api_key: "{{ sonarr_api_key }}"
+    sonarr_url: "{{ sonarr_url }}"
+  with_items:
+    - 'info_test'
+    - 'info_test1'
+
+- name: clean up tag
+  devopsarr.sonarr.sonarr_tag:
+    label: 'autotaginfotest'
+    state: 'absent'
+    sonarr_api_key: "{{ sonarr_api_key }}"
+    sonarr_url: "{{ sonarr_url }}"
+  register: result
