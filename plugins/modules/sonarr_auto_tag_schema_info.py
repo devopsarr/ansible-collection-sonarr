@@ -8,13 +8,13 @@ __metaclass__ = type
 
 DOCUMENTATION = r'''
 ---
-module: sonarr_custom_format_schema_info
+module: sonarr_auto_tag_schema_info
 
-short_description: Get information about Sonarr custom format schema.
+short_description: Get information about Sonarr auto tag schema.
 
 version_added: "1.0.0"
 
-description: Get information about Sonarr custom format schema.
+description: Get information about Sonarr auto tag schema.
 
 options:
     name:
@@ -30,20 +30,20 @@ author:
 
 EXAMPLES = r'''
 ---
-# Gather information about all custom formats schema.
-- name: Gather information about all custom formats schema
-  devopsarr.sonarr.sonarr_custom_format_schema_info:
+# Gather information about all auto tags schema.
+- name: Gather information about all auto tags schema
+  devopsarr.sonarr.sonarr_auto_tag_schema_info:
 
-# Gather information about a single custom format schema.
-- name: Gather information about a single custom format schema
-  devopsarr.sonarr.sonarr_custom_format_schema_info:
+# Gather information about a single auto tag schema.
+- name: Gather information about a single auto tag schema
+  devopsarr.sonarr.sonarr_auto_tag_schema_info:
     name: test
 '''
 
 RETURN = r'''
 # These are examples of possible return values, and in general should use other names for return values.
-custom_formats:
-    description: A list of custom format.
+auto_tags:
+    description: A list of auto tag.
     returned: always
     type: list
     elements: dict
@@ -82,7 +82,7 @@ def run_module():
 
     result = dict(
         changed=False,
-        custom_formats=[],
+        auto_tags=[],
     )
 
     module = SonarrModule(
@@ -90,24 +90,24 @@ def run_module():
         supports_check_mode=True
     )
 
-    client = sonarr.CustomFormatApi(module.api)
+    client = sonarr.AutoTaggingApi(module.api)
 
     # List resources.
     try:
-        formats = client.list_custom_format_schema()
+        tags = client.list_auto_tagging_schema()
     except Exception as e:
-        module.fail_json('Error listing custom formats: %s' % to_native(e.reason), **result)
+        module.fail_json('Error listing auto tags: %s' % to_native(e.reason), **result)
 
-    custom_formats = []
+    auto_tags = []
     # Check if a resource is present already.
-    for custom_format in formats:
+    for auto_tag in tags:
         if module.params['name']:
-            if custom_format['implementation'] == module.params['name']:
-                custom_formats = [custom_format.dict(by_alias=False)]
+            if auto_tag['implementation'] == module.params['name']:
+                auto_tags = [auto_tag.dict(by_alias=False)]
         else:
-            custom_formats.append(custom_format.dict(by_alias=False))
+            auto_tags.append(auto_tag.dict(by_alias=False))
 
-    result.update(custom_formats=custom_formats)
+    result.update(auto_tags=auto_tags)
 
     module.exit_json(**result)
 
