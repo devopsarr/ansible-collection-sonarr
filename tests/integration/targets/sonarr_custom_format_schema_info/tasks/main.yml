@@ -1,0 +1,23 @@
+---
+- name: format a single custom format schema
+  devopsarr.sonarr.sonarr_custom_format_schema_info:
+    name: "LanguageSpecification"
+    sonarr_api_key: "{{ sonarr_api_key }}"
+    sonarr_url: "{{ sonarr_url }}"
+  register: result
+
+- name: assert single custom format schema
+  assert:
+    that:
+      - result['custom_formats'][0]['implementation'] == 'LanguageSpecification'
+# ----------------------------------------------------------------------------
+- name: format all custom format schemas
+  devopsarr.sonarr.sonarr_custom_format_schema_info:
+    sonarr_api_key: "{{ sonarr_api_key }}"
+    sonarr_url: "{{ sonarr_url }}"
+  register: result
+
+- name: assert multiple custom format schemas
+  assert:
+    that:
+      - result['custom_formats'] | length > 1

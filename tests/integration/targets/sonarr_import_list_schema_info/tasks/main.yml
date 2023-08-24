@@ -1,0 +1,23 @@
+---
+- name: list a single import list schema
+  devopsarr.sonarr.sonarr_import_list_schema_info:
+    name: "PlexImport"
+    sonarr_api_key: "{{ sonarr_api_key }}"
+    sonarr_url: "{{ sonarr_url }}"
+  register: result
+
+- name: assert single import list schema
+  assert:
+    that:
+      - result['import_lists'][0]['name'] == 'PlexImport'
+# ----------------------------------------------------------------------------
+- name: list all import list schemas
+  devopsarr.sonarr.sonarr_import_list_schema_info:
+    sonarr_api_key: "{{ sonarr_api_key }}"
+    sonarr_url: "{{ sonarr_url }}"
+  register: result
+
+- name: assert multiple import list schemas
+  assert:
+    that:
+      - result['import_lists'] | length > 1

@@ -1,0 +1,90 @@
+---
+- name: create tag
+  devopsarr.sonarr.sonarr_tag:
+    label: 'autotagtest'
+    sonarr_api_key: "{{ sonarr_api_key }}"
+    sonarr_url: "{{ sonarr_url }}"
+  register: tag
+
+- name: create auto tag
+  devopsarr.sonarr.sonarr_auto_tag:
+    remove_tags_automatically: false
+    name: "Type"
+    tags: ["{{ tag['id'] }}"]
+    specifications:
+    - name: "anime"
+      implementation: "SeriesTypeSpecification"
+      negate: true
+      required: false
+      fields:
+      - name: "value"
+        value: 2
+    sonarr_api_key: "{{ sonarr_api_key }}"
+    sonarr_url: "{{ sonarr_url }}"
+  register: result
+- name: assert auto tag creation
+  assert:
+    that:
+      - result['name'] == 'Type'
+# ----------------------------------------------------------------------------
+- name: edit already present auto tag
+  devopsarr.sonarr.sonarr_auto_tag:
+    remove_tags_automatically: false
+    name: "Type"
+    tags: ["{{ tag['id'] }}"]
+    specifications:
+    - name: "daily"
+      implementation: "SeriesTypeSpecification"
+      negate: true
+      required: false
+      fields:
+      - name: "value"
+        value: 1
+    sonarr_api_key: "{{ sonarr_api_key }}"
+    sonarr_url: "{{ sonarr_url }}"
+  register: result
+- name: assert auto tag changes
+  assert:
+    that:
+      - result.changed == true
+# ----------------------------------------------------------------------------
+- name: test idempotency
+  devopsarr.sonarr.sonarr_auto_tag:
+    remove_tags_automatically: false
+    name: "Type"
+    tags: ["{{ tag['id'] }}"]
+    specifications:
+    - name: "daily"
+      implementation: "SeriesTypeSpecification"
+      negate: true
+      required: false
+      fields:
+      - name: "value"
+        value: 1
+    sonarr_api_key: "{{ sonarr_api_key }}"
+    sonarr_url: "{{ sonarr_url }}"
+  register: result
+- name: assert auto tag idempotency
+  assert:
+    that:
+      - result.changed == false
+# ----------------------------------------------------------------------------
+- name: delete auto tag
+  devopsarr.sonarr.sonarr_auto_tag:
+    name: "Type"
+    sonarr_api_key: "{{ sonarr_api_key }}"
+    sonarr_url: "{{ sonarr_url }}"
+    state: 'absent'
+  register: result
+- name: assert auto tag deletion
+  assert:
+    that:
+      - result['id'] == 0
+
+- name: clean up tag
+  devopsarr.sonarr.sonarr_tag:
+    label: 'autotagtest'
+    state: 'absent'
+    sonarr_api_key: "{{ sonarr_api_key }}"
+    sonarr_url: "{{ sonarr_url }}"
+  register: result

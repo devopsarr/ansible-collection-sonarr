@@ -8,41 +8,21 @@ __metaclass__ = type
 
 DOCUMENTATION = r'''
 ---
-module: sonarr_indexer
+module: sonarr_metadata
 
-short_description: Manages Sonarr indexer.
+short_description: Manages Sonarr metadata.
 
-version_added: "0.5.0"
+version_added: "1.0.0"
 
-description: Manages Sonarr indexer.
+description: Manages Sonarr metadata.
 
 options:
     name:
         description: Name.
         required: true
         type: str
-    enable_automatic_search:
-        description: Enable automatic search flag.
-        type: bool
-    enable_interactive_search:
-        description: Enable interactive search flag.
-        type: bool
-    enable_rss:
-        description: Enable RSS flag.
-        type: bool
-    priority:
-        description: Priority.
-        type: int
-    download_client_id:
-        description: Download client ID.
-        type: int
-        default: 0
-    protocol:
-        description: Protocol.
-        choices: [ "torrent", "usenet" ]
-        type: str
-    update_secrets:
-        description: Flag to force update of secret fields.
+    enable:
+        description: enable flag.
         type: bool
         default: false
 
@@ -58,27 +38,21 @@ author:
 
 EXAMPLES = r'''
 ---
-# Create a indexer
-- name: Create a indexer
-  devopsarr.sonarr.sonarr_indexer:
+# Create a metadata
+- name: Create a metadata
+  devopsarr.sonarr.sonarr_metadata:
     name: "Example"
-    enable_automatic_search: false
-    enable_interactive_search: false
-    enable_rss: false
-    priority: 10
-    config_contract: "FanzubSettings"
-    implementation: "Fanzub"
-    protocol: "usenet"
+    enable: true
+    config_contract: "WdtvMetadataSettings"
+    implementation: "WdtvMetadata"
     fields:
-    - name: "baseUrl"
-      value: "http://fanzub.com/rss/"
-    - name: "animeStandardFormatSearch"
+    - name: "seasonImages"
       value: true
     tags: [1,2]
 
-# Delete a indexer
-- name: Delete a indexer
-  devopsarr.sonarr.sonarr_indexer:
+# Delete a metadata
+- name: Delete a metadata
+  devopsarr.sonarr.sonarr_metadata:
     name: Example
     state: absent
 '''
@@ -86,7 +60,7 @@ EXAMPLES = r'''
 RETURN = r'''
 # These are examples of possible return values, and in general should use other names for return values.
 id:
-    description: indexer ID.
+    description: metadata ID.
     type: int
     returned: always
     sample: 1
@@ -95,46 +69,21 @@ name:
     returned: always
     type: str
     sample: "Example"
-enable_automatic_search:
-    description: Enable automatic search flag.
+enable:
+    description: On grab flag.
     returned: always
     type: bool
     sample: true
-enable_interactive_search:
-    description: Enable interactive search flag.
-    returned: always
-    type: bool
-    sample: false
-enable_rss:
-    description: Enable RSS flag.
-    returned: always
-    type: bool
-    sample: true
-priority:
-    description: Priority.
-    returned: always
-    type: int
-    sample: 1
-download_client_id:
-    description: Download client ID.
-    returned: always
-    type: int
-    sample: 0
 config_contract:
     description: Config contract.
     returned: always
     type: str
-    sample: "BroadcastheNetSettings"
+    sample: "WebhookSettings"
 implementation:
     description: Implementation.
     returned: always
     type: str
-    sample: "BroadcastheNet"
-protocol:
-    description: Protocol.
-    returned: always
-    type: str
-    sample: "torrent"
+    sample: "Webhook"
 tags:
     description: Tag list.
     type: list
@@ -160,20 +109,15 @@ except ImportError:
 
 def is_changed(status, want):
     if (want.name != status.name or
-            want.enable_automatic_search != status.enable_automatic_search or
-            want.enable_interactive_search != status.enable_interactive_search or
-            want.enable_rss != status.enable_rss or
-            want.priority != status.priority or
-            want.download_client_id != status.download_client_id or
+            want.enable != status.enable or
             want.config_contract != status.config_contract or
             want.implementation != status.implementation or
-            want.protocol != status.protocol or
             want.tags != status.tags):
         return True
 
     for status_field in status.fields:
         for want_field in want.fields:
-            if want_field.name == status_field.name and want_field.value != status_field.value and status_field.value != "********":
+            if want_field.name == status_field.name and want_field.value != status_field.value:
                 return True
     return False
 
@@ -184,19 +128,12 @@ def run_module():
     # define available arguments/parameters a user can pass to the module
     module_args = dict(
         name=dict(type='str', required=True),
-        enable_automatic_search=dict(type='bool'),
-        enable_interactive_search=dict(type='bool'),
-        enable_rss=dict(type='bool'),
-        priority=dict(type='int'),
-        download_client_id=dict(type='int', default=0),
+        enable=dict(type='bool', default=False),
         config_contract=dict(type='str'),
         implementation=dict(type='str'),
-        protocol=dict(type='str', choices=['usenet', 'torrent']),
         tags=dict(type='list', elements='int', default=[]),
         fields=dict(type='list', elements='dict', options=field_helper.field_args),
         state=dict(default='present', type='str', choices=['present', 'absent']),
-        # Needed to manage obfuscate response from api "********"
-        update_secrets=dict(type='bool', default=False),
     )
 
     result = dict(
@@ -209,20 +146,20 @@ def run_module():
         supports_check_mode=True
     )
 
-    client = sonarr.IndexerApi(module.api)
+    client = sonarr.MetadataApi(module.api)
 
     # List resources.
     try:
-        indexers = client.list_indexer()
+        metadatas = client.list_metadata()
     except Exception as e:
-        module.fail_json('Error listing indexers: %s' % to_native(e.reason), **result)
+        module.fail_json('Error listing metadatas: %s' % to_native(e.reason), **result)
 
-    state = sonarr.IndexerResource()
+    state = sonarr.MetadataResource()
     # Check if a resource is present already.
-    for indexer in indexers:
-        if indexer['name'] == module.params['name']:
-            result.update(indexer.dict(by_alias=False))
-            state = indexer
+    for metadata in metadatas:
+        if metadata['name'] == module.params['name']:
+            result.update(metadata.dict(by_alias=False))
+            state = metadata
 
     # Delete the resource if needed.
     if module.params['state'] == 'absent':
@@ -230,22 +167,17 @@ def run_module():
             result['changed'] = True
             if not module.check_mode:
                 try:
-                    response = client.delete_indexer(result['id'])
+                    response = client.delete_metadata(result['id'])
                 except Exception as e:
-                    module.fail_json('Error deleting indexer: %s' % to_native(e.reason), **result)
+                    module.fail_json('Error deleting metadata: %s' % to_native(e.reason), **result)
                 result['id'] = 0
         module.exit_json(**result)
 
-    want = sonarr.IndexerResource(**{
+    want = sonarr.MetadataResource(**{
         'name': module.params['name'],
-        'enable_automatic_search': module.params['enable_automatic_search'],
-        'enable_interactive_search': module.params['enable_interactive_search'],
-        'enable_rss': module.params['enable_rss'],
-        'priority': module.params['priority'],
-        'download_client_id': module.params['download_client_id'],
+        'enable': module.params['enable'],
         'config_contract': module.params['config_contract'],
         'implementation': module.params['implementation'],
-        'protocol': module.params['protocol'],
         'tags': module.params['tags'],
         'fields': field_helper.populate_fields(module.params['fields']),
     })
@@ -256,21 +188,21 @@ def run_module():
         # Only without check mode.
         if not module.check_mode:
             try:
-                response = client.create_indexer(indexer_resource=want)
+                response = client.create_metadata(metadata_resource=want)
             except Exception as e:
-                module.fail_json('Error creating indexer: %s' % to_native(e.reason), **result)
+                module.fail_json('Error creating metadata: %s' % to_native(e.reason), **result)
             result.update(response.dict(by_alias=False))
         module.exit_json(**result)
 
     # Update an existing resource.
     want.id = result['id']
-    if is_changed(state, want) or module.params['update_secrets']:
+    if is_changed(state, want):
         result['changed'] = True
         if not module.check_mode:
             try:
-                response = client.update_indexer(indexer_resource=want, id=str(want.id))
+                response = client.update_metadata(metadata_resource=want, id=str(want.id))
             except Exception as e:
-                module.fail_json('Error updating indexer: %s' % to_native(e.reason), **result)
+                module.fail_json('Error updating metadata: %s' % to_native(e.reason), **result)
         result.update(response.dict(by_alias=False))
 
     module.exit_json(**result)

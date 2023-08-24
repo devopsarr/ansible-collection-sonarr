@@ -1,0 +1,136 @@
+---
+- name: create notification
+  devopsarr.sonarr.sonarr_notification:
+    name: "Example"
+    config_contract: "CustomScriptSettings"
+    implementation: "CustomScript"
+    fields:
+    - name: "path"
+      value: "/scripts/test.sh"
+    sonarr_api_key: "{{ sonarr_api_key }}"
+    sonarr_url: "{{ sonarr_url }}"
+  register: result
+- name: assert notification creation
+  assert:
+    that:
+      - result['implementation'] == 'CustomScript'
+# ----------------------------------------------------------------------------
+- name: edit already present notification
+  devopsarr.sonarr.sonarr_notification:
+    name: "Example"
+    on_grab: true
+    config_contract: "CustomScriptSettings"
+    implementation: "CustomScript"
+    fields:
+    - name: "path"
+      value: "/scripts/test.sh"
+    sonarr_api_key: "{{ sonarr_api_key }}"
+    sonarr_url: "{{ sonarr_url }}"
+  register: result
+- name: assert notification changes
+  assert:
+    that:
+      - result.changed == true
+# ----------------------------------------------------------------------------
+- name: test idempotency
+  devopsarr.sonarr.sonarr_notification:
+    name: "Example"
+    on_grab: true
+    config_contract: "CustomScriptSettings"
+    implementation: "CustomScript"
+    fields:
+    - name: "path"
+      value: "/scripts/test.sh"
+    sonarr_api_key: "{{ sonarr_api_key }}"
+    sonarr_url: "{{ sonarr_url }}"
+  register: result
+- name: assert notification idempotency
+  assert:
+    that:
+      - result.changed == false
+# ----------------------------------------------------------------------------
+- name: delete notification
+  devopsarr.sonarr.sonarr_notification:
+    name: "Example"
+    sonarr_api_key: "{{ sonarr_api_key }}"
+    sonarr_url: "{{ sonarr_url }}"
+    state: 'absent'
+  register: result
+- name: assert notification deletion
+  assert:
+    that:
+      - result['id'] == 0
+# ----------------------------------------------------------------------------
+- name: create another notification with sensitive values
+  devopsarr.sonarr.sonarr_notification:
+    name: "Example"
+    config_contract: "WebhookSettings"
+    implementation: "Webhook"
+    fields:
+    - name: "username"
+      value: "User"
+    - name: "password"
+      value: "test"
+    - name: "url"
+      value: "webhook.lcl"
+    - name: "method"
+      value: 1
+    sonarr_api_key: "{{ sonarr_api_key }}"
+    sonarr_url: "{{ sonarr_url }}"
+  register: result
+- name: assert notification creation
+  assert:
+    that:
+      - result['implementation'] == 'Webhook'
+# ----------------------------------------------------------------------------
+- name: test idempotency
+  devopsarr.sonarr.sonarr_notification:
+    name: "Example"
+    config_contract: "WebhookSettings"
+    implementation: "Webhook"
+    fields:
+    - name: "username"
+      value: "User"
+    - name: "password123"
+      value: "test"
+    - name: "url"
+      value: "webhook.lcl"
+    - name: "method"
+      value: 1
+    sonarr_api_key: "{{ sonarr_api_key }}"
+    sonarr_url: "{{ sonarr_url }}"
+  register: result
+- name: assert notification idempotency
+  assert:
+    that:
+      - result.changed == false
+# ----------------------------------------------------------------------------
+- name: test key change
+  devopsarr.sonarr.sonarr_notification:
+    name: "Example"
+    config_contract: "WebhookSettings"
+    implementation: "Webhook"
+    fields:
+    - name: "username"
+      value: "User"
+    - name: "password123"
+      value: "test"
+    - name: "url"
+      value: "webhook.lcl"
+    - name: "method"
+      value: 1
+    update_secrets: true
+    sonarr_api_key: "{{ sonarr_api_key }}"
+    sonarr_url: "{{ sonarr_url }}"
+  register: result
+- name: assert notification idempotency
+  assert:
+    that:
+      - result.changed == true
+# ----------------------------------------------------------------------------
+- name: clean up
+  devopsarr.sonarr.sonarr_notification:
+    name: "Example"
+    state: absent
+    sonarr_api_key: "{{ sonarr_api_key }}"
+    sonarr_url: "{{ sonarr_url }}"

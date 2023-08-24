@@ -1,0 +1,72 @@
+---
+- name: create series
+  devopsarr.sonarr.sonarr_series:
+    title: "Breaking Bad"
+    title_slug: "breaking-bad"
+    tvdb_id: 81189
+    monitored: false
+    season_folder: true
+    use_scene_numbering: false
+    path: "/config/breaking-bad"
+    root_folder_path: "/config"
+    quality_profile_id: 1
+    sonarr_api_key: "{{ sonarr_api_key }}"
+    sonarr_url: "{{ sonarr_url }}"
+  register: result
+- name: assert series creation
+  assert:
+    that:
+      - result['tvdb_id'] == 81189
+# ----------------------------------------------------------------------------
+- name: edit already present series
+  devopsarr.sonarr.sonarr_series:
+    title: "Breaking Bad"
+    title_slug: "breaking-bad"
+    tvdb_id: 81189
+    monitored: true
+    season_folder: true
+    use_scene_numbering: false
+    path: "/config/breaking-bad"
+    root_folder_path: "/config"
+    quality_profile_id: 1
+    sonarr_api_key: "{{ sonarr_api_key }}"
+    sonarr_url: "{{ sonarr_url }}"
+  register: result
+- name: assert series changes
+  assert:
+    that:
+      - result.changed == true
+# ----------------------------------------------------------------------------
+- name: test idempotency
+  devopsarr.sonarr.sonarr_series:
+    title: "Breaking Bad"
+    title_slug: "breaking-bad"
+    tvdb_id: 81189
+    monitored: true
+    season_folder: true
+    use_scene_numbering: false
+    path: "/config/breaking-bad"
+    root_folder_path: "/config"
+    quality_profile_id: 1
+    sonarr_api_key: "{{ sonarr_api_key }}"
+    sonarr_url: "{{ sonarr_url }}"
+  register: result
+- name: assert series idempotency
+  assert:
+    that:
+      - result.changed == false
+# ----------------------------------------------------------------------------
+- name: delete series
+  devopsarr.sonarr.sonarr_series:
+    title: "Breaking Bad"
+    title_slug: "breaking-bad"
+    tvdb_id: 81189
+    path: "/config/breaking-bad"
+    sonarr_api_key: "{{ sonarr_api_key }}"
+    sonarr_url: "{{ sonarr_url }}"
+    state: 'absent'
+  register: result
+- name: assert series deletion
+  assert:
+    that:
+      - result['id'] == 0

@@ -8,13 +8,13 @@ __metaclass__ = type
 
 DOCUMENTATION = r'''
 ---
-module: sonarr_download_client_info
+module: sonarr_download_client_schema_info
 
-short_description: Get information about Sonarr download client.
+short_description: Get information about Sonarr download client schema.
 
-version_added: "0.6.0"
+version_added: "1.0.0"
 
-description: Get information about Sonarr download client.
+description: Get information about Sonarr download client schema.
 
 options:
     name:
@@ -30,14 +30,14 @@ author:
 
 EXAMPLES = r'''
 ---
-# Gather information about all download clients.
-- name: Gather information about all download clients
-  devopsarr.sonarr.sonarr_download_client_info:
+# Gather information about all download clients schema.
+- name: Gather information about all download clients schema
+  devopsarr.sonarr.sonarr_download_client_schema_info:
 
-# Gather information about a single download client.
-- name: Gather information about a single download client
-  devopsarr.sonarr.sonarr_download_client_info:
-    name: Example
+# Gather information about a single download client schema.
+- name: Gather information about a single download client schema
+  devopsarr.sonarr.sonarr_download_client_schema_info:
+    name: test
 '''
 
 RETURN = r'''
@@ -135,7 +135,7 @@ def run_module():
 
     # List resources.
     try:
-        clients = client.list_download_client()
+        clients = client.list_download_client_schema()
     except Exception as e:
         module.fail_json('Error listing download clients: %s' % to_native(e.reason), **result)
 
@@ -143,7 +143,7 @@ def run_module():
     # Check if a resource is present already.
     for download_client in clients:
         if module.params['name']:
-            if download_client['name'] == module.params['name']:
+            if download_client['implementation'] == module.params['name']:
                 download_clients = [download_client.dict(by_alias=False)]
         else:
             download_clients.append(download_client.dict(by_alias=False))

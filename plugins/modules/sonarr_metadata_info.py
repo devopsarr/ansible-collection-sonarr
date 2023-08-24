@@ -8,13 +8,13 @@ __metaclass__ = type
 
 DOCUMENTATION = r'''
 ---
-module: sonarr_download_client_info
+module: sonarr_metadata_info
 
-short_description: Get information about Sonarr download client.
+short_description: Get information about Sonarr metadata.
 
-version_added: "0.6.0"
+version_added: "1.0.0"
 
-description: Get information about Sonarr download client.
+description: Get information about Sonarr metadata.
 
 options:
     name:
@@ -30,26 +30,26 @@ author:
 
 EXAMPLES = r'''
 ---
-# Gather information about all download clients.
-- name: Gather information about all download clients
-  devopsarr.sonarr.sonarr_download_client_info:
+# Gather information about all metadatas.
+- name: Gather information about all metadatas
+  devopsarr.sonarr.sonarr_metadata_info:
 
-# Gather information about a single download client.
-- name: Gather information about a single download client
-  devopsarr.sonarr.sonarr_download_client_info:
-    name: Example
+# Gather information about a single metadata.
+- name: Gather information about a single metadata
+  devopsarr.sonarr.sonarr_metadata_info:
+    name: test
 '''
 
 RETURN = r'''
 # These are examples of possible return values, and in general should use other names for return values.
-download_clients:
-    description: A list of download client.
+metadatas:
+    description: A list of metadatas.
     returned: always
     type: list
     elements: dict
     contains:
         id:
-            description: download clientID.
+            description: metadata ID.
             type: int
             returned: always
             sample: 1
@@ -58,41 +58,21 @@ download_clients:
             returned: always
             type: str
             sample: "Example"
-        remove_completed_downloads:
-            description: Remove completed downloads flag.
-            returned: always
-            type: bool
-            sample: true
-        remove_failed_downloads:
-            description: Remove failed downloads flag.
-            returned: always
-            type: bool
-            sample: false
         enable:
-            description: Enable flag.
+            description: On grab flag.
             returned: always
             type: bool
             sample: true
-        priority:
-            description: Priority.
-            returned: always
-            type: int
-            sample: 1
         config_contract:
             description: Config contract.
             returned: always
             type: str
-            sample: "BroadcastheNetSettings"
+            sample: "WebhookSettings"
         implementation:
             description: Implementation.
             returned: always
             type: str
-            sample: "BroadcastheNet"
-        protocol:
-            description: Protocol.
-            returned: always
-            type: str
-            sample: "torrent"
+            sample: "Webhook"
         tags:
             description: Tag list.
             type: list
@@ -123,7 +103,7 @@ def run_module():
 
     result = dict(
         changed=False,
-        download_clients=[],
+        metadatas=[],
     )
 
     module = SonarrModule(
@@ -131,24 +111,24 @@ def run_module():
         supports_check_mode=True
     )
 
-    client = sonarr.DownloadClientApi(module.api)
+    client = sonarr.MetadataApi(module.api)
 
     # List resources.
     try:
-        clients = client.list_download_client()
+        metadata_list = client.list_metadata()
     except Exception as e:
-        module.fail_json('Error listing download clients: %s' % to_native(e.reason), **result)
+        module.fail_json('Error listing metadatas: %s' % to_native(e.reason), **result)
 
-    download_clients = []
+    metadatas = []
     # Check if a resource is present already.
-    for download_client in clients:
+    for metadata in metadata_list:
         if module.params['name']:
-            if download_client['name'] == module.params['name']:
-                download_clients = [download_client.dict(by_alias=False)]
+            if metadata['name'] == module.params['name']:
+                metadatas = [metadata.dict(by_alias=False)]
         else:
-            download_clients.append(download_client.dict(by_alias=False))
+            metadatas.append(metadata.dict(by_alias=False))
 
-    result.update(download_clients=download_clients)
+    result.update(metadatas=metadatas)
 
     module.exit_json(**result)
 

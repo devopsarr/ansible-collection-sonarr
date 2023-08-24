@@ -8,13 +8,13 @@ __metaclass__ = type
 
 DOCUMENTATION = r'''
 ---
-module: sonarr_download_client_info
+module: sonarr_import_list_schema_info
 
-short_description: Get information about Sonarr download client.
+short_description: Get information about Sonarr import list schema.
 
-version_added: "0.6.0"
+version_added: "1.0.0"
 
-description: Get information about Sonarr download client.
+description: Get information about Sonarr import list schema.
 
 options:
     name:
@@ -30,26 +30,26 @@ author:
 
 EXAMPLES = r'''
 ---
-# Gather information about all download clients.
-- name: Gather information about all download clients
-  devopsarr.sonarr.sonarr_download_client_info:
+# Gather information about all import lists schema.
+- name: Gather information about all import lists schema
+  devopsarr.sonarr.sonarr_import_list_schema_info:
 
-# Gather information about a single download client.
-- name: Gather information about a single download client
-  devopsarr.sonarr.sonarr_download_client_info:
-    name: Example
+# Gather information about a single import list schema.
+- name: Gather information about a single import list schema
+  devopsarr.sonarr.sonarr_import_list_schema_info:
+    name: PlexImport
 '''
 
 RETURN = r'''
 # These are examples of possible return values, and in general should use other names for return values.
-download_clients:
-    description: A list of download client.
+import_lists:
+    description: A list of import list.
     returned: always
     type: list
     elements: dict
     contains:
         id:
-            description: download clientID.
+            description: import listID.
             type: int
             returned: always
             sample: 1
@@ -58,36 +58,46 @@ download_clients:
             returned: always
             type: str
             sample: "Example"
-        remove_completed_downloads:
-            description: Remove completed downloads flag.
-            returned: always
-            type: bool
-            sample: true
-        remove_failed_downloads:
-            description: Remove failed downloads flag.
+        enable_automatic_add:
+            description: Enable automatic add flag.
             returned: always
             type: bool
             sample: false
-        enable:
-            description: Enable flag.
+        season_folder:
+            description: Season folder flag.
             returned: always
             type: bool
-            sample: true
-        priority:
-            description: Priority.
+            sample: false
+        quality_profile_id:
+            description: Quality profile ID.
             returned: always
             type: int
             sample: 1
+        should_monitor:
+            description: Should monitor.
+            returned: always
+            type: str
+            sample: "unknown"
+        root_folder_path:
+            description: Root folder path.
+            returned: always
+            type: str
+            sample: "/path"
+        series_type:
+            description: Series type.
+            returned: always
+            type: str
+            sample: "standard"
         config_contract:
             description: Config contract.
             returned: always
             type: str
-            sample: "BroadcastheNetSettings"
+            sample: "CustomSettings"
         implementation:
             description: Implementation.
             returned: always
             type: str
-            sample: "BroadcastheNet"
+            sample: "CustomImport"
         protocol:
             description: Protocol.
             returned: always
@@ -123,7 +133,7 @@ def run_module():
 
     result = dict(
         changed=False,
-        download_clients=[],
+        import_lists=[],
     )
 
     module = SonarrModule(
@@ -131,24 +141,24 @@ def run_module():
         supports_check_mode=True
     )
 
-    client = sonarr.DownloadClientApi(module.api)
+    list = sonarr.ImportListApi(module.api)
 
     # List resources.
     try:
-        clients = client.list_download_client()
+        lists = list.list_import_list_schema()
     except Exception as e:
-        module.fail_json('Error listing download clients: %s' % to_native(e.reason), **result)
+        module.fail_json('Error listing import lists: %s' % to_native(e.reason), **result)
 
-    download_clients = []
+    import_lists = []
     # Check if a resource is present already.
-    for download_client in clients:
+    for import_list in lists:
         if module.params['name']:
-            if download_client['name'] == module.params['name']:
-                download_clients = [download_client.dict(by_alias=False)]
+            if import_list['name'] == module.params['name']:
+                import_lists = [import_list.dict(by_alias=False)]
         else:
-            download_clients.append(download_client.dict(by_alias=False))
+            import_lists.append(import_list.dict(by_alias=False))
 
-    result.update(download_clients=download_clients)
+    result.update(import_lists=import_lists)
 
     module.exit_json(**result)
 
