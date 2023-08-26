@@ -153,7 +153,7 @@ def run_module():
     # Check if a resource is present already.
     for import_list in lists:
         if module.params['name']:
-            if import_list['name'] == module.params['name']:
+            if import_list['implementation'] == module.params['name']:
                 import_lists = [import_list.dict(by_alias=False)]
         else:
             import_lists.append(import_list.dict(by_alias=False))
