@@ -2,7 +2,7 @@
 version: "3.9"
 services:
   sonarr:
-    image: hotio/sonarr:v4-4.0.0.585@sha256:5ccb59653a367be173a2bd2be8f2a4837d40340f1864b42fa97625285d80329d
+    image: hotio/sonarr:v4-4.0.0.646@sha256:2e10a69041b1df822deaefbe79808e3e867cbcddf92137647c7d40b0ed7b253f
     container_name: sonarr
     depends_on:
       - transmission
