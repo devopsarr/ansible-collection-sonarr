@@ -18,27 +18,17 @@
   devopsarr.sonarr.sonarr_quality_profile:
     name: "Example"
     upgrade_allowed: true
-    cutoff: 1
+    cutoff: "WEB 720p"
     min_format_score: 0
     cutoff_format_score: 0
     quality_groups:
       - qualities:
-        - id: 1
-          name: "SDTV"
-          source: "television"
-          resolution: 480
+          - "SDTV"
       - name: "WEB 720p"
-        id: 1001
         qualities:
-        - id: 14
-          name: "WEBRip-720p"
-          source: "webRip"
-          resolution: 720
-        - id: 5
-          name: "WEBDL-720p"
-          source: "web"
-          resolution: 720
-    formats: []
+          - "WEBRip-720p"
+          - "WEBDL-720p"
+    formats: 
     sonarr_api_key: "{{ sonarr_api_key }}"
     sonarr_url: "{{ sonarr_url }}"
   register: result
@@ -51,30 +41,17 @@
   devopsarr.sonarr.sonarr_quality_profile:
     name: "Example"
     upgrade_allowed: false
-    cutoff: 1
+    cutoff: "WEB 720p"
     min_format_score: 0
     cutoff_format_score: 0
     quality_groups:
       - qualities:
-        - id: 1
-          name: "SDTV"
-          source: "television"
-          resolution: 480
+          - "SDTV"
       - name: "WEB 720p"
-        id: 1001
         qualities:
-        - id: 14
-          name: "WEBRip-720p"
-          source: "webRip"
-          resolution: 720
-        - id: 5
-          name: "WEBDL-720p"
-          source: "web"
-          resolution: 720
-    formats:
-      - name: "{{ format['name'] }}"
-        id: "{{ format['id'] }}"
-        score: 100
+          - "WEBRip-720p"
+          - "WEBDL-720p"
+    formats: 
     sonarr_api_key: "{{ sonarr_api_key }}"
     sonarr_url: "{{ sonarr_url }}"
   register: result
@@ -88,30 +65,17 @@
   devopsarr.sonarr.sonarr_quality_profile:
     name: "Example"
     upgrade_allowed: false
-    cutoff: 1
+    cutoff: "WEB 720p"
     min_format_score: 0
     cutoff_format_score: 0
     quality_groups:
       - qualities:
-        - id: 1
-          name: "SDTV"
-          source: "television"
-          resolution: 480
+          - "SDTV"
       - name: "WEB 720p"
-        id: 1001
         qualities:
-        - id: 14
-          name: "WEBRip-720p"
-          source: "webRip"
-          resolution: 720
-        - id: 5
-          name: "WEBDL-720p"
-          source: "web"
-          resolution: 720
-    formats:
-      - name: "{{ format['name'] }}"
-        id: "{{ format['id'] }}"
-        score: 100
+          - "WEBRip-720p"
+          - "WEBDL-720p"
+    formats: 
     sonarr_api_key: "{{ sonarr_api_key }}"
     sonarr_url: "{{ sonarr_url }}"
   register: result
@@ -132,9 +96,4 @@
   assert:
     that:
       - result['id'] == 0
-- name: clean up custom format
-  devopsarr.sonarr.sonarr_custom_format:
-    name: "Arab"
-    sonarr_api_key: "{{ sonarr_api_key }}"
-    sonarr_url: "{{ sonarr_url }}"
-    state: 'absent'
+
