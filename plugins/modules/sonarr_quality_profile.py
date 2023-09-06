@@ -55,7 +55,7 @@ options:
     formats:
         description: Format items with score.
         type: dict
-        default: {}
+        default: 0
 
 extends_documentation_fragment:
     - devopsarr.sonarr.sonarr_credentials
@@ -205,7 +205,7 @@ def run_module():
 
     # Break apart quality groups and create a dict.
     quality_groups_dict = OrderedDict()
-
+    
     for item in want.items:
         if item.quality is None:
             for quality in item.items:
@@ -225,13 +225,12 @@ def run_module():
             if name == module.params['cutoff']:
                 cutoff_id = quality_groups_dict[name].quality.id
         else:
-            qualities = [quality_groups_dict[name].copy()]
-            quality_groups_dict[name].allowed = True
-            for quality in item['qualities'][1:]:
+            qualities = []
+            for quality in item['qualities']:
                 qualities.append(quality_groups_dict.pop(quality))
                 qualities[-1].allowed = True
 
-            quality_groups_dict[name] = quality_groups_dict[name].copy(update={
+            quality_groups_dict[name] = sonarr.QualityProfileQualityItemResource(**{
                 'allowed': True,
                 'name': item['name'],
                 'id': ident,
@@ -242,8 +241,9 @@ def run_module():
             if item['name'] == module.params['cutoff']:
                 cutoff_id = ident
             ident += 1
-        quality_groups_dict.move_to_end(name, last=True)
+        quality_groups_dict.move_to_end(name)
     want.items = list(quality_groups_dict.values())
+
 
     # Populate formats.
     formats_dict = {item['name']: item for item in want.format_items}
@@ -291,4 +291,3 @@ def main():
 
 if __name__ == '__main__':
     main()
-
