@@ -55,7 +55,7 @@ options:
     formats:
         description: Format items with score.
         type: dict
-        default: 0
+        default: {}
 
 extends_documentation_fragment:
     - devopsarr.sonarr.sonarr_credentials
@@ -205,7 +205,7 @@ def run_module():
 
     # Break apart quality groups and create a dict.
     quality_groups_dict = OrderedDict()
-    
+
     for item in want.items:
         if item.quality is None:
             for quality in item.items:
@@ -244,7 +244,6 @@ def run_module():
             ident += 1
         quality_groups_dict.move_to_end(name, last=True)
     want.items = list(quality_groups_dict.values())
-
 
     # Populate formats.
     formats_dict = {item['name']: item for item in want.format_items}
