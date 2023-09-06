@@ -55,7 +55,7 @@ options:
     formats:
         description: Format items with score.
         type: dict
-        default: {}
+        default: 0
 
 extends_documentation_fragment:
     - devopsarr.sonarr.sonarr_credentials
@@ -218,7 +218,7 @@ def run_module():
     # Populate quality groups.
     ident = 1000
     cutoff_id = None
-    for item in module.params['quality_groups']:
+    for item in reversed(module.params['quality_groups']):
         name = item['qualities'][0]
         if len(item['qualities']) == 1:
             quality_groups_dict[name].allowed = True
@@ -242,6 +242,7 @@ def run_module():
             if item['name'] == module.params['cutoff']:
                 cutoff_id = ident
             ident += 1
+        quality_groups_dict.move_to_end(name, last=True)
     want.items = list(quality_groups_dict.values())
 
 
