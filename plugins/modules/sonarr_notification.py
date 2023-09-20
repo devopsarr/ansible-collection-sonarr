@@ -65,6 +65,10 @@ options:
         description: On manual interaction required flag.
         type: bool
         default: false
+    on_upgrade:
+        description: On upgrade flag.
+        type: bool
+        default: false
     update_secrets:
         description: Flag to force update of secret fields.
         type: bool
@@ -174,6 +178,11 @@ on_manual_interaction_required:
     returned: always
     type: bool
     sample: true
+on_upgrade:
+    description: On upgrade flag.
+    returned: always
+    type: bool
+    sample: true
 config_contract:
     description: Config contract.
     returned: always
@@ -219,6 +228,7 @@ def is_changed(status, want):
             want.on_health_issue != status.on_health_issue or
             want.on_health_restored != status.on_health_restored or
             want.on_manual_interaction_required != status.on_manual_interaction_required or
+            want.on_upgrade != status.on_upgrade or
             want.on_application_update != status.on_application_update or
             want.config_contract != status.config_contract or
             want.implementation != status.implementation or
@@ -249,6 +259,7 @@ def run_module():
         on_health_restored=dict(type='bool', default=False),
         on_application_update=dict(type='bool', default=False),
         on_manual_interaction_required=dict(type='bool', default=False),
+        on_upgrade=dict(type='bool', default=False),
         config_contract=dict(type='str'),
         implementation=dict(type='str'),
         tags=dict(type='list', elements='int', default=[]),
@@ -308,6 +319,7 @@ def run_module():
         'on_health_restored': module.params['on_health_restored'],
         'on_application_update': module.params['on_application_update'],
         'on_manual_interaction_required': module.params['on_manual_interaction_required'],
+        'on_upgrade': module.params['on_upgrade'],
         'config_contract': module.params['config_contract'],
         'implementation': module.params['implementation'],
         'tags': module.params['tags'],
