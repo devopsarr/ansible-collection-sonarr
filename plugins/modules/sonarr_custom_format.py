@@ -119,22 +119,37 @@ except ImportError:
 
 
 def is_changed(status, want):
-    if (want.name != status.name or
-            want.include_custom_format_when_renaming != status.include_custom_format_when_renaming):
+    # Check if the basic attributes are different
+    if (
+        want.name != status.name
+        or want.include_custom_format_when_renaming != status.include_custom_format_when_renaming
+        or len(want.specifications) != len(status.specifications)
+    ):
         return True
 
-    for status_spec in status.specifications:
-        for want_spec in want.specifications:
-            if want_spec.name == status_spec.name and (
-                    want_spec.implementation != status_spec.implementation or
-                    want_spec.required != status_spec.required or
-                    want_spec.negate != status_spec.negate):
+    # Create a dictionary to store specifications by name for faster lookup
+    status_specs = {spec.name: spec for spec in status.specifications}
+
+    # Check if any specification is different
+    for want_spec in want.specifications:
+        status_spec = status_specs.get(want_spec.name)
+        if (
+            status_spec is None
+            or want_spec.implementation != status_spec.implementation
+            or want_spec.required != status_spec.required
+            or want_spec.negate != status_spec.negate
+        ):
+            return True
+
+        # Check if any field within the specification is different
+        for want_field in want_spec.fields:
+            status_field = next(
+                (field for field in status_spec.fields if field.name == want_field.name),
+                None,
+            )
+            if status_field is None or want_field.value != status_field.value:
                 return True
 
-            for status_field in status_spec.fields:
-                for want_field in want_spec.fields:
-                    if want_field.name == status_field.name and want_field.value != status_field.value:
-                        return True
     return False
 
 
