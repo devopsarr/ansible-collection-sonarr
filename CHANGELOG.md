@@ -1,5 +1,17 @@
 # Changelog
 
+## [1.1.0](https://github.com/devopsarr/ansible-collection-sonarr/compare/v1.0.0...v1.1.0) (2023-09-25)
+
+
+### Features
+
+* **#70:** add notification on_upgrade flag ([ea7b9ad](https://github.com/devopsarr/ansible-collection-sonarr/commit/ea7b9ad4d106a397f13f9153e4903c7be0e22bb6))
+
+
+### Bug Fixes
+
+* **#67:** custom formats idempotency ([6677fed](https://github.com/devopsarr/ansible-collection-sonarr/commit/6677fed6e191af572732518dd1494b3381d9312b))
+
 ## [1.0.0](https://github.com/devopsarr/ansible-collection-sonarr/compare/v0.6.0...v1.0.0) (2023-08-26)
 
 
