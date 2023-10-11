@@ -1,4 +1,19 @@
 ---
+- name: create example custom format
+  devopsarr.sonarr.sonarr_custom_format:
+    include_custom_format_when_renaming: false
+    name: "Arab"
+    specifications:
+    - name: "arabic"
+      implementation: "LanguageSpecification"
+      negate: false
+      required: true
+      fields:
+      - name: "value"
+        value: 26
+    sonarr_api_key: "{{ sonarr_api_key }}"
+    sonarr_url: "{{ sonarr_url }}"
+  register: format
 - name: create quality profile
   devopsarr.sonarr.sonarr_quality_profile:
     name: "Example"
@@ -56,7 +71,10 @@
           name: "WEBDL-720p"
           source: "web"
           resolution: 720
-    formats: []
+    formats:
+      - name: "{{ format['name'] }}"
+        id: "{{ format['id'] }}"
+        score: 100
     sonarr_api_key: "{{ sonarr_api_key }}"
     sonarr_url: "{{ sonarr_url }}"
   register: result
@@ -90,7 +108,10 @@
           name: "WEBDL-720p"
           source: "web"
           resolution: 720
-    formats: []
+    formats:
+      - name: "{{ format['name'] }}"
+        id: "{{ format['id'] }}"
+        score: 100
     sonarr_api_key: "{{ sonarr_api_key }}"
     sonarr_url: "{{ sonarr_url }}"
   register: result
@@ -111,3 +132,9 @@
   assert:
     that:
       - result['id'] == 0
+- name: clean up custom format
+  devopsarr.sonarr.sonarr_custom_format:
+    name: "Arab"
+    sonarr_api_key: "{{ sonarr_api_key }}"
+    sonarr_url: "{{ sonarr_url }}"
+    state: 'absent'
