@@ -37,7 +37,7 @@ options:
         type: int
         default: 0
     quality_groups:
-        description: Quality groups
+        description: Quality groups ordered list. Define only the allowed groups.
         type: list
         elements: dict
         default: []
@@ -66,7 +66,7 @@ options:
                         description: Quality ID.
                         type: int
     formats:
-        description: Format items list.
+        description: Format items list. Define only the used custom formats.
         type: list
         elements: dict
         default: []
@@ -232,6 +232,7 @@ def run_module():
 
     # Populate quality groups.
     quality_groups = []
+    allowed_qualities = []
     for item in module.params['quality_groups']:
         if len(item['qualities']) == 1:
             quality_groups.append(sonarr.QualityProfileQualityItemResource(**{
@@ -244,6 +245,7 @@ def run_module():
                 'items': [],
                 'allowed': True,
             }))
+            allowed_qualities.append(item['qualities'][0]['id'])
         else:
             qualities = []
             for quality in item['qualities']:
@@ -257,6 +259,7 @@ def run_module():
                     'allowed': True,
                     'items': []
                 }))
+                allowed_qualities.append(quality['id'])
 
             quality_groups.append(sonarr.QualityProfileQualityItemResource(**{
                 'allowed': True,
@@ -265,14 +268,53 @@ def run_module():
                 'items': qualities,
             }))
 
+    # Add disallowed qualities
+    temp_client = sonarr.QualityDefinitionApi(module.api)
+    # GET resources.
+    try:
+        all_qualities = temp_client.list_quality_definition()
+    except Exception as e:
+        module.fail_json('Error listing qualities: %s' % to_native(e.reason), **result)
+
+    for q in all_qualities[::-1]:
+        if q['quality']['id'] not in allowed_qualities:
+            quality_groups.insert(0, sonarr.QualityProfileQualityItemResource(**{
+                'quality': sonarr.Quality(**{
+                    'id': q['quality']['id'],
+                    'name': q['quality']['name'],
+                    'source': q['quality']['source'],
+                    'resolution': q['quality']['resolution'],
+                }),
+                'items': [],
+                'allowed': False,
+            }))
+
     # Populate formats.
     formats = []
+    used_formats = []
     for item in module.params['formats']:
         formats.append(sonarr.ProfileFormatItemResource(**{
             'name': item['name'],
             'format': item['id'],
             'score': item['score'],
         }))
+        used_formats.append(item['id'])
+
+    # Add unused formats
+    temp_client = sonarr.CustomFormatApi(module.api)
+    # GET resources.
+    try:
+        all_formats = temp_client.list_custom_format()
+    except Exception as e:
+        module.fail_json('Error listing formats: %s' % to_native(e.reason), **result)
+
+    for f in all_formats:
+        if f['id'] not in used_formats:
+            formats.append(sonarr.ProfileFormatItemResource(**{
+                'name': f['name'],
+                'format': f['id'],
+                'score': 0,
+            }))
 
     want = sonarr.QualityProfileResource(**{
         'name': module.params['name'],
