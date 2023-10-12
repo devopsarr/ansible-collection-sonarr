@@ -5,6 +5,9 @@ CHANGE THIS IN changelogs/config.yaml! Release Notes
 .. contents:: Topics
 
 
+v1.1.1
+======
+
 v1.1.0
 ======
 
