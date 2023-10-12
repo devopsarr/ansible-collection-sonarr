@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.1.1](https://github.com/devopsarr/ansible-collection-sonarr/compare/v1.1.0...v1.1.1) (2023-10-12)
+
+
+### Bug Fixes
+
+* **#68:** add all qualities and custom formats to profiles ([652221c](https://github.com/devopsarr/ansible-collection-sonarr/commit/652221c0300f73edcf93f6fdb4a72099856ef702))
+
 ## [1.1.0](https://github.com/devopsarr/ansible-collection-sonarr/compare/v1.0.0...v1.1.0) (2023-09-25)
 
 
