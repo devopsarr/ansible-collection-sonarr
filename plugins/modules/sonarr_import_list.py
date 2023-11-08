@@ -183,11 +183,9 @@ def is_changed(status, want):
     return False
 
 
-def run_module():
-    field_helper = FieldHelper()
-
+def init_module_args():
     # define available arguments/parameters a user can pass to the module
-    module_args = dict(
+    return dict(
         name=dict(type='str', required=True),
         enable_automatic_add=dict(type='bool'),
         season_folder=dict(type='bool'),
@@ -204,43 +202,87 @@ def run_module():
         update_secrets=dict(type='bool', default=False),
     )
 
+
+def create_import_list(want, result):
+    result['changed'] = True
+    # Only without check mode.
+    if not module.check_mode:
+        try:
+            response = client.create_import_list(import_list_resource=want)
+        except Exception as e:
+            module.fail_json('Error creating import list: %s' % to_native(e.reason), **result)
+        result.update(response.dict(by_alias=False))
+    module.exit_json(**result)
+
+
+def list_import_lists(result):
+    try:
+        return client.list_import_list()
+    except Exception as e:
+        module.fail_json('Error listing import lists: %s' % to_native(e.reason), **result)
+
+
+def find_import_list(name, result):
+    for import_list in list_import_lists(result):
+        if import_list['name'] == name:
+            return import_list
+    return None
+
+
+def update_import_list(want, result):
+    result['changed'] = True
+    # Only without check mode.
+    if not module.check_mode:
+        try:
+            response = client.update_import_list(import_list_resource=want, id=str(want.id))
+        except Exception as e:
+            module.fail_json('Error updating import list: %s' % to_native(e.reason), **result)
+    # No need to exit module since it will exit by default either way
+    result.update(response.dict(by_alias=False))
+
+
+def delete_import_list(result):
+    if result['id'] != 0:
+        result['changed'] = True
+        if not module.check_mode:
+            try:
+                client.delete_import_list(result['id'])
+            except Exception as e:
+                module.fail_json('Error deleting import list: %s' % to_native(e.reason), **result)
+            result['id'] = 0
+    module.exit_json(**result)
+
+
+def run_module():
+    global client
+    global module
+    global field_helper
+
+    # Init helper.
+    field_helper = FieldHelper()
+
+    # Define available arguments/parameters a user can pass to the module
+    module = SonarrModule(
+        argument_spec=init_module_args(),
+        supports_check_mode=True,
+    )
+
+    # Init client and result.
+    client = sonarr.ImportListApi(module.api)
     result = dict(
         changed=False,
         id=0,
     )
-
-    module = SonarrModule(
-        argument_spec=module_args,
-        supports_check_mode=True
-    )
-
-    list = sonarr.ImportListApi(module.api)
-
-    # List resources.
-    try:
-        lists = list.list_import_list()
-    except Exception as e:
-        module.fail_json('Error listing import lists: %s' % to_native(e.reason), **result)
-
-    state = sonarr.ImportListResource()
     # Check if a resource is present already.
-    for import_list in lists:
-        if import_list['name'] == module.params['name']:
-            result.update(import_list.dict(by_alias=False))
-            state = import_list
+    state = find_import_list(module.params['name'], result)
+    if state:
+        result.update(state.dict(by_alias=False))
 
     # Delete the resource if needed.
     if module.params['state'] == 'absent':
-        if result['id'] != 0:
-            result['changed'] = True
-            if not module.check_mode:
-                try:
-                    response = list.delete_import_list(result['id'])
-                except Exception as e:
-                    module.fail_json('Error deleting import list: %s' % to_native(e.reason), **result)
-                result['id'] = 0
-        module.exit_json(**result)
+        delete_import_list(result)
 
+    # Set wanted resource.
     want = sonarr.ImportListResource(**{
         'name': module.params['name'],
         'season_folder': module.params['season_folder'],
@@ -255,29 +297,16 @@ def run_module():
         'fields': field_helper.populate_fields(module.params['fields']),
     })
 
-    # Create a new resource.
+    # Create a new resource, if needed.
     if result['id'] == 0:
-        result['changed'] = True
-        # Only without check mode.
-        if not module.check_mode:
-            try:
-                response = list.create_import_list(import_list_resource=want)
-            except Exception as e:
-                module.fail_json('Error creating import list: %s' % to_native(e.reason), **result)
-            result.update(response.dict(by_alias=False))
-        module.exit_json(**result)
+        create_import_list(want, result)
 
     # Update an existing resource.
     want.id = result['id']
     if is_changed(state, want) or module.params['update_secrets']:
-        result['changed'] = True
-        if not module.check_mode:
-            try:
-                response = list.update_import_list(import_list_resource=want, id=str(want.id))
-            except Exception as e:
-                module.fail_json('Error updating import list: %s' % to_native(e), **result)
-        result.update(response.dict(by_alias=False))
+        update_import_list(want, result)
 
+    # Exit whith no changes.
     module.exit_json(**result)
 
 

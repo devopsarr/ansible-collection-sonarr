@@ -93,41 +93,52 @@ except ImportError:
     HAS_SONARR_LIBRARY = False
 
 
-def run_module():
+def init_module_args():
     # define available arguments/parameters a user can pass to the module
-    module_args = dict(
+    return dict(
         name=dict(type='str'),
     )
 
-    result = dict(
-        changed=False,
-        release_profiles=[],
-    )
 
-    module = SonarrModule(
-        argument_spec=module_args,
-        supports_check_mode=True,
-    )
-
-    client = sonarr.ReleaseProfileApi(module.api)
-
-    # List resources.
+def list_release_profile(result):
     try:
-        release_profiles = client.list_release_profile()
+        return client.list_release_profile()
     except Exception as e:
         module.fail_json('Error listing release profiles: %s' % to_native(e.reason), **result)
 
+
+def populate_release_profile(result):
     profiles = []
     # Check if a resource is present already.
-    for profile in release_profiles:
+    for profile in list_release_profile(result):
         if module.params['name']:
             if profile['name'] == module.params['name']:
                 profiles = [profile.dict(by_alias=False)]
         else:
             profiles.append(profile.dict(by_alias=False))
+    return profiles
 
-    result.update(release_profiles=profiles)
 
+def run_module():
+    global client
+    global module
+
+    # Define available arguments/parameters a user can pass to the module
+    module = SonarrModule(
+        argument_spec=init_module_args(),
+        supports_check_mode=True,
+    )
+    # Init client and result.
+    client = sonarr.ReleaseProfileApi(module.api)
+    result = dict(
+        changed=False,
+        release_profiles=[],
+    )
+
+    # List resources.
+    result.update(release_profiles=populate_release_profile(result))
+
+    # Exit with data.
     module.exit_json(**result)
 
 

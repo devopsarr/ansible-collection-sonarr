@@ -73,7 +73,6 @@ remote_path_mappings:
 from ansible_collections.devopsarr.sonarr.plugins.module_utils.sonarr_module import SonarrModule
 from ansible.module_utils.common.text.converters import to_native
 
-
 try:
     import sonarr
     HAS_SONARR_LIBRARY = True
@@ -81,41 +80,52 @@ except ImportError:
     HAS_SONARR_LIBRARY = False
 
 
-def run_module():
+def init_module_args():
     # define available arguments/parameters a user can pass to the module
-    module_args = dict(
+    return dict(
         id=dict(type='int'),
     )
 
-    result = dict(
-        changed=False,
-        remote_path_mappings=[],
-    )
 
-    module = SonarrModule(
-        argument_spec=module_args,
-        supports_check_mode=True,
-    )
-
-    client = sonarr.RemotePathMappingApi(module.api)
-
-    # List resources.
+def list_remote_path_mapping(result):
     try:
-        remote_path_mappings = client.list_remote_path_mapping()
+        return client.list_remote_path_mapping()
     except Exception as e:
         module.fail_json('Error listing remote path mappings: %s' % to_native(e.reason), **result)
 
+
+def populate_remote_path_mappings(result):
     mappings = []
     # Check if a resource is present already.
-    for remote_path_mapping in remote_path_mappings:
+    for remote_path_mapping in list_remote_path_mapping(result):
         if module.params['id']:
             if remote_path_mapping['id'] == module.params['id']:
                 mappings = [remote_path_mapping.dict(by_alias=False)]
         else:
             mappings.append(remote_path_mapping.dict(by_alias=False))
+    return mappings
 
-    result.update(remote_path_mappings=mappings)
 
+def run_module():
+    global client
+    global module
+
+    # Define available arguments/parameters a user can pass to the module
+    module = SonarrModule(
+        argument_spec=init_module_args(),
+        supports_check_mode=True,
+    )
+    # Init client and result.
+    client = sonarr.RemotePathMappingApi(module.api)
+    result = dict(
+        changed=False,
+        remote_path_mappings=[],
+    )
+
+    # List resources.
+    result.update(remote_path_mappings=populate_remote_path_mappings(result))
+
+    # Exit with data.
     module.exit_json(**result)
 
 

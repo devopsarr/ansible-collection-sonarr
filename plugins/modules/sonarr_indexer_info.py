@@ -120,41 +120,52 @@ except ImportError:
     HAS_SONARR_LIBRARY = False
 
 
-def run_module():
+def init_module_args():
     # define available arguments/parameters a user can pass to the module
-    module_args = dict(
+    return dict(
         name=dict(type='str'),
     )
 
-    result = dict(
-        changed=False,
-        indexers=[],
-    )
 
-    module = SonarrModule(
-        argument_spec=module_args,
-        supports_check_mode=True
-    )
-
-    client = sonarr.IndexerApi(module.api)
-
-    # List resources.
+def list_indexers(result):
     try:
-        indexer_list = client.list_indexer()
+        return client.list_indexer()
     except Exception as e:
         module.fail_json('Error listing indexers: %s' % to_native(e.reason), **result)
 
+
+def populate_indexers(result):
     indexers = []
     # Check if a resource is present already.
-    for indexer in indexer_list:
+    for indexer in list_indexers(result):
         if module.params['name']:
             if indexer['name'] == module.params['name']:
                 indexers = [indexer.dict(by_alias=False)]
         else:
             indexers.append(indexer.dict(by_alias=False))
+    return indexers
 
-    result.update(indexers=indexers)
 
+def run_module():
+    global client
+    global module
+
+    # Define available arguments/parameters a user can pass to the module
+    module = SonarrModule(
+        argument_spec=init_module_args(),
+        supports_check_mode=True,
+    )
+    # Init client and result.
+    client = sonarr.IndexerApi(module.api)
+    result = dict(
+        changed=False,
+        indexers=[],
+    )
+
+    # List resources.
+    result.update(indexers=populate_indexers(result))
+
+    # Exit with data.
     module.exit_json(**result)
 
 

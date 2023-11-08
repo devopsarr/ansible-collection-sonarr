@@ -112,9 +112,9 @@ except ImportError:
     HAS_SONARR_LIBRARY = False
 
 
-def run_module():
+def init_module_args():
     # define available arguments/parameters a user can pass to the module
-    module_args = dict(
+    return dict(
         name=dict(type='str', required=True),
         ignored=dict(type='list', elements='str'),
         required=dict(type='list', elements='str'),
@@ -124,42 +124,84 @@ def run_module():
         state=dict(default='present', type='str', choices=['present', 'absent']),
     )
 
+
+def create_release_profile(want, result):
+    result['changed'] = True
+    # Only without check mode.
+    if not module.check_mode:
+        try:
+            response = client.create_release_profile(release_profile_resource=want)
+        except Exception as e:
+            module.fail_json('Error creating release profile: %s' % to_native(e.reason), **result)
+        result.update(response.dict(by_alias=False))
+    module.exit_json(**result)
+
+
+def list_release_profiles(result):
+    try:
+        return client.list_release_profile()
+    except Exception as e:
+        module.fail_json('Error listing release profiles: %s' % to_native(e.reason), **result)
+
+
+def find_release_profile(name, result):
+    for profile in list_release_profiles(result):
+        if profile['name'] == name:
+            return profile
+    return None
+
+
+def update_release_profile(want, result):
+    result['changed'] = True
+    # Only without check mode.
+    if not module.check_mode:
+        try:
+            response = client.update_release_profile(release_profile_resource=want, id=str(want.id))
+        except Exception as e:
+            module.fail_json('Error updating release profile: %s' % to_native(e.reason), **result)
+    # No need to exit module since it will exit by default either way
+    result.update(response.dict(by_alias=False))
+
+
+def delete_release_profile(result):
+    if result['id'] != 0:
+        result['changed'] = True
+        if not module.check_mode:
+            try:
+                client.delete_release_profile(result['id'])
+            except Exception as e:
+                module.fail_json('Error deleting release profile: %s' % to_native(e.reason), **result)
+            result['id'] = 0
+    module.exit_json(**result)
+
+
+def run_module():
+    global client
+    global module
+
+    # Define available arguments/parameters a user can pass to the module
+    module = SonarrModule(
+        argument_spec=init_module_args(),
+        supports_check_mode=True,
+    )
+
+    # Init client and result.
+    client = sonarr.ReleaseProfileApi(module.api)
     result = dict(
         changed=False,
         id=0,
     )
 
-    module = SonarrModule(
-        argument_spec=module_args,
-        supports_check_mode=True,
-    )
-
-    client = sonarr.ReleaseProfileApi(module.api)
-
-    # List resources.
-    try:
-        release_profiles = client.list_release_profile()
-    except Exception as e:
-        module.fail_json('Error listing release profiles: %s' % to_native(e.reason), **result)
-
     # Check if a resource is present already.
-    for profile in release_profiles:
-        if profile['name'] == module.params['name']:
-            result.update(profile.dict(by_alias=False))
-            state = profile
+    state = find_release_profile(module.params['name'], result)
+    if state:
+        result.update(state.dict(by_alias=False))
 
     # Delete the resource if needed.
     if module.params['state'] == 'absent':
-        if result['id'] != 0:
-            result['changed'] = True
-            if not module.check_mode:
-                try:
-                    response = client.delete_release_profile(result['id'])
-                except Exception as e:
-                    module.fail_json('Error deleting release profile: %s' % to_native(e.reason), **result)
-                result['id'] = 0
-        module.exit_json(**result)
+        delete_release_profile(result)
 
+    # Set wanted resource.
     want = sonarr.ReleaseProfileResource(**{
         'name': module.params['name'],
         'enabled': module.params['enabled'],
@@ -169,29 +211,16 @@ def run_module():
         'tags': module.params['tags'],
     })
 
-    # Create a new resource.
+    # Create a new resource if needed.
     if result['id'] == 0:
-        result['changed'] = True
-        # Only without check mode.
-        if not module.check_mode:
-            try:
-                response = client.create_release_profile(release_profile_resource=want)
-            except Exception as e:
-                module.fail_json('Error creating release profile: %s' % to_native(e.reason), **result)
-            result.update(response.dict(by_alias=False))
-        module.exit_json(**result)
+        create_release_profile(want, result)
 
     # Update an existing resource.
     want.id = result['id']
     if want != state:
-        result['changed'] = True
-        if not module.check_mode:
-            try:
-                response = client.update_release_profile(release_profile_resource=want, id=str(want.id))
-            except Exception as e:
-                module.fail_json('Error updating release profile: %s' % to_native(e.reason), **result)
-        result.update(response.dict(by_alias=False))
+        update_release_profile(want, result)
 
+    # Exit whith no changes.
     module.exit_json(**result)
 
 

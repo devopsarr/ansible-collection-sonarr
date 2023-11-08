@@ -242,11 +242,9 @@ def is_changed(status, want):
     return False
 
 
-def run_module():
-    field_helper = FieldHelper()
-
+def init_module_args():
     # define available arguments/parameters a user can pass to the module
-    module_args = dict(
+    return dict(
         name=dict(type='str', required=True),
         on_grab=dict(type='bool', default=False),
         on_download=dict(type='bool', default=False),
@@ -269,43 +267,88 @@ def run_module():
         update_secrets=dict(type='bool', default=False),
     )
 
+
+def create_notification(want, result):
+    result['changed'] = True
+    # Only without check mode.
+    if not module.check_mode:
+        try:
+            response = client.create_notification(notification_resource=want)
+        except Exception as e:
+            module.fail_json('Error creating notification: %s' % to_native(e.reason), **result)
+        result.update(response.dict(by_alias=False))
+    module.exit_json(**result)
+
+
+def list_notifications(result):
+    try:
+        return client.list_notification()
+    except Exception as e:
+        module.fail_json('Error listing notifications: %s' % to_native(e.reason), **result)
+
+
+def find_notification(name, result):
+    for notification in list_notifications(result):
+        if notification['name'] == name:
+            return notification
+    return None
+
+
+def update_notification(want, result):
+    result['changed'] = True
+    # Only without check mode.
+    if not module.check_mode:
+        try:
+            response = client.update_notification(notification_resource=want, id=str(want.id))
+        except Exception as e:
+            module.fail_json('Error updating notification: %s' % to_native(e.reason), **result)
+    # No need to exit module since it will exit by default either way
+    result.update(response.dict(by_alias=False))
+
+
+def delete_notification(result):
+    if result['id'] != 0:
+        result['changed'] = True
+        if not module.check_mode:
+            try:
+                client.delete_notification(result['id'])
+            except Exception as e:
+                module.fail_json('Error deleting notification: %s' % to_native(e.reason), **result)
+            result['id'] = 0
+    module.exit_json(**result)
+
+
+def run_module():
+    global client
+    global module
+    global field_helper
+
+    # Init helper.
+    field_helper = FieldHelper()
+
+    # Define available arguments/parameters a user can pass to the module
+    module = SonarrModule(
+        argument_spec=init_module_args(),
+        supports_check_mode=True,
+    )
+
+    # Init client and result.
+    client = sonarr.NotificationApi(module.api)
     result = dict(
         changed=False,
         id=0,
     )
 
-    module = SonarrModule(
-        argument_spec=module_args,
-        supports_check_mode=True
-    )
-
-    client = sonarr.NotificationApi(module.api)
-
-    # List resources.
-    try:
-        notifications = client.list_notification()
-    except Exception as e:
-        module.fail_json('Error listing notifications: %s' % to_native(e.reason), **result)
-
-    state = sonarr.NotificationResource()
     # Check if a resource is present already.
-    for notification in notifications:
-        if notification['name'] == module.params['name']:
-            result.update(notification.dict(by_alias=False))
-            state = notification
+    state = find_notification(module.params['name'], result)
+    if state:
+        result.update(state.dict(by_alias=False))
 
     # Delete the resource if needed.
     if module.params['state'] == 'absent':
-        if result['id'] != 0:
-            result['changed'] = True
-            if not module.check_mode:
-                try:
-                    response = client.delete_notification(result['id'])
-                except Exception as e:
-                    module.fail_json('Error deleting notification: %s' % to_native(e.reason), **result)
-                result['id'] = 0
-        module.exit_json(**result)
+        delete_notification(result)
 
+    # Set wanted resource.
     want = sonarr.NotificationResource(**{
         'name': module.params['name'],
         'on_grab': module.params['on_grab'],
@@ -326,29 +369,16 @@ def run_module():
         'fields': field_helper.populate_fields(module.params['fields']),
     })
 
-    # Create a new resource.
+    # Create a new resource if needed.
     if result['id'] == 0:
-        result['changed'] = True
-        # Only without check mode.
-        if not module.check_mode:
-            try:
-                response = client.create_notification(notification_resource=want)
-            except Exception as e:
-                module.fail_json('Error creating notification: %s' % to_native(e.reason), **result)
-            result.update(response.dict(by_alias=False))
-        module.exit_json(**result)
+        create_notification(want, result)
 
     # Update an existing resource.
     want.id = result['id']
     if is_changed(state, want) or module.params['update_secrets']:
-        result['changed'] = True
-        if not module.check_mode:
-            try:
-                response = client.update_notification(notification_resource=want, id=str(want.id))
-            except Exception as e:
-                module.fail_json('Error updating notification: %s' % to_native(e.reason), **result)
-        result.update(response.dict(by_alias=False))
+        update_notification(want, result)
 
+    # Exit whith no changes.
     module.exit_json(**result)
 
 

@@ -69,7 +69,6 @@ download_client_working_folders:
 from ansible_collections.devopsarr.sonarr.plugins.module_utils.sonarr_module import SonarrModule
 from ansible.module_utils.common.text.converters import to_native
 
-
 try:
     import sonarr
     HAS_SONARR_LIBRARY = True
@@ -77,32 +76,54 @@ except ImportError:
     HAS_SONARR_LIBRARY = False
 
 
-def run_module():
+def init_module_args():
     # define available arguments/parameters a user can pass to the module
-    module_args = dict(
+    return dict(
         enable_completed_download_handling=dict(type='bool', required=True),
         auto_redownload_failed=dict(type='bool', required=True),
     )
 
+
+def read_download_client_config(result):
+    try:
+        return client.get_download_client_config()
+    except Exception as e:
+        module.fail_json('Error getting download client config: %s' % to_native(e.reason), **result)
+
+
+def update_download_client_config(want, result):
+    result['changed'] = True
+    # Only without check mode.
+    if not module.check_mode:
+        try:
+            response = client.update_download_client_config(download_client_config_resource=want, id="1")
+        except Exception as e:
+            module.fail_json('Error updating download client config: %s' % to_native(e.reason), **result)
+    # No need to exit module since it will exit by default either way
+    result.update(response.dict(by_alias=False))
+
+
+def run_module():
+    global client
+    global module
+
+    # Define available arguments/parameters a user can pass to the module
+    module = SonarrModule(
+        argument_spec=init_module_args(),
+        supports_check_mode=True,
+    )
+
+    # Init client and result.
+    client = sonarr.DownloadClientConfigApi(module.api)
     result = dict(
         changed=False,
         id=0,
     )
 
-    module = SonarrModule(
-        argument_spec=module_args,
-        supports_check_mode=True
-    )
-
-    client = sonarr.DownloadClientConfigApi(module.api)
-
     # Get resource.
-    try:
-        client_config = client.get_download_client_config()
-    except Exception as e:
-        module.fail_json('Error getting download client config: %s' % to_native(e.reason), **result)
-
-    result.update(client_config.dict(by_alias=False))
+    state = read_download_client_config(result)
+    if state:
+        result.update(state.dict(by_alias=False))
 
     want = sonarr.DownloadClientConfigResource(**{
         'enable_completed_download_handling': module.params['enable_completed_download_handling'],
@@ -112,15 +133,10 @@ def run_module():
     })
 
     # Update an existing resource.
-    if want != client_config:
-        result['changed'] = True
-        if not module.check_mode:
-            try:
-                response = client.update_download_client_config(download_client_config_resource=want, id=str(want.id))
-            except Exception as e:
-                module.fail_json('Error updating download client config: %s' % to_native(e.reason), **result)
-        result.update(response.dict(by_alias=False))
+    if want != state:
+        update_download_client_config(want, result)
 
+    # Exit whith no changes.
     module.exit_json(**result)
 
 

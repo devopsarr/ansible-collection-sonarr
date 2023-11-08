@@ -57,7 +57,6 @@ download_client_working_folders:
 from ansible_collections.devopsarr.sonarr.plugins.module_utils.sonarr_module import SonarrModule
 from ansible.module_utils.common.text.converters import to_native
 
-
 try:
     import sonarr
     HAS_SONARR_LIBRARY = True
@@ -65,26 +64,32 @@ except ImportError:
     HAS_SONARR_LIBRARY = False
 
 
+def get_download_client_config(result):
+    try:
+        return client.get_download_client_config()
+    except Exception as e:
+        module.fail_json('Error getting download client config: %s' % to_native(e.reason), **result)
+
+
 def run_module():
+    global client
+    global module
+
+    # Define available arguments/parameters a user can pass to the module
+    module = SonarrModule(
+        argument_spec={},
+        supports_check_mode=True,
+    )
+    # Init client and result.
+    client = sonarr.DownloadClientConfigApi(module.api)
     result = dict(
         changed=False,
     )
 
-    module = SonarrModule(
-        argument_spec={},
-        supports_check_mode=True
-    )
-
-    client = sonarr.DownloadClientConfigApi(module.api)
-
     # Get resource.
-    try:
-        client_config = client.get_download_client_config()
-    except Exception as e:
-        module.fail_json('Error getting download client config: %s' % to_native(e.reason), **result)
+    result.update(get_download_client_config(result).dict(by_alias=False))
 
-    result.update(client_config.dict(by_alias=False))
-
+    # Exit with data.
     module.exit_json(**result)
 
 

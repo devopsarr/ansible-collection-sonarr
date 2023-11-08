@@ -102,41 +102,52 @@ except ImportError:
     HAS_SONARR_LIBRARY = False
 
 
-def run_module():
+def init_module_args():
     # define available arguments/parameters a user can pass to the module
-    module_args = dict(
+    return dict(
         name=dict(type='str'),
     )
 
-    result = dict(
-        changed=False,
-        quality_profiles=[],
-    )
 
-    module = SonarrModule(
-        argument_spec=module_args,
-        supports_check_mode=True,
-    )
-
-    client = sonarr.QualityProfileApi(module.api)
-
-    # List resources.
+def list_quality_profile(result):
     try:
-        quality_profiles = client.list_quality_profile()
+        return client.list_quality_profile()
     except Exception as e:
         module.fail_json('Error listing quality profiles: %s' % to_native(e.reason), **result)
 
+
+def populate_quality_profiles(result):
     profiles = []
     # Check if a resource is present already.
-    for profile in quality_profiles:
+    for profile in list_quality_profile(result):
         if module.params['name']:
             if profile['name'] == module.params['name']:
                 profiles = [profile.dict(by_alias=False)]
         else:
             profiles.append(profile.dict(by_alias=False))
+    return profiles
 
-    result.update(quality_profiles=profiles)
 
+def run_module():
+    global client
+    global module
+
+    # Define available arguments/parameters a user can pass to the module
+    module = SonarrModule(
+        argument_spec=init_module_args(),
+        supports_check_mode=True,
+    )
+    # Init client and result.
+    client = sonarr.QualityProfileApi(module.api)
+    result = dict(
+        changed=False,
+        quality_profiles=[],
+    )
+
+    # List resources.
+    result.update(quality_profiles=populate_quality_profiles(result))
+
+    # Exit with data.
     module.exit_json(**result)
 
 

@@ -68,7 +68,6 @@ import_list_exclusions:
 from ansible_collections.devopsarr.sonarr.plugins.module_utils.sonarr_module import SonarrModule
 from ansible.module_utils.common.text.converters import to_native
 
-
 try:
     import sonarr
     HAS_SONARR_LIBRARY = True
@@ -76,41 +75,52 @@ except ImportError:
     HAS_SONARR_LIBRARY = False
 
 
-def run_module():
+def init_module_args():
     # define available arguments/parameters a user can pass to the module
-    module_args = dict(
+    return dict(
         tvdb_id=dict(type='int'),
     )
 
-    result = dict(
-        changed=False,
-        import_list_exclusions=[],
-    )
 
-    module = SonarrModule(
-        argument_spec=module_args,
-        supports_check_mode=True,
-    )
-
-    client = sonarr.ImportListExclusionApi(module.api)
-
-    # List resources.
+def list_import_list_exclusion(result):
     try:
-        import_list_exclusions = client.list_import_list_exclusion()
+        return client.list_import_list_exclusion()
     except Exception as e:
         module.fail_json('Error listing import list exclusions: %s' % to_native(e.reason), **result)
 
+
+def populate_import_list_exclusions(result):
     exclusions = []
     # Check if a resource is present already.
-    for import_list_exclusion in import_list_exclusions:
+    for import_list_exclusion in list_import_list_exclusion(result):
         if module.params['tvdb_id']:
             if import_list_exclusion['tvdb_id'] == module.params['tvdb_id']:
                 exclusions = [import_list_exclusion.dict(by_alias=False)]
         else:
             exclusions.append(import_list_exclusion.dict(by_alias=False))
+    return exclusions
 
-    result.update(import_list_exclusions=exclusions)
 
+def run_module():
+    global client
+    global module
+
+    # Define available arguments/parameters a user can pass to the module
+    module = SonarrModule(
+        argument_spec=init_module_args(),
+        supports_check_mode=True,
+    )
+    # Init client and result.
+    client = sonarr.ImportListExclusionApi(module.api)
+    result = dict(
+        changed=False,
+        import_list_exclusions=[],
+    )
+
+    # List resources.
+    result.update(import_list_exclusions=populate_import_list_exclusions(result))
+
+    # Exit with data.
     module.exit_json(**result)
 
 

@@ -154,9 +154,9 @@ except ImportError:
     HAS_SONARR_LIBRARY = False
 
 
-def run_module():
+def init_module_args():
     # define available arguments/parameters a user can pass to the module
-    module_args = dict(
+    return dict(
         preferred_protocol=dict(type='str', choices=['torrent', 'usenet']),
         usenet_delay=dict(type='int'),
         torrent_delay=dict(type='int'),
@@ -170,42 +170,84 @@ def run_module():
         state=dict(default='present', type='str', choices=['present', 'absent']),
     )
 
+
+def create_delay_profile(want, result):
+    result['changed'] = True
+    # Only without check mode.
+    if not module.check_mode:
+        try:
+            response = client.create_delay_profile(delay_profile_resource=want)
+        except Exception as e:
+            module.fail_json('Error creating delay profile: %s' % to_native(e.reason), **result)
+        result.update(response.dict(by_alias=False))
+    module.exit_json(**result)
+
+
+def list_delay_profiles(result):
+    try:
+        return client.list_delay_profile()
+    except Exception as e:
+        module.fail_json('Error listing delay profiles: %s' % to_native(e.reason), **result)
+
+
+def find_delay_profile(tags, result):
+    for profile in list_delay_profiles(result):
+        if profile['tags'] == tags:
+            return profile
+    return None
+
+
+def update_delay_profile(want, result):
+    result['changed'] = True
+    # Only without check mode.
+    if not module.check_mode:
+        try:
+            response = client.update_delay_profile(delay_profile_resource=want, id=str(want.id))
+        except Exception as e:
+            module.fail_json('Error updating delay profile: %s' % to_native(e.reason), **result)
+    # No need to exit module since it will exit by default either way
+    result.update(response.dict(by_alias=False))
+
+
+def delete_delay_profile(result):
+    if result['id'] != 0:
+        result['changed'] = True
+        if not module.check_mode:
+            try:
+                client.delete_delay_profile(result['id'])
+            except Exception as e:
+                module.fail_json('Error deleting delay profile: %s' % to_native(e.reason), **result)
+            result['id'] = 0
+    module.exit_json(**result)
+
+
+def run_module():
+    global client
+    global module
+
+    # Define available arguments/parameters a user can pass to the module
+    module = SonarrModule(
+        argument_spec=init_module_args(),
+        supports_check_mode=True,
+    )
+
+    # Init client and result.
+    client = sonarr.DelayProfileApi(module.api)
     result = dict(
         changed=False,
         id=0,
     )
 
-    module = SonarrModule(
-        argument_spec=module_args,
-        supports_check_mode=True,
-    )
-
-    client = sonarr.DelayProfileApi(module.api)
-
-    # List resources.
-    try:
-        delay_profiles = client.list_delay_profile()
-    except Exception as e:
-        module.fail_json('Error listing delay profiles: %s' % to_native(e.reason), **result)
-
     # Check if a resource is present already.
-    for profile in delay_profiles:
-        if profile['tags'] == module.params['tags']:
-            result.update(profile.dict(by_alias=False))
-            state = profile
+    state = find_delay_profile(module.params['tags'], result)
+    if state:
+        result.update(state.dict(by_alias=False))
 
     # Delete the resource if needed.
     if module.params['state'] == 'absent':
-        if result['id'] != 0:
-            result['changed'] = True
-            if not module.check_mode:
-                try:
-                    response = client.delete_delay_profile(result['id'])
-                except Exception as e:
-                    module.fail_json('Error deleting delay profile: %s' % to_native(e.reason), **result)
-                result['id'] = 0
-        module.exit_json(**result)
+        delete_delay_profile(result)
 
+    # Set wanted resource.
     want = sonarr.DelayProfileResource(**{
         'enable_usenet': module.params['enable_usenet'],
         'enable_torrent': module.params['enable_torrent'],
@@ -219,29 +261,16 @@ def run_module():
         'tags': module.params['tags'],
     })
 
-    # Create a new resource.
+    # Create a new resource if needed.
     if result['id'] == 0:
-        result['changed'] = True
-        # Only without check mode.
-        if not module.check_mode:
-            try:
-                response = client.create_delay_profile(delay_profile_resource=want)
-            except Exception as e:
-                module.fail_json('Error creating delay profile: %s' % to_native(e.reason), **result)
-            result.update(response.dict(by_alias=False))
-        module.exit_json(**result)
+        create_delay_profile(want, result)
 
     # Update an existing resource.
     want.id = result['id']
     if want != state:
-        result['changed'] = True
-        if not module.check_mode:
-            try:
-                response = client.update_delay_profile(delay_profile_resource=want, id=str(want.id))
-            except Exception as e:
-                module.fail_json('Error updating delay profile: %s' % to_native(e.reason), **result)
-        result.update(response.dict(by_alias=False))
+        update_delay_profile(want, result)
 
+    # Exit whith no changes.
     module.exit_json(**result)
 
 

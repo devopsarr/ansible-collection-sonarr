@@ -90,7 +90,6 @@ quality:
 from ansible_collections.devopsarr.sonarr.plugins.module_utils.sonarr_module import SonarrModule
 from ansible.module_utils.common.text.converters import to_native
 
-
 try:
     import sonarr
     HAS_SONARR_LIBRARY = True
@@ -98,9 +97,9 @@ except ImportError:
     HAS_SONARR_LIBRARY = False
 
 
-def run_module():
+def init_module_args():
     # define available arguments/parameters a user can pass to the module
-    module_args = dict(
+    return dict(
         name=dict(type='str', required=True),
         title=dict(type='str'),
         min_size=dict(type='float'),
@@ -108,31 +107,56 @@ def run_module():
         preferred_size=dict(type='float'),
     )
 
+
+def list_qualities(result):
+    try:
+        return client.list_quality_definition()
+    except Exception as e:
+        module.fail_json('Error listing qualities: %s' % to_native(e.reason), **result)
+
+
+def find_quality(name, result):
+    for quality in list_qualities(result):
+        if quality['quality']['name'] == name:
+            return quality
+    return None
+
+
+def update_quality(want, result):
+    result['changed'] = True
+    # Only without check mode.
+    if not module.check_mode:
+        try:
+            response = client.update_quality_definition(quality_definition_resource=want, id=str(want.id))
+        except Exception as e:
+            module.fail_json('Error updating quality: %s' % to_native(e.reason), **result)
+    # No need to exit module since it will exit by default either way
+    result.update(response.dict(by_alias=False))
+
+
+def run_module():
+    global client
+    global module
+
+    # Define available arguments/parameters a user can pass to the module
+    module = SonarrModule(
+        argument_spec=init_module_args(),
+        supports_check_mode=True,
+    )
+
+    # Init client and result.
+    client = sonarr.QualityDefinitionApi(module.api)
     result = dict(
         changed=False,
-        qualities=[],
+        id=0,
     )
-
-    module = SonarrModule(
-        argument_spec=module_args,
-        supports_check_mode=True
-    )
-
-    client = sonarr.QualityDefinitionApi(module.api)
-
-    # Get resource.
-    try:
-        quality_list = client.list_quality_definition()
-    except Exception as e:
-        module.fail_json('Error getting qualities: %s' % to_native(e.reason), **result)
 
     # Check if a resource is present already.
-    for quality in quality_list:
-        if module.params['name']:
-            if quality['quality']['name'] == module.params['name']:
-                result.update(quality.dict(by_alias=False))
-                state = quality
+    state = find_quality(module.params['name'], result)
+    if state:
+        result.update(state.dict(by_alias=False))
 
+    # No delete is needed
     want = sonarr.QualityDefinitionResource(**{
         'title': module.params['title'],
         'min_size': module.params['min_size'],
@@ -140,19 +164,14 @@ def run_module():
         'preferred_size': module.params['preferred_size'],
     })
 
-    # Update an existing resource.
+    # Update an existing resource if needed.
     want.id = result['id']
     want.weight = result['weight']
     want.quality = sonarr.Quality(**result['quality'])
     if want != state:
-        result['changed'] = True
-        if not module.check_mode:
-            try:
-                response = client.update_quality_definition(quality_definition_resource=want, id=str(want.id))
-            except Exception as e:
-                module.fail_json('Error updating quality: %s' % to_native(e.reason), **result)
-        result.update(response.dict(by_alias=False))
+        update_quality(want, result)
 
+    # Exit whith no changes.
     module.exit_json(**result)
 
 

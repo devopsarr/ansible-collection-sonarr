@@ -132,7 +132,6 @@ copy_using_hardlinks:
 from ansible_collections.devopsarr.sonarr.plugins.module_utils.sonarr_module import SonarrModule
 from ansible.module_utils.common.text.converters import to_native
 
-
 try:
     import sonarr
     HAS_SONARR_LIBRARY = True
@@ -140,26 +139,32 @@ except ImportError:
     HAS_SONARR_LIBRARY = False
 
 
-def run_module():
-    result = dict(
-        changed=False,
-    )
+def get_media_management_config(result):
+    try:
+        return client.get_media_management_config()
+    except Exception as e:
+        module.fail_json('Error getting media management: %s' % to_native(e.reason), **result)
 
+
+def run_module():
+    global client
+    global module
+
+    # Define available arguments/parameters a user can pass to the module
     module = SonarrModule(
         argument_spec={},
         supports_check_mode=True,
     )
-
+    # Init client and result.
     client = sonarr.MediaManagementConfigApi(module.api)
+    result = dict(
+        changed=False,
+    )
 
     # Get resource.
-    try:
-        media_management = client.get_media_management_config()
-    except Exception as e:
-        module.fail_json('Error getting media managements: %s' % to_native(e.reason), **result)
+    result.update(get_media_management_config(result).dict(by_alias=False))
 
-    result.update(media_management.dict(by_alias=False))
-
+    # Exit with data.
     module.exit_json(**result)
 
 
