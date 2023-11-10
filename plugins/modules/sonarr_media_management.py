@@ -246,7 +246,6 @@ copy_using_hardlinks:
 from ansible_collections.devopsarr.sonarr.plugins.module_utils.sonarr_module import SonarrModule
 from ansible.module_utils.common.text.converters import to_native
 
-
 try:
     import sonarr
     HAS_SONARR_LIBRARY = True
@@ -254,9 +253,9 @@ except ImportError:
     HAS_SONARR_LIBRARY = False
 
 
-def run_module():
+def init_module_args():
     # define available arguments/parameters a user can pass to the module
-    module_args = dict(
+    return dict(
         chmod_folder=dict(type='str', required=True),
         rescan_after_refresh=dict(type='str', required=True, choices=["always", "afterManual", "never"]),
         recycle_bin=dict(type='str', required=True),
@@ -279,25 +278,47 @@ def run_module():
         copy_using_hardlinks=dict(type='bool', required=True),
     )
 
+
+def read_media_management(result):
+    try:
+        return client.get_media_management_config()
+    except Exception as e:
+        module.fail_json('Error getting media management: %s' % to_native(e.reason), **result)
+
+
+def update_media_management(want, result):
+    result['changed'] = True
+    # Only without check mode.
+    if not module.check_mode:
+        try:
+            response = client.update_media_management_config(media_management_config_resource=want, id="1")
+        except Exception as e:
+            module.fail_json('Error updating media management: %s' % to_native(e.reason), **result)
+    # No need to exit module since it will exit by default either way
+    result.update(response.dict(by_alias=False))
+
+
+def run_module():
+    global client
+    global module
+
+    # Define available arguments/parameters a user can pass to the module
+    module = SonarrModule(
+        argument_spec=init_module_args(),
+        supports_check_mode=True,
+    )
+
+    # Init client and result.
+    client = sonarr.MediaManagementConfigApi(module.api)
     result = dict(
         changed=False,
         id=0,
     )
 
-    module = SonarrModule(
-        argument_spec=module_args,
-        supports_check_mode=True,
-    )
-
-    client = sonarr.MediaManagementConfigApi(module.api)
-
     # Get resource.
-    try:
-        media_management = client.get_media_management_config()
-    except Exception as e:
-        module.fail_json('Error getting media managements: %s' % to_native(e.reason), **result)
-
-    result.update(media_management.dict(by_alias=False))
+    state = read_media_management(result)
+    if state:
+        result.update(state.dict(by_alias=False))
 
     want = sonarr.MediaManagementConfigResource(**{
         'chmod_folder': module.params['chmod_folder'],
@@ -324,15 +345,10 @@ def run_module():
     })
 
     # Update an existing resource.
-    if want != media_management:
-        result['changed'] = True
-        if not module.check_mode:
-            try:
-                response = client.update_media_management_config(media_management_config_resource=want, id=str(want.id))
-            except Exception as e:
-                module.fail_json('Error updating media management: %s' % to_native(e.reason), **result)
-        result.update(response.dict(by_alias=False))
+    if want != state:
+        update_media_management(want, result)
 
+    # Exit whith no changes.
     module.exit_json(**result)
 
 

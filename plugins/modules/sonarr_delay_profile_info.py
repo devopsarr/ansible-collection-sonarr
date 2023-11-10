@@ -116,41 +116,52 @@ except ImportError:
     HAS_SONARR_LIBRARY = False
 
 
-def run_module():
+def init_module_args():
     # define available arguments/parameters a user can pass to the module
-    module_args = dict(
+    return dict(
         tag=dict(type='int'),
     )
 
-    result = dict(
-        changed=False,
-        delay_profiles=[],
-    )
 
-    module = SonarrModule(
-        argument_spec=module_args,
-        supports_check_mode=True,
-    )
-
-    client = sonarr.DelayProfileApi(module.api)
-
-    # List resources.
+def list_delay_profile(result):
     try:
-        response = client.list_delay_profile()
+        return client.list_delay_profile()
     except Exception as e:
         module.fail_json('Error listing delay profiles: %s' % to_native(e.reason), **result)
 
+
+def populate_delay_profile(result):
     profiles = []
     # Check if a resource is present already.
-    for profile in response:
+    for profile in list_delay_profile(result):
         if module.params['tag']:
             if module.params['tag'] in profile['tags']:
                 profiles = [profile.dict(by_alias=False)]
         else:
             profiles.append(profile.dict(by_alias=False))
+    return profiles
 
-    result.update(delay_profiles=profiles)
 
+def run_module():
+    global client
+    global module
+
+    # Define available arguments/parameters a user can pass to the module
+    module = SonarrModule(
+        argument_spec=init_module_args(),
+        supports_check_mode=True,
+    )
+    # Init client and result.
+    client = sonarr.DelayProfileApi(module.api)
+    result = dict(
+        changed=False,
+        delay_profiles=[],
+    )
+
+    # List resources.
+    result.update(delay_profiles=populate_delay_profile(result))
+
+    # Exit with data.
     module.exit_json(**result)
 
 

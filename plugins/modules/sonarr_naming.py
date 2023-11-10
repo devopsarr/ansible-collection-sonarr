@@ -150,7 +150,6 @@ replace_illegal_characters:
 from ansible_collections.devopsarr.sonarr.plugins.module_utils.sonarr_module import SonarrModule
 from ansible.module_utils.common.text.converters import to_native
 
-
 try:
     import sonarr
     HAS_SONARR_LIBRARY = True
@@ -158,9 +157,9 @@ except ImportError:
     HAS_SONARR_LIBRARY = False
 
 
-def run_module():
+def init_module_args():
     # define available arguments/parameters a user can pass to the module
-    module_args = dict(
+    return dict(
         standard_episode_format=dict(type='str', required=True),
         daily_episode_format=dict(type='str', required=True),
         anime_episode_format=dict(type='str', required=True),
@@ -173,25 +172,47 @@ def run_module():
         replace_illegal_characters=dict(type='bool', required=True),
     )
 
+
+def read_naming(result):
+    try:
+        return client.get_naming_config()
+    except Exception as e:
+        module.fail_json('Error getting naming: %s' % to_native(e.reason), **result)
+
+
+def update_naming(want, result):
+    result['changed'] = True
+    # Only without check mode.
+    if not module.check_mode:
+        try:
+            response = client.update_naming_config(naming_config_resource=want, id="1")
+        except Exception as e:
+            module.fail_json('Error updating naming: %s' % to_native(e.reason), **result)
+    # No need to exit module since it will exit by default either way
+    result.update(response.dict(by_alias=False))
+
+
+def run_module():
+    global client
+    global module
+
+    # Define available arguments/parameters a user can pass to the module
+    module = SonarrModule(
+        argument_spec=init_module_args(),
+        supports_check_mode=True,
+    )
+
+    # Init client and result.
+    client = sonarr.NamingConfigApi(module.api)
     result = dict(
         changed=False,
         id=0,
     )
 
-    module = SonarrModule(
-        argument_spec=module_args,
-        supports_check_mode=True,
-    )
-
-    client = sonarr.NamingConfigApi(module.api)
-
     # Get resource.
-    try:
-        naming = client.get_naming_config()
-    except Exception as e:
-        module.fail_json('Error getting naming: %s' % to_native(e.reason), **result)
-
-    result.update(naming.dict(by_alias=False))
+    state = read_naming(result)
+    if state:
+        result.update(state.dict(by_alias=False))
 
     want = sonarr.NamingConfigResource(**{
         'standard_episode_format': module.params['standard_episode_format'],
@@ -215,15 +236,10 @@ def run_module():
     })
 
     # Update an existing resource.
-    if want != naming:
-        result['changed'] = True
-        if not module.check_mode:
-            try:
-                response = client.update_naming_config(naming_config_resource=want, id=str(want.id))
-            except Exception as e:
-                module.fail_json('Error updating naming: %s' % to_native(e.reason), **result)
-        result.update(response.dict(by_alias=False))
+    if want != state:
+        update_naming(want, result)
 
+    # Exit whith no changes.
     module.exit_json(**result)
 
 

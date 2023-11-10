@@ -116,41 +116,52 @@ except ImportError:
     HAS_SONARR_LIBRARY = False
 
 
-def run_module():
+def init_module_args():
     # define available arguments/parameters a user can pass to the module
-    module_args = dict(
+    return dict(
         tvdb_id=dict(type='int'),
     )
 
-    result = dict(
-        changed=False,
-        series_list=[],
-    )
 
-    module = SonarrModule(
-        argument_spec=module_args,
-        supports_check_mode=True
-    )
-
-    client = sonarr.SeriesApi(module.api)
-
-    # List resources.
+def list_series(result):
     try:
-        series_list = client.list_series()
+        return client.list_series()
     except Exception as e:
         module.fail_json('Error listing series: %s' % to_native(e.reason), **result)
 
+
+def populate_series(result):
     series = []
     # Check if a resource is present already.
-    for single_series in series_list:
+    for single_series in list_series(result):
         if module.params['tvdb_id']:
             if single_series['tvdb_id'] == module.params['tvdb_id']:
                 series = [single_series.dict(by_alias=False)]
         else:
             series.append(single_series.dict(by_alias=False))
+    return series
 
-    result.update(series_list=series)
 
+def run_module():
+    global client
+    global module
+
+    # Define available arguments/parameters a user can pass to the module
+    module = SonarrModule(
+        argument_spec=init_module_args(),
+        supports_check_mode=True,
+    )
+    # Init client and result.
+    client = sonarr.SeriesApi(module.api)
+    result = dict(
+        changed=False,
+        series_list=[],
+    )
+
+    # List resources.
+    result.update(series_list=populate_series(result))
+
+    # Exit with data.
     module.exit_json(**result)
 
 

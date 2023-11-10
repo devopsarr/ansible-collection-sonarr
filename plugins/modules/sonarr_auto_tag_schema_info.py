@@ -74,41 +74,52 @@ except ImportError:
     HAS_SONARR_LIBRARY = False
 
 
-def run_module():
+def init_module_args():
     # define available arguments/parameters a user can pass to the module
-    module_args = dict(
+    return dict(
         name=dict(type='str'),
     )
 
-    result = dict(
-        changed=False,
-        auto_tags=[],
-    )
 
-    module = SonarrModule(
-        argument_spec=module_args,
-        supports_check_mode=True
-    )
-
-    client = sonarr.AutoTaggingApi(module.api)
-
-    # List resources.
+def list_auto_tag_schema(result):
     try:
-        tags = client.list_auto_tagging_schema()
+        return client.list_auto_tagging_schema()
     except Exception as e:
         module.fail_json('Error listing auto tags: %s' % to_native(e.reason), **result)
 
+
+def populate_auto_tag_schema(result):
     auto_tags = []
     # Check if a resource is present already.
-    for auto_tag in tags:
+    for auto_tag in list_auto_tag_schema(result):
         if module.params['name']:
             if auto_tag['implementation'] == module.params['name']:
                 auto_tags = [auto_tag.dict(by_alias=False)]
         else:
             auto_tags.append(auto_tag.dict(by_alias=False))
+    return auto_tags
 
-    result.update(auto_tags=auto_tags)
 
+def run_module():
+    global client
+    global module
+
+    # Define available arguments/parameters a user can pass to the module
+    module = SonarrModule(
+        argument_spec=init_module_args(),
+        supports_check_mode=True,
+    )
+    # Init client and result.
+    client = sonarr.AutoTaggingApi(module.api)
+    result = dict(
+        changed=False,
+        auto_tags=[],
+    )
+
+    # List resources.
+    result.update(auto_tags=populate_auto_tag_schema(result))
+
+    # Exit with data.
     module.exit_json(**result)
 
 

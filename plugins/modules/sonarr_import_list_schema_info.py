@@ -125,41 +125,52 @@ except ImportError:
     HAS_SONARR_LIBRARY = False
 
 
-def run_module():
+def init_module_args():
     # define available arguments/parameters a user can pass to the module
-    module_args = dict(
+    return dict(
         name=dict(type='str'),
     )
 
-    result = dict(
-        changed=False,
-        import_lists=[],
-    )
 
-    module = SonarrModule(
-        argument_spec=module_args,
-        supports_check_mode=True
-    )
-
-    list = sonarr.ImportListApi(module.api)
-
-    # List resources.
+def list_import_list_schema(result):
     try:
-        lists = list.list_import_list_schema()
+        return client.list_import_list_schema()
     except Exception as e:
-        module.fail_json('Error listing import lists: %s' % to_native(e.reason), **result)
+        module.fail_json('Error listing import list schemas: %s' % to_native(e.reason), **result)
 
+
+def populate_import_list_schema(result):
     import_lists = []
     # Check if a resource is present already.
-    for import_list in lists:
+    for import_list in list_import_list_schema(result):
         if module.params['name']:
             if import_list['implementation'] == module.params['name']:
                 import_lists = [import_list.dict(by_alias=False)]
         else:
             import_lists.append(import_list.dict(by_alias=False))
+    return import_lists
 
-    result.update(import_lists=import_lists)
 
+def run_module():
+    global client
+    global module
+
+    # Define available arguments/parameters a user can pass to the module
+    module = SonarrModule(
+        argument_spec=init_module_args(),
+        supports_check_mode=True,
+    )
+    # Init client and result.
+    client = sonarr.ImportListApi(module.api)
+    result = dict(
+        changed=False,
+        import_lists=[],
+    )
+
+    # List resources.
+    result.update(import_lists=populate_import_list_schema(result))
+
+    # Exit with data.
     module.exit_json(**result)
 
 

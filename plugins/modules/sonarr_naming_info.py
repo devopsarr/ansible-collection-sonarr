@@ -94,7 +94,6 @@ replace_illegal_characters:
 from ansible_collections.devopsarr.sonarr.plugins.module_utils.sonarr_module import SonarrModule
 from ansible.module_utils.common.text.converters import to_native
 
-
 try:
     import sonarr
     HAS_SONARR_LIBRARY = True
@@ -102,26 +101,32 @@ except ImportError:
     HAS_SONARR_LIBRARY = False
 
 
-def run_module():
-    result = dict(
-        changed=False,
-    )
+def get_naming_config(result):
+    try:
+        return client.get_naming_config()
+    except Exception as e:
+        module.fail_json('Error getting naming: %s' % to_native(e.reason), **result)
 
+
+def run_module():
+    global client
+    global module
+
+    # Define available arguments/parameters a user can pass to the module
     module = SonarrModule(
         argument_spec={},
         supports_check_mode=True,
     )
-
+    # Init client and result.
     client = sonarr.NamingConfigApi(module.api)
+    result = dict(
+        changed=False,
+    )
 
     # Get resource.
-    try:
-        naming = client.get_naming_config()
-    except Exception as e:
-        module.fail_json('Error getting naming: %s' % to_native(e.reason), **result)
+    result.update(get_naming_config(result).dict(by_alias=False))
 
-    result.update(naming.dict(by_alias=False))
-
+    # Exit with data.
     module.exit_json(**result)
 
 

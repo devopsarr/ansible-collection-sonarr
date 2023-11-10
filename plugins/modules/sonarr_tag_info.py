@@ -70,40 +70,51 @@ except ImportError:
     HAS_SONARR_LIBRARY = False
 
 
-def run_module():
+def init_module_args():
     # define available arguments/parameters a user can pass to the module
-    module_args = dict(
+    return dict(
         label=dict(type='str'),
     )
 
-    result = dict(
-        changed=False,
-        tags=[]
-    )
 
-    module = SonarrModule(
-        argument_spec=module_args,
-        supports_check_mode=True,
-    )
-
-    client = sonarr.TagApi(module.api)
-
-    # List resources.
+def list_tags(result):
     try:
-        response = client.list_tag()
+        return client.list_tag()
     except Exception as e:
         module.fail_json('Error listing tags: %s' % to_native(e.reason), **result)
 
+
+def populate_tags(result):
     tags = []
-    for tag in response:
+    for tag in list_tags(result):
         if module.params['label']:
             if tag['label'] == module.params['label']:
                 tags = [tag.dict(by_alias=False)]
         else:
             tags.append(tag.dict(by_alias=False))
+    return tags
 
-    result.update(tags=tags)
 
+def run_module():
+    global client
+    global module
+
+    # Define available arguments/parameters a user can pass to the module
+    module = SonarrModule(
+        argument_spec=init_module_args(),
+        supports_check_mode=True,
+    )
+    # Init client and result.
+    client = sonarr.TagApi(module.api)
+    result = dict(
+        changed=False,
+        tags=[],
+    )
+
+    # List resources.
+    result.update(tags=populate_tags(result))
+
+    # Exit with data.
     module.exit_json(**result)
 
 

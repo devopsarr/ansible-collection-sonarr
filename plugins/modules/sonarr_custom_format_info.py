@@ -70,7 +70,6 @@ custom_formats:
 '''
 
 from ansible_collections.devopsarr.sonarr.plugins.module_utils.sonarr_module import SonarrModule
-from ansible_collections.devopsarr.sonarr.plugins.module_utils.sonarr_specification_utils import SpecificationHelper
 from ansible.module_utils.common.text.converters import to_native
 
 try:
@@ -80,43 +79,52 @@ except ImportError:
     HAS_SONARR_LIBRARY = False
 
 
-def run_module():
-    specification_helper = SpecificationHelper()
-
+def init_module_args():
     # define available arguments/parameters a user can pass to the module
-    module_args = dict(
+    return dict(
         name=dict(type='str'),
     )
 
-    result = dict(
-        changed=False,
-        custom_formats=[],
-    )
 
-    module = SonarrModule(
-        argument_spec=module_args,
-        supports_check_mode=True
-    )
-
-    client = sonarr.CustomFormatApi(module.api)
-
-    # list resources.
+def list_custom_formats(result):
     try:
-        formats = client.list_custom_format()
+        return client.list_custom_format()
     except Exception as e:
         module.fail_json('Error listing custom formats: %s' % to_native(e.reason), **result)
 
+
+def populate_custom_formats(result):
     custom_formats = []
     # Check if a resource is present already.
-    for custom_format in formats:
+    for custom_format in list_custom_formats(result):
         if module.params['name']:
             if custom_format['name'] == module.params['name']:
                 custom_formats = [custom_format.dict(by_alias=False)]
         else:
             custom_formats.append(custom_format.dict(by_alias=False))
+    return custom_formats
 
-    result.update(custom_formats=custom_formats)
 
+def run_module():
+    global client
+    global module
+
+    # Define available arguments/parameters a user can pass to the module
+    module = SonarrModule(
+        argument_spec=init_module_args(),
+        supports_check_mode=True,
+    )
+    # Init client and result.
+    client = sonarr.CustomFormatApi(module.api)
+    result = dict(
+        changed=False,
+        custom_formats=[],
+    )
+
+    # List resources.
+    result.update(custom_formats=populate_custom_formats(result))
+
+    # Exit with data.
     module.exit_json(**result)
 
 

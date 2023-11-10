@@ -145,41 +145,52 @@ except ImportError:
     HAS_SONARR_LIBRARY = False
 
 
-def run_module():
+def init_module_args():
     # define available arguments/parameters a user can pass to the module
-    module_args = dict(
+    return dict(
         name=dict(type='str'),
     )
 
-    result = dict(
-        changed=False,
-        notifications=[],
-    )
 
-    module = SonarrModule(
-        argument_spec=module_args,
-        supports_check_mode=True
-    )
-
-    client = sonarr.NotificationApi(module.api)
-
-    # List resources.
+def list_notification_schema(result):
     try:
-        notification_list = client.list_notification_schema()
+        return client.list_notification_schema()
     except Exception as e:
         module.fail_json('Error listing notification schemas: %s' % to_native(e.reason), **result)
 
+
+def populate_notification_schema(result):
     notifications = []
     # Check if a resource is present already.
-    for notification in notification_list:
+    for notification in list_notification_schema(result):
         if module.params['name']:
             if notification['implementation'] == module.params['name']:
                 notifications = [notification.dict(by_alias=False)]
         else:
             notifications.append(notification.dict(by_alias=False))
+    return notifications
 
-    result.update(notifications=notifications)
 
+def run_module():
+    global client
+    global module
+
+    # Define available arguments/parameters a user can pass to the module
+    module = SonarrModule(
+        argument_spec=init_module_args(),
+        supports_check_mode=True,
+    )
+    # Init client and result.
+    client = sonarr.NotificationApi(module.api)
+    result = dict(
+        changed=False,
+        notifications=[],
+    )
+
+    # List resources.
+    result.update(notifications=populate_notification_schema(result))
+
+    # Exit with data.
     module.exit_json(**result)
 
 

@@ -82,7 +82,6 @@ qualities:
 from ansible_collections.devopsarr.sonarr.plugins.module_utils.sonarr_module import SonarrModule
 from ansible.module_utils.common.text.converters import to_native
 
-
 try:
     import sonarr
     HAS_SONARR_LIBRARY = True
@@ -90,41 +89,52 @@ except ImportError:
     HAS_SONARR_LIBRARY = False
 
 
-def run_module():
+def init_module_args():
     # define available arguments/parameters a user can pass to the module
-    module_args = dict(
+    return dict(
         name=dict(type='str'),
     )
 
-    result = dict(
-        changed=False,
-        qualities=[],
-    )
 
-    module = SonarrModule(
-        argument_spec=module_args,
-        supports_check_mode=True
-    )
-
-    client = sonarr.QualityDefinitionApi(module.api)
-
-    # Get resource.
+def list_qualities(result):
     try:
-        quality_list = client.list_quality_definition()
+        return client.list_quality_definition()
     except Exception as e:
         module.fail_json('Error getting qualities: %s' % to_native(e.reason), **result)
 
+
+def populate_qualities(result):
     qualities = []
     # Check if a resource is present already.
-    for quality in quality_list:
+    for quality in list_qualities(result):
         if module.params['name']:
             if quality['quality']['name'] == module.params['name']:
                 qualities = [quality.dict(by_alias=False)]
         else:
             qualities.append(quality.dict(by_alias=False))
+    return qualities
 
-    result.update(qualities=qualities)
 
+def run_module():
+    global client
+    global module
+
+    # Define available arguments/parameters a user can pass to the module
+    module = SonarrModule(
+        argument_spec=init_module_args(),
+        supports_check_mode=True,
+    )
+    # Init client and result.
+    client = sonarr.QualityDefinitionApi(module.api)
+    result = dict(
+        changed=False,
+        qualities=[],
+    )
+
+    # List resources.
+    result.update(qualities=populate_qualities(result))
+
+    # Exit with data.
     module.exit_json(**result)
 
 

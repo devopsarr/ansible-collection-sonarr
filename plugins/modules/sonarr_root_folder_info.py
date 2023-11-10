@@ -73,7 +73,6 @@ root_folders:
 from ansible_collections.devopsarr.sonarr.plugins.module_utils.sonarr_module import SonarrModule
 from ansible.module_utils.common.text.converters import to_native
 
-
 try:
     import sonarr
     HAS_SONARR_LIBRARY = True
@@ -81,40 +80,52 @@ except ImportError:
     HAS_SONARR_LIBRARY = False
 
 
-def run_module():
+def init_module_args():
     # define available arguments/parameters a user can pass to the module
-    module_args = dict(
+    return dict(
         path=dict(type='str'),
     )
 
-    result = dict(
-        changed=False,
-    )
 
-    module = SonarrModule(
-        argument_spec=module_args,
-        supports_check_mode=True
-    )
-
-    client = sonarr.RootFolderApi(module.api)
-
-    # List resources.
+def list_root_folder(result):
     try:
-        root_folders = client.list_root_folder()
+        return client.list_root_folder()
     except Exception as e:
         module.fail_json('Error listing root folders: %s' % to_native(e.reason), **result)
 
+
+def populate_root_folders(result):
     folders = []
     # Check if a resource is present already.
-    for root_folder in root_folders:
+    for root_folder in list_root_folder(result):
         if module.params['path']:
             if root_folder['path'] == module.params['path']:
                 folders = [root_folder.dict(by_alias=False)]
         else:
             folders.append(root_folder.dict(by_alias=False))
+    return folders
 
-    result.update(root_folders=folders)
 
+def run_module():
+    global client
+    global module
+
+    # Define available arguments/parameters a user can pass to the module
+    module = SonarrModule(
+        argument_spec=init_module_args(),
+        supports_check_mode=True,
+    )
+    # Init client and result.
+    client = sonarr.RootFolderApi(module.api)
+    result = dict(
+        changed=False,
+        root_folders=[],
+    )
+
+    # List resources.
+    result.update(root_folders=populate_root_folders(result))
+
+    # Exit with data.
     module.exit_json(**result)
 
 
