@@ -34,7 +34,7 @@
 - name: assert quality profile creation
   assert:
     that:
-      - result['cutoff'] == 1
+      - result['upgrade_allowed'] == true
 # ----------------------------------------------------------------------------
 - name: edit already present quality profile
   devopsarr.sonarr.sonarr_quality_profile:
@@ -93,4 +93,3 @@
   assert:
     that:
       - result['id'] == 0
-
