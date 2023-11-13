@@ -26,8 +26,8 @@ options:
         type: bool
         default: False
     cutoff:
-        description: Quality ID to which cutoff.
-        type: int
+        description: Quality name at which to cut off.
+        type: str
     cutoff_format_score:
         description: Cutoff format score.
         type: int
@@ -37,7 +37,7 @@ options:
         type: int
         default: 0
     quality_groups:
-        description: Quality groups ordered list. Define only the allowed groups.
+        description: Quality groups
         type: list
         elements: dict
         default: []
@@ -49,37 +49,13 @@ options:
                 description: Quality group ID.
                 type: int
             qualities:
-                description: Quality list.
+                description: Quality name list.
                 type: list
-                elements: dict
-                suboptions:
-                    name:
-                        description: Quality name.
-                        type: str
-                    resolution:
-                        description: Quality resolution.
-                        type: str
-                    source:
-                        description: Quality source.
-                        type: str
-                    id:
-                        description: Quality ID.
-                        type: int
+                elements: str
     formats:
-        description: Format items list. Define only the used custom formats.
-        type: list
-        elements: dict
-        default: []
-        suboptions:
-            name:
-                description: Format name.
-                type: str
-            id:
-                description: Format ID.
-                type: int
-            score:
-                description: Format score.
-                type: int
+        description: Format items with score.
+        type: dict
+        default: {}
 
 extends_documentation_fragment:
     - devopsarr.sonarr.sonarr_credentials
@@ -96,27 +72,17 @@ EXAMPLES = r'''
   devopsarr.sonarr.sonarr_quality_profile:
     name: "Example"
     upgrade_allowed: true
-    cutoff: 1
+    cutoff: "WEB 720p"
     min_format_score: 0
     cutoff_format_score: 0
     quality_groups:
       - qualities:
-        - id: 1
-          name: "SDTV"
-          source: "television"
-          resolution: 480
+          - "SDTV"
       - name: "WEB 720p"
-        id: 1001
         qualities:
-          - id: 14
-            name: "WEBRip-720p"
-            source: "webRip"
-            resolution: 720
-          - id: 5
-            name: "WEBDL-720p"
-            source: "web"
-            resolution: 720
-    formats: []
+          - "WEBRip-720p"
+          - "WEBDL-720p"
+    formats: {}
 
 # Delete a quality profile
 - name: Delete a quality_profile
@@ -167,12 +133,12 @@ format_items:
     description: Format items list.
     returned: always
     type: list
-    elements: dict
     sample: []
 '''
 
 from ansible_collections.devopsarr.sonarr.plugins.module_utils.sonarr_module import SonarrModule
 from ansible.module_utils.common.text.converters import to_native
+from collections import OrderedDict
 
 try:
     import sonarr
@@ -185,12 +151,12 @@ def run_module():
     # define available arguments/parameters a user can pass to the module
     module_args = dict(
         name=dict(type='str', required=True),
-        cutoff=dict(type='int'),
+        cutoff=dict(type='str'),
         min_format_score=dict(type='int', default=0),
         cutoff_format_score=dict(type='int', default=0),
         upgrade_allowed=dict(type='bool', default=False),
         quality_groups=dict(type='list', elements='dict', default=[]),
-        formats=dict(type='list', elements='dict', default=[]),
+        formats=dict(type='dict', default={}),
         state=dict(default='present', type='str', choices=['present', 'absent']),
     )
 
@@ -230,100 +196,66 @@ def run_module():
                 result['id'] = 0
         module.exit_json(**result)
 
+    # Get schema
+    schema_client = sonarr.QualityProfileSchemaApi(module.api)
+    try:
+        want = schema_client.get_qualityprofile_schema()
+    except Exception as e:
+        module.fail_json('Error getting quality profile schema: %s' % to_native(e.reason), **result)
+
+    # Break apart quality groups and create a dict.
+    quality_groups_dict = OrderedDict()
+
+    for item in want.items:
+        if item.quality is None:
+            for quality in item.items:
+                quality.allowed = False
+                quality_groups_dict[quality.quality.name] = quality
+        else:
+            item.allowed = False
+            quality_groups_dict[item.quality.name] = item
+
     # Populate quality groups.
-    quality_groups = []
-    allowed_qualities = []
-    for item in module.params['quality_groups']:
+    ident = 1000
+    cutoff_id = None
+    for item in reversed(module.params['quality_groups']):
+        name = item['qualities'][0]
         if len(item['qualities']) == 1:
-            quality_groups.append(sonarr.QualityProfileQualityItemResource(**{
-                'quality': sonarr.Quality(**{
-                    'id': item['qualities'][0]['id'],
-                    'name': item['qualities'][0]['name'],
-                    'source': item['qualities'][0]['source'],
-                    'resolution': item['qualities'][0]['resolution'],
-                }),
-                'items': [],
-                'allowed': True,
-            }))
-            allowed_qualities.append(item['qualities'][0]['id'])
+            quality_groups_dict[name].allowed = True
+            if name == module.params['cutoff']:
+                cutoff_id = quality_groups_dict[name].quality.id
         else:
             qualities = []
             for quality in item['qualities']:
-                qualities.append(sonarr.QualityProfileQualityItemResource(**{
-                    'quality': sonarr.Quality(**{
-                        'id': quality['id'],
-                        'name': quality['name'],
-                        'source': quality['source'],
-                        'resolution': quality['resolution'],
-                    }),
-                    'allowed': True,
-                    'items': []
-                }))
-                allowed_qualities.append(quality['id'])
+                qualities.append(quality_groups_dict.pop(quality))
+                qualities[-1].allowed = True
 
-            quality_groups.append(sonarr.QualityProfileQualityItemResource(**{
+            quality_groups_dict[name] = sonarr.QualityProfileQualityItemResource(**{
                 'allowed': True,
                 'name': item['name'],
-                'id': item['id'],
+                'id': ident,
+                'quality': None,
                 'items': qualities,
-            }))
+            })
 
-    # Add disallowed qualities
-    temp_client = sonarr.QualityDefinitionApi(module.api)
-    # GET resources.
-    try:
-        all_qualities = temp_client.list_quality_definition()
-    except Exception as e:
-        module.fail_json('Error listing qualities: %s' % to_native(e.reason), **result)
-
-    for q in all_qualities[::-1]:
-        if q['quality']['id'] not in allowed_qualities:
-            quality_groups.insert(0, sonarr.QualityProfileQualityItemResource(**{
-                'quality': sonarr.Quality(**{
-                    'id': q['quality']['id'],
-                    'name': q['quality']['name'],
-                    'source': q['quality']['source'],
-                    'resolution': q['quality']['resolution'],
-                }),
-                'items': [],
-                'allowed': False,
-            }))
+            if item['name'] == module.params['cutoff']:
+                cutoff_id = ident
+            ident += 1
+        quality_groups_dict.move_to_end(name)
+    want.items = list(quality_groups_dict.values())
 
     # Populate formats.
-    formats = []
-    used_formats = []
-    for item in module.params['formats']:
-        formats.append(sonarr.ProfileFormatItemResource(**{
-            'name': item['name'],
-            'format': item['id'],
-            'score': item['score'],
-        }))
-        used_formats.append(item['id'])
+    formats_dict = {item['name']: item for item in want.format_items}
+    for key, value in module.params['formats'].items():
+        formats_dict[key].score = value
+    want.format_items = list(formats_dict.values())
 
-    # Add unused formats
-    temp_client = sonarr.CustomFormatApi(module.api)
-    # GET resources.
-    try:
-        all_formats = temp_client.list_custom_format()
-    except Exception as e:
-        module.fail_json('Error listing formats: %s' % to_native(e.reason), **result)
-
-    for f in all_formats:
-        if f['id'] not in used_formats:
-            formats.append(sonarr.ProfileFormatItemResource(**{
-                'name': f['name'],
-                'format': f['id'],
-                'score': 0,
-            }))
-
-    want = sonarr.QualityProfileResource(**{
+    want = want.copy(update={
         'name': module.params['name'],
-        'cutoff': module.params['cutoff'],
+        'cutoff': cutoff_id,
         'upgrade_allowed': module.params['upgrade_allowed'],
         'cutoff_format_score': module.params['cutoff_format_score'],
         'min_format_score': module.params['min_format_score'],
-        'items': quality_groups,
-        'format_items': formats,
     })
 
     # Create a new resource.
