@@ -21,6 +21,10 @@ options:
         description: Auto redownload failed.
         required: true
         type: bool
+    auto_redownload_failed_from_interactive_search:
+        description: Auto redownload failed from interactive search.
+        required: true
+        type: bool
     enable_completed_download_handling:
         description: Enable completed download handling.
         required: true
@@ -38,6 +42,7 @@ EXAMPLES = r'''
 # update download client config
 - name: Update download client config
   devopsarr.sonarr.sonarr_download_client_config:
+    auto_redownload_failed_from_interactive_search: false
     auto_redownload_failed: false
     enable_completed_download_handling: true
 '''
@@ -50,17 +55,22 @@ id:
     returned: always
     sample: '1'
 auto_redownload_failed:
-    description: Maximum size.
+    description: Auto redownload failed.
+    returned: always
+    type: bool
+    sample: true
+auto_redownload_failed_from_interactive_search:
+    description: Auto redownload failed from interactive search.
     returned: always
     type: bool
     sample: true
 enable_completed_download_handling:
-    description: Minimum age.
+    description: Enable completed download handling.
     returned: always
     type: bool
     sample: true
 download_client_working_folders:
-    description: Retention.
+    description: download client working folders.
     returned: always
     type: str
     sample: '_UNPACK_|_FAILED_'
@@ -81,6 +91,7 @@ def init_module_args():
     return dict(
         enable_completed_download_handling=dict(type='bool', required=True),
         auto_redownload_failed=dict(type='bool', required=True),
+        auto_redownload_failed_from_interactive_search=dict(type='bool', required=True),
     )
 
 
@@ -132,6 +143,7 @@ def run_module():
     want = sonarr.DownloadClientConfigResource(
         enable_completed_download_handling=module.params['enable_completed_download_handling'],
         auto_redownload_failed=module.params['auto_redownload_failed'],
+        auto_redownload_failed_from_interactive_search=module.params['auto_redownload_failed_from_interactive_search'],
         download_client_working_folders='_UNPACK_|_FAILED_',
         id=1,
     )

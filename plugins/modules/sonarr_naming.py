@@ -230,13 +230,6 @@ def run_module():
         rename_episodes=module.params['rename_episodes'],
         replace_illegal_characters=module.params['replace_illegal_characters'],
         id=1,
-        # add not used parameters to compare resource
-        include_series_title=False,
-        include_episode_title=False,
-        include_quality=False,
-        replace_spaces=True,
-        separator=' - ',
-        number_style='S{season:00}E{episode:00}',
     )
 
     # Update an existing resource.

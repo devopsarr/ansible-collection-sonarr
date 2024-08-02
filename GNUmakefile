@@ -10,7 +10,7 @@ sanity:
 # Run integration test
 .PHONY: integration
 integration:
-	ansible-test integration ${TEST_MODULE} -vvv
+	ansible-test integration ${TEST_MODULE} -vvv --venv
 
 # Generate doc
 .PHONY: doc

@@ -38,7 +38,7 @@
     sonarr_api_key: "{{ sonarr_api_key }}"
     sonarr_url: "{{ sonarr_url }}"
   register: result
-- name: Assert delay profile idempotency
+- name: Assert naming idempotency
   ansible.builtin.assert:
     that:
       - result.changed == false

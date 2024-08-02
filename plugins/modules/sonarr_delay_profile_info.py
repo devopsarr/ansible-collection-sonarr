@@ -137,7 +137,7 @@ def populate_delay_profile(result):
     # Check if a resource is present already.
     for profile in list_delay_profile(result):
         if module.params['tag']:
-            if module.params.tag in profile['tags']:
+            if module.params['tag'] in profile.tags:
                 profiles = [profile.model_dump(by_alias=False)]
         else:
             profiles.append(profile.model_dump(by_alias=False))

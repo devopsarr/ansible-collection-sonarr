@@ -324,7 +324,8 @@ def populate_formats(result):
     for item in module.params['formats']:
         formats.append(sonarr.ProfileFormatItemResource(
             name=item['name'],
-            format=item['id'],
+            # they wrote defined int but send string
+            format=int(item['id']),
             score=item['score'],
         ))
         used_formats.append(item['id'])

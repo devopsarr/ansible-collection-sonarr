@@ -38,17 +38,22 @@ id:
     returned: always
     sample: '1'
 auto_redownload_failed:
-    description: Maximum size.
+    description: Auto redownload failed.
+    returned: always
+    type: bool
+    sample: true
+auto_redownload_failed_from_interactive_search:
+    description: Auto redownload failed from interactive search.
     returned: always
     type: bool
     sample: true
 enable_completed_download_handling:
-    description: Minimum age.
+    description: Enable completed download handling.
     returned: always
     type: bool
     sample: true
 download_client_working_folders:
-    description: Retention.
+    description: download client working folders.
     returned: always
     type: str
     sample: '_UNPACK_|_FAILED_'
