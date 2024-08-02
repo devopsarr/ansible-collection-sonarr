@@ -1,6 +1,6 @@
 default: sanity
 
-TEST_MODULE ?= "sonarr_import_list_info"
+TEST_MODULE ?= "sonarr_tag"
 
 # Run sanity test
 .PHONY: sanity

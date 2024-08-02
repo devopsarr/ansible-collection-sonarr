@@ -99,8 +99,10 @@ def init_module_args():
 def list_qualities(result):
     try:
         return client.list_quality_definition()
+    except sonarr.ApiException as e:
+        module.fail_json('Error getting qualities: {}\n body: {}'.format(to_native(e.reason), to_native(e.body)), **result)
     except Exception as e:
-        module.fail_json('Error getting qualities: %s' % to_native(e.reason), **result)
+        module.fail_json('Error getting qualities: {}'.format(to_native(e)), **result)
 
 
 def populate_qualities(result):
@@ -108,10 +110,10 @@ def populate_qualities(result):
     # Check if a resource is present already.
     for quality in list_qualities(result):
         if module.params['name']:
-            if quality['quality']['name'] == module.params['name']:
-                qualities = [quality.dict(by_alias=False)]
+            if quality.quality.name == module.params['name']:
+                qualities = [quality.model_dump(by_alias=False)]
         else:
-            qualities.append(quality.dict(by_alias=False))
+            qualities.append(quality.model_dump(by_alias=False))
     return qualities
 
 

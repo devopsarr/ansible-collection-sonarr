@@ -204,22 +204,26 @@ def create_indexer(want, result):
     if not module.check_mode:
         try:
             response = client.create_indexer(indexer_resource=want)
+        except sonarr.ApiException as e:
+            module.fail_json('Error creating indexer: {}\n body: {}'.format(to_native(e.reason), to_native(e.body)), **result)
         except Exception as e:
-            module.fail_json('Error creating indexer: %s' % to_native(e.reason), **result)
-        result.update(response.dict(by_alias=False))
+            module.fail_json('Error creating indexer: {}'.format(to_native(e)), **result)
+        result.update(response.model_dump(by_alias=False))
     module.exit_json(**result)
 
 
 def list_indexers(result):
     try:
         return client.list_indexer()
+    except sonarr.ApiException as e:
+        module.fail_json('Error listing indexers: {}\n body: {}'.format(to_native(e.reason), to_native(e.body)), **result)
     except Exception as e:
-        module.fail_json('Error listing indexers: %s' % to_native(e.reason), **result)
+        module.fail_json('Error listing indexers: {}'.format(to_native(e)), **result)
 
 
 def find_indexer(name, result):
     for indexer in list_indexers(result):
-        if indexer['name'] == name:
+        if indexer.name == name:
             return indexer
     return None
 
@@ -230,10 +234,12 @@ def update_indexer(want, result):
     if not module.check_mode:
         try:
             response = client.update_indexer(indexer_resource=want, id=str(want.id))
+        except sonarr.ApiException as e:
+            module.fail_json('Error updating indexer: {}\n body: {}'.format(to_native(e.reason), to_native(e.body)), **result)
         except Exception as e:
-            module.fail_json('Error updating indexer: %s' % to_native(e.reason), **result)
+            module.fail_json('Error updating indexer: {}'.format(to_native(e)), **result)
     # No need to exit module since it will exit by default either way
-    result.update(response.dict(by_alias=False))
+    result.update(response.model_dump(by_alias=False))
 
 
 def delete_indexer(result):
@@ -242,8 +248,10 @@ def delete_indexer(result):
         if not module.check_mode:
             try:
                 client.delete_indexer(result['id'])
+            except sonarr.ApiException as e:
+                module.fail_json('Error deleting indexer: {}\n body: {}'.format(to_native(e.reason), to_native(e.body)), **result)
             except Exception as e:
-                module.fail_json('Error deleting indexer: %s' % to_native(e.reason), **result)
+                module.fail_json('Error deleting indexer: {}'.format(to_native(e)), **result)
             result['id'] = 0
     module.exit_json(**result)
 
@@ -272,26 +280,26 @@ def run_module():
     # Check if a resource is present already.
     state = find_indexer(module.params['name'], result)
     if state:
-        result.update(state.dict(by_alias=False))
+        result.update(state.model_dump(by_alias=False))
 
     # Delete the resource if needed.
     if module.params['state'] == 'absent':
         delete_indexer(result)
 
     # Set wanted resource.
-    want = sonarr.IndexerResource(**{
-        'name': module.params['name'],
-        'enable_automatic_search': module.params['enable_automatic_search'],
-        'enable_interactive_search': module.params['enable_interactive_search'],
-        'enable_rss': module.params['enable_rss'],
-        'priority': module.params['priority'],
-        'download_client_id': module.params['download_client_id'],
-        'config_contract': module.params['config_contract'],
-        'implementation': module.params['implementation'],
-        'protocol': module.params['protocol'],
-        'tags': module.params['tags'],
-        'fields': field_helper.populate_fields(module.params['fields']),
-    })
+    want = sonarr.IndexerResource(
+        name=module.params['name'],
+        enable_automatic_search=module.params['enable_automatic_search'],
+        enable_interactive_search=module.params['enable_interactive_search'],
+        enable_rss=module.params['enable_rss'],
+        priority=module.params['priority'],
+        download_client_id=module.params['download_client_id'],
+        config_contract=module.params['config_contract'],
+        implementation=module.params['implementation'],
+        protocol=module.params['protocol'],
+        tags=module.params['tags'],
+        fields=field_helper.populate_fields(module.params['fields']),
+    )
 
     # Create a new resource, if needed.
     if result['id'] == 0:

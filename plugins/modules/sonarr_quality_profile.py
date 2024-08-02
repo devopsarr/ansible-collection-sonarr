@@ -201,22 +201,26 @@ def create_quality_profile(want, result):
     if not module.check_mode:
         try:
             response = client.create_quality_profile(quality_profile_resource=want)
+        except sonarr.ApiException as e:
+            module.fail_json('Error creating quality profile: {}\n body: {}'.format(to_native(e.reason), to_native(e.body)), **result)
         except Exception as e:
-            module.fail_json('Error creating quality profile: %s' % to_native(e.reason), **result)
-        result.update(response.dict(by_alias=False))
+            module.fail_json('Error creating quality profile: {}'.format(to_native(e)), **result)
+        result.update(response.model_dump(by_alias=False))
     module.exit_json(**result)
 
 
 def list_quality_profiles(result):
     try:
         return client.list_quality_profile()
+    except sonarr.ApiException as e:
+        module.fail_json('Error listing quality profiles: {}\n body: {}'.format(to_native(e.reason), to_native(e.body)), **result)
     except Exception as e:
-        module.fail_json('Error listing quality profiles: %s' % to_native(e.reason), **result)
+        module.fail_json('Error listing quality profiles: {}'.format(to_native(e)), **result)
 
 
 def find_quality_profile(name, result):
     for profile in list_quality_profiles(result):
-        if profile['name'] == name:
+        if profile.name == name:
             return profile
     return None
 
@@ -227,10 +231,12 @@ def update_quality_profile(want, result):
     if not module.check_mode:
         try:
             response = client.update_quality_profile(quality_profile_resource=want, id=str(want.id))
+        except sonarr.ApiException as e:
+            module.fail_json('Error updating quality profile: {}\n body: {}'.format(to_native(e.reason), to_native(e.body)), **result)
         except Exception as e:
-            module.fail_json('Error updating quality profile: %s' % to_native(e.reason), **result)
+            module.fail_json('Error updating quality profile: {}'.format(to_native(e)), **result)
     # No need to exit module since it will exit by default either way
-    result.update(response.dict(by_alias=False))
+    result.update(response.model_dump(by_alias=False))
 
 
 def delete_quality_profile(result):
@@ -239,70 +245,75 @@ def delete_quality_profile(result):
         if not module.check_mode:
             try:
                 client.delete_quality_profile(result['id'])
+            except sonarr.ApiException as e:
+                module.fail_json('Error deleting quality profile: {}\n body: {}'.format(to_native(e.reason), to_native(e.body)), **result)
             except Exception as e:
-                module.fail_json('Error deleting quality profile: %s' % to_native(e.reason), **result)
+                module.fail_json('Error deleting quality profile: {}'.format(to_native(e)), **result)
             result['id'] = 0
     module.exit_json(**result)
 
 
 def populate_quality_groups(result):
-    quality_groups = []
-    allowed_qualities = []
-    for item in module.params['quality_groups']:
-        if len(item['qualities']) == 1:
-            quality_groups.append(sonarr.QualityProfileQualityItemResource(**{
-                'quality': sonarr.Quality(**{
-                    'id': item['qualities'][0]['id'],
-                    'name': item['qualities'][0]['name'],
-                    'source': item['qualities'][0]['source'],
-                    'resolution': item['qualities'][0]['resolution'],
-                }),
-                'items': [],
-                'allowed': True,
-            }))
-            allowed_qualities.append(item['qualities'][0]['id'])
-        else:
-            qualities = []
-            for quality in item['qualities']:
-                qualities.append(sonarr.QualityProfileQualityItemResource(**{
-                    'quality': sonarr.Quality(**{
-                        'id': quality['id'],
-                        'name': quality['name'],
-                        'source': quality['source'],
-                        'resolution': quality['resolution'],
-                    }),
-                    'allowed': True,
-                    'items': []
-                }))
-                allowed_qualities.append(quality['id'])
-
-            quality_groups.append(sonarr.QualityProfileQualityItemResource(**{
-                'allowed': True,
-                'name': item['name'],
-                'id': item['id'],
-                'items': qualities,
-            }))
-
-            # Add disallowed qualities
+    # Needed for disallowed qualities
     temp_client = sonarr.QualityDefinitionApi(module.api)
     # GET resources.
     try:
         all_qualities = temp_client.list_quality_definition()
+    except sonarr.ApiException as e:
+        module.fail_json('Error listing qualities: {}\n body: {}'.format(to_native(e.reason), to_native(e.body)), **result)
     except Exception as e:
-        module.fail_json('Error listing qualities: %s' % to_native(e.reason), **result)
+        module.fail_json('Error listing qualities: {}'.format(to_native(e)), **result)
 
+    quality_groups = []
+    allowed_qualities = []
+    for item in module.params['quality_groups']:
+        if len(item['qualities']) == 1:
+            quality_groups.append(sonarr.QualityProfileQualityItemResource(
+                quality=sonarr.Quality(
+                    id=item['qualities'][0]['id'],
+                    name=item['qualities'][0]['name'],
+                    source=item['qualities'][0]['source'],
+                    resolution=item['qualities'][0]['resolution'],
+                ),
+                items=[],
+                allowed=True,
+            ))
+            allowed_qualities.append(item['qualities'][0]['id'])
+        else:
+            qualities = []
+            for quality in item['qualities']:
+                qualities.append(sonarr.QualityProfileQualityItemResource(
+                    quality=sonarr.Quality(
+                        id=quality['id'],
+                        name=quality['name'],
+                        source=quality['source'],
+                        resolution=quality['resolution'],
+                    ),
+                    allowed=True,
+                    items=[]
+                ))
+                allowed_qualities.append(quality['id'])
+
+            quality_groups.append(sonarr.QualityProfileQualityItemResource(
+                allowed=True,
+                name=item['name'],
+                id=item['id'],
+                items=qualities,
+            ))
+
+    # Add disallowed qualities
     for q in all_qualities[::-1]:
-        if q['quality']['id'] not in allowed_qualities:
-            quality_groups.insert(0, sonarr.QualityProfileQualityItemResource(**{
-                'quality': sonarr.Quality(**{
-                    'id': q['quality']['id'],
-                    'name': q['quality']['name'],
-                    'source': q['quality']['source'],
-                    'resolution': q['quality']['resolution'],
-                }),
-                'items': [],
-                'allowed': False,
-            }))
+        if q.quality.id not in allowed_qualities:
+            quality_groups.insert(0, sonarr.QualityProfileQualityItemResource(
+                quality=sonarr.Quality(
+                    id=q.quality.id,
+                    name=q.quality.name,
+                    source=q.quality.source,
+                    resolution=q.quality.resolution,
+                ),
+                items=[],
+                allowed=False,
+            ))
 
     return quality_groups
 
@@ -311,11 +322,11 @@ def populate_formats(result):
     formats = []
     used_formats = []
     for item in module.params['formats']:
-        formats.append(sonarr.ProfileFormatItemResource(**{
-            'name': item['name'],
-            'format': item['id'],
-            'score': item['score'],
-        }))
+        formats.append(sonarr.ProfileFormatItemResource(
+            name=item['name'],
+            format=item['id'],
+            score=item['score'],
+        ))
         used_formats.append(item['id'])
 
     # Add unused formats
@@ -323,16 +334,18 @@ def populate_formats(result):
     # GET resources.
     try:
         all_formats = temp_client.list_custom_format()
+    except sonarr.ApiException as e:
+        module.fail_json('Error listing formats: {}\n body: {}'.format(to_native(e.reason), to_native(e.body)), **result)
     except Exception as e:
-        module.fail_json('Error listing formats: %s' % to_native(e.reason), **result)
+        module.fail_json('Error listing formats: {}'.format(to_native(e)), **result)
 
     for f in all_formats:
-        if f['id'] not in used_formats:
-            formats.append(sonarr.ProfileFormatItemResource(**{
-                'name': f['name'],
-                'format': f['id'],
-                'score': 0,
-            }))
+        if f.id not in used_formats:
+            formats.append(sonarr.ProfileFormatItemResource(
+                name=f.name,
+                format=f.id,
+                score=0,
+            ))
 
     return formats
 
@@ -357,7 +370,7 @@ def run_module():
     # Check if a resource is present already.
     state = find_quality_profile(module.params['name'], result)
     if state:
-        result.update(state.dict(by_alias=False))
+        result.update(state.model_dump(by_alias=False))
 
     # Delete the resource if needed.
     if module.params['state'] == 'absent':
@@ -367,15 +380,15 @@ def run_module():
     quality_groups = populate_quality_groups(result)
     formats = populate_formats(result)
     # Set wanted resource.
-    want = sonarr.QualityProfileResource(**{
-        'name': module.params['name'],
-        'cutoff': module.params['cutoff'],
-        'upgrade_allowed': module.params['upgrade_allowed'],
-        'cutoff_format_score': module.params['cutoff_format_score'],
-        'min_format_score': module.params['min_format_score'],
-        'items': quality_groups,
-        'format_items': formats,
-    })
+    want = sonarr.QualityProfileResource(
+        name=module.params['name'],
+        cutoff=module.params['cutoff'],
+        upgrade_allowed=module.params['upgrade_allowed'],
+        cutoff_format_score=module.params['cutoff_format_score'],
+        min_format_score=module.params['min_format_score'],
+        items=quality_groups,
+        format_items=formats,
+    )
 
     # Create a new resource if needed.
     if result['id'] == 0:

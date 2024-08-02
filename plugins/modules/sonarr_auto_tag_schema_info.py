@@ -84,8 +84,10 @@ def init_module_args():
 def list_auto_tag_schema(result):
     try:
         return client.list_auto_tagging_schema()
+    except sonarr.ApiException as e:
+        module.fail_json('Error listing auto tags: {}\n body: {}'.format(to_native(e.reason), to_native(e.body)), **result)
     except Exception as e:
-        module.fail_json('Error listing auto tags: %s' % to_native(e.reason), **result)
+        module.fail_json('Error listing auto tags: {}'.format(to_native(e)), **result)
 
 
 def populate_auto_tag_schema(result):
@@ -93,10 +95,10 @@ def populate_auto_tag_schema(result):
     # Check if a resource is present already.
     for auto_tag in list_auto_tag_schema(result):
         if module.params['name']:
-            if auto_tag['implementation'] == module.params['name']:
-                auto_tags = [auto_tag.dict(by_alias=False)]
+            if auto_tag.implementation == module.params['name']:
+                auto_tags = [auto_tag.model_dump(by_alias=False)]
         else:
-            auto_tags.append(auto_tag.dict(by_alias=False))
+            auto_tags.append(auto_tag.model_dump(by_alias=False))
     return auto_tags
 
 

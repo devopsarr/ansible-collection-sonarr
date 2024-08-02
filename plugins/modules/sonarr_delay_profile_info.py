@@ -126,8 +126,10 @@ def init_module_args():
 def list_delay_profile(result):
     try:
         return client.list_delay_profile()
+    except sonarr.ApiException as e:
+        module.fail_json('Error listing delay profiles: {}\n body: {}'.format(to_native(e.reason), to_native(e.body)), **result)
     except Exception as e:
-        module.fail_json('Error listing delay profiles: %s' % to_native(e.reason), **result)
+        module.fail_json('Error listing delay profiles: {}'.format(to_native(e)), **result)
 
 
 def populate_delay_profile(result):
@@ -135,10 +137,10 @@ def populate_delay_profile(result):
     # Check if a resource is present already.
     for profile in list_delay_profile(result):
         if module.params['tag']:
-            if module.params['tag'] in profile['tags']:
-                profiles = [profile.dict(by_alias=False)]
+            if module.params.tag in profile['tags']:
+                profiles = [profile.model_dump(by_alias=False)]
         else:
-            profiles.append(profile.dict(by_alias=False))
+            profiles.append(profile.model_dump(by_alias=False))
     return profiles
 
 

@@ -84,8 +84,10 @@ def init_module_args():
 def list_custom_format_schema(result):
     try:
         return client.list_custom_format_schema()
+    except sonarr.ApiException as e:
+        module.fail_json('Error listing custom formats: {}\n body: {}'.format(to_native(e.reason), to_native(e.body)), **result)
     except Exception as e:
-        module.fail_json('Error listing custom formats: %s' % to_native(e.reason), **result)
+        module.fail_json('Error listing custom formats: {}'.format(to_native(e)), **result)
 
 
 def populate_custom_format_schema(result):
@@ -93,10 +95,10 @@ def populate_custom_format_schema(result):
     # Check if a resource is present already.
     for custom_format in list_custom_format_schema(result):
         if module.params['name']:
-            if custom_format['implementation'] == module.params['name']:
-                custom_formats = [custom_format.dict(by_alias=False)]
+            if custom_format.implementation == module.params['name']:
+                custom_formats = [custom_format.model_dump(by_alias=False)]
         else:
-            custom_formats.append(custom_format.dict(by_alias=False))
+            custom_formats.append(custom_format.model_dump(by_alias=False))
     return custom_formats
 
 

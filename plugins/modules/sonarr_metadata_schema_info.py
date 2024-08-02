@@ -105,8 +105,10 @@ def init_module_args():
 def list_metadata_schema(result):
     try:
         return client.list_metadata_schema()
+    except sonarr.ApiException as e:
+        module.fail_json('Error listing metadata schemas: {}\n body: {}'.format(to_native(e.reason), to_native(e.body)), **result)
     except Exception as e:
-        module.fail_json('Error listing metadata schemas: %s' % to_native(e.reason), **result)
+        module.fail_json('Error listing metadata schemas: {}'.format(to_native(e)), **result)
 
 
 def populate_metadata_schema(result):
@@ -114,10 +116,10 @@ def populate_metadata_schema(result):
     # Check if a resource is present already.
     for metadata in list_metadata_schema(result):
         if module.params['name']:
-            if metadata['implementation'] == module.params['name']:
-                metadatas = [metadata.dict(by_alias=False)]
+            if metadata.implementation == module.params['name']:
+                metadatas = [metadata.model_dump(by_alias=False)]
         else:
-            metadatas.append(metadata.dict(by_alias=False))
+            metadatas.append(metadata.model_dump(by_alias=False))
     return metadatas
 
 

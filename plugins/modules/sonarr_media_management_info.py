@@ -142,8 +142,10 @@ except ImportError:
 def get_media_management_config(result):
     try:
         return client.get_media_management_config()
+    except sonarr.ApiException as e:
+        module.fail_json('Error getting media management: {}\n body: {}'.format(to_native(e.reason), to_native(e.body)), **result)
     except Exception as e:
-        module.fail_json('Error getting media management: %s' % to_native(e.reason), **result)
+        module.fail_json('Error getting media management: {}'.format(to_native(e)), **result)
 
 
 def run_module():
@@ -162,7 +164,7 @@ def run_module():
     )
 
     # Get resource.
-    result.update(get_media_management_config(result).dict(by_alias=False))
+    result.update(get_media_management_config(result).model_dump(by_alias=False))
 
     # Exit with data.
     module.exit_json(**result)

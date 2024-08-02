@@ -25,10 +25,10 @@ class FieldHelper():
 
         for field in field_list:
             fields.append(
-                sonarr.Field(**{
-                    'name': field['name'],
-                    'value': field['value'],
-                }),
+                sonarr.Field(
+                    name=field['name'],
+                    value=field['value'],
+                ),
             )
 
         return fields

@@ -67,8 +67,10 @@ except ImportError:
 def get_download_client_config(result):
     try:
         return client.get_download_client_config()
+    except sonarr.ApiException as e:
+        module.fail_json('Error getting download client config: {}\n body: {}'.format(to_native(e.reason), to_native(e.body)), **result)
     except Exception as e:
-        module.fail_json('Error getting download client config: %s' % to_native(e.reason), **result)
+        module.fail_json('Error getting download client config: {}'.format(to_native(e)), **result)
 
 
 def run_module():
@@ -87,7 +89,7 @@ def run_module():
     )
 
     # Get resource.
-    result.update(get_download_client_config(result).dict(by_alias=False))
+    result.update(get_download_client_config(result).model_dump(by_alias=False))
 
     # Exit with data.
     module.exit_json(**result)

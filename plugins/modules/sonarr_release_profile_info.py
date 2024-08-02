@@ -103,8 +103,10 @@ def init_module_args():
 def list_release_profile(result):
     try:
         return client.list_release_profile()
+    except sonarr.ApiException as e:
+        module.fail_json('Error listing release profiles: {}\n body: {}'.format(to_native(e.reason), to_native(e.body)), **result)
     except Exception as e:
-        module.fail_json('Error listing release profiles: %s' % to_native(e.reason), **result)
+        module.fail_json('Error listing release profiles: {}'.format(to_native(e)), **result)
 
 
 def populate_release_profile(result):
@@ -112,10 +114,10 @@ def populate_release_profile(result):
     # Check if a resource is present already.
     for profile in list_release_profile(result):
         if module.params['name']:
-            if profile['name'] == module.params['name']:
-                profiles = [profile.dict(by_alias=False)]
+            if profile.name == module.params['name']:
+                profiles = [profile.model_dump(by_alias=False)]
         else:
-            profiles.append(profile.dict(by_alias=False))
+            profiles.append(profile.model_dump(by_alias=False))
     return profiles
 
 

@@ -82,22 +82,26 @@ def create_tag(want, result):
     if not module.check_mode:
         try:
             response = client.create_tag(tag_resource=want)
+        except sonarr.ApiException as e:
+            module.fail_json('Error creating tag: {}\n body: {}'.format(to_native(e.reason), to_native(e.body)), **result)
         except Exception as e:
-            module.fail_json('Error creating tag: %s' % to_native(e.reason), **result)
-        result.update(response.dict(by_alias=False))
+            module.fail_json('Error creating tag: {}'.format(to_native(e)), **result)
+        result.update(response.model_dump(by_alias=False))
     module.exit_json(**result)
 
 
 def list_tags(result):
     try:
         return client.list_tag()
+    except sonarr.ApiException as e:
+        module.fail_json('Error listing tags: {}\n body: {}'.format(to_native(e.reason), to_native(e.body)), **result)
     except Exception as e:
-        module.fail_json('Error listing tags: %s' % to_native(e.reason), **result)
+        module.fail_json('Error listing tags: {}'.format(to_native(e)), **result)
 
 
 def find_tag(label, result):
     for tag in list_tags(result):
-        if tag['label'] == label:
+        if tag.label == label:
             return tag
     return None
 
@@ -108,8 +112,10 @@ def delete_tag(result):
         if not module.check_mode:
             try:
                 client.delete_tag(result['id'])
+            except sonarr.ApiException as e:
+                module.fail_json('Error deleting tag: {}\n body: {}'.format(to_native(e.reason), to_native(e.body)), **result)
             except Exception as e:
-                module.fail_json('Error deleting tag: %s' % to_native(e.reason), **result)
+                module.fail_json('Error deleting tag: {}'.format(to_native(e)), **result)
             result['id'] = 0
     module.exit_json(**result)
 
@@ -133,7 +139,7 @@ def run_module():
     # Check if a resource is present already.
     state = find_tag(module.params['label'], result)
     if state:
-        result.update(state.dict(by_alias=False))
+        result.update(state.model_dump(by_alias=False))
 
     # Delete the resource if needed.
     if module.params['state'] == 'absent':

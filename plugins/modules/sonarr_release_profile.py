@@ -131,22 +131,26 @@ def create_release_profile(want, result):
     if not module.check_mode:
         try:
             response = client.create_release_profile(release_profile_resource=want)
+        except sonarr.ApiException as e:
+            module.fail_json('Error creating release profile: {}\n body: {}'.format(to_native(e.reason), to_native(e.body)), **result)
         except Exception as e:
-            module.fail_json('Error creating release profile: %s' % to_native(e.reason), **result)
-        result.update(response.dict(by_alias=False))
+            module.fail_json('Error creating release profile: {}'.format(to_native(e)), **result)
+        result.update(response.model_dump(by_alias=False))
     module.exit_json(**result)
 
 
 def list_release_profiles(result):
     try:
         return client.list_release_profile()
+    except sonarr.ApiException as e:
+        module.fail_json('Error listing release profiles: {}\n body: {}'.format(to_native(e.reason), to_native(e.body)), **result)
     except Exception as e:
-        module.fail_json('Error listing release profiles: %s' % to_native(e.reason), **result)
+        module.fail_json('Error listing release profiles: {}'.format(to_native(e)), **result)
 
 
 def find_release_profile(name, result):
     for profile in list_release_profiles(result):
-        if profile['name'] == name:
+        if profile.name == name:
             return profile
     return None
 
@@ -157,10 +161,12 @@ def update_release_profile(want, result):
     if not module.check_mode:
         try:
             response = client.update_release_profile(release_profile_resource=want, id=str(want.id))
+        except sonarr.ApiException as e:
+            module.fail_json('Error updating release profile: {}\n body: {}'.format(to_native(e.reason), to_native(e.body)), **result)
         except Exception as e:
-            module.fail_json('Error updating release profile: %s' % to_native(e.reason), **result)
+            module.fail_json('Error updating release profile: {}'.format(to_native(e)), **result)
     # No need to exit module since it will exit by default either way
-    result.update(response.dict(by_alias=False))
+    result.update(response.model_dump(by_alias=False))
 
 
 def delete_release_profile(result):
@@ -169,8 +175,10 @@ def delete_release_profile(result):
         if not module.check_mode:
             try:
                 client.delete_release_profile(result['id'])
+            except sonarr.ApiException as e:
+                module.fail_json('Error deleting release profile: {}\n body: {}'.format(to_native(e.reason), to_native(e.body)), **result)
             except Exception as e:
-                module.fail_json('Error deleting release profile: %s' % to_native(e.reason), **result)
+                module.fail_json('Error deleting release profile: {}'.format(to_native(e)), **result)
             result['id'] = 0
     module.exit_json(**result)
 
@@ -195,21 +203,21 @@ def run_module():
     # Check if a resource is present already.
     state = find_release_profile(module.params['name'], result)
     if state:
-        result.update(state.dict(by_alias=False))
+        result.update(state.model_dump(by_alias=False))
 
     # Delete the resource if needed.
     if module.params['state'] == 'absent':
         delete_release_profile(result)
 
     # Set wanted resource.
-    want = sonarr.ReleaseProfileResource(**{
-        'name': module.params['name'],
-        'enabled': module.params['enabled'],
-        'required': module.params['required'],
-        'ignored': module.params['ignored'],
-        'indexer_id': module.params['indexer_id'],
-        'tags': module.params['tags'],
-    })
+    want = sonarr.ReleaseProfileResource(
+        name=module.params['name'],
+        enabled=module.params['enabled'],
+        required=module.params['required'],
+        ignored=module.params['ignored'],
+        indexer_id=module.params['indexer_id'],
+        tags=module.params['tags'],
+    )
 
     # Create a new resource if needed.
     if result['id'] == 0:

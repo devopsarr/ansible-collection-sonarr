@@ -85,8 +85,10 @@ def init_module_args():
 def list_import_list_exclusion(result):
     try:
         return client.list_import_list_exclusion()
+    except sonarr.ApiException as e:
+        module.fail_json('Error listing import list exclusions: {}\n body: {}'.format(to_native(e.reason), to_native(e.body)), **result)
     except Exception as e:
-        module.fail_json('Error listing import list exclusions: %s' % to_native(e.reason), **result)
+        module.fail_json('Error listing import list exclusions: {}'.format(to_native(e)), **result)
 
 
 def populate_import_list_exclusions(result):
@@ -94,10 +96,10 @@ def populate_import_list_exclusions(result):
     # Check if a resource is present already.
     for import_list_exclusion in list_import_list_exclusion(result):
         if module.params['tvdb_id']:
-            if import_list_exclusion['tvdb_id'] == module.params['tvdb_id']:
-                exclusions = [import_list_exclusion.dict(by_alias=False)]
+            if import_list_exclusion.tvdb_id == module.params['tvdb_id']:
+                exclusions = [import_list_exclusion.model_dump(by_alias=False)]
         else:
-            exclusions.append(import_list_exclusion.dict(by_alias=False))
+            exclusions.append(import_list_exclusion.model_dump(by_alias=False))
     return exclusions
 
 

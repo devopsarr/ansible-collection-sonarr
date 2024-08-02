@@ -126,8 +126,10 @@ def init_module_args():
 def list_series(result):
     try:
         return client.list_series()
+    except sonarr.ApiException as e:
+        module.fail_json('Error listing series: {}\n body: {}'.format(to_native(e.reason), to_native(e.body)), **result)
     except Exception as e:
-        module.fail_json('Error listing series: %s' % to_native(e.reason), **result)
+        module.fail_json('Error listing series: {}'.format(to_native(e)), **result)
 
 
 def populate_series(result):
@@ -135,10 +137,10 @@ def populate_series(result):
     # Check if a resource is present already.
     for single_series in list_series(result):
         if module.params['tvdb_id']:
-            if single_series['tvdb_id'] == module.params['tvdb_id']:
-                series = [single_series.dict(by_alias=False)]
+            if single_series.tvdb_id == module.params['tvdb_id']:
+                series = [single_series.model_dump(by_alias=False)]
         else:
-            series.append(single_series.dict(by_alias=False))
+            series.append(single_series.model_dump(by_alias=False))
     return series
 
 

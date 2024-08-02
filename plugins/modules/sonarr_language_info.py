@@ -80,8 +80,10 @@ def init_module_args():
 def list_languages(result):
     try:
         return client.list_language()
+    except sonarr.ApiException as e:
+        module.fail_json('Error getting languages: {}\n body: {}'.format(to_native(e.reason), to_native(e.body)), **result)
     except Exception as e:
-        module.fail_json('Error getting languages: %s' % to_native(e.reason), **result)
+        module.fail_json('Error getting languages: {}'.format(to_native(e)), **result)
 
 
 def populate_languages(result):
@@ -89,10 +91,10 @@ def populate_languages(result):
     # Check if a resource is present already.
     for language in list_languages(result):
         if module.params['name']:
-            if language['name'] == module.params['name']:
-                languages = [language.dict(by_alias=False)]
+            if language.name == module.params['name']:
+                languages = [language.model_dump(by_alias=False)]
         else:
-            languages.append(language.dict(by_alias=False))
+            languages.append(language.model_dump(by_alias=False))
     return languages
 
 

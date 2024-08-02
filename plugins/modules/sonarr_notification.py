@@ -274,22 +274,26 @@ def create_notification(want, result):
     if not module.check_mode:
         try:
             response = client.create_notification(notification_resource=want)
+        except sonarr.ApiException as e:
+            module.fail_json('Error creating notification: {}\n body: {}'.format(to_native(e.reason), to_native(e.body)), **result)
         except Exception as e:
-            module.fail_json('Error creating notification: %s' % to_native(e.reason), **result)
-        result.update(response.dict(by_alias=False))
+            module.fail_json('Error creating notification: {}'.format(to_native(e)), **result)
+        result.update(response.model_dump(by_alias=False))
     module.exit_json(**result)
 
 
 def list_notifications(result):
     try:
         return client.list_notification()
+    except sonarr.ApiException as e:
+        module.fail_json('Error listing notifications: {}\n body: {}'.format(to_native(e.reason), to_native(e.body)), **result)
     except Exception as e:
-        module.fail_json('Error listing notifications: %s' % to_native(e.reason), **result)
+        module.fail_json('Error listing notifications: {}'.format(to_native(e)), **result)
 
 
 def find_notification(name, result):
     for notification in list_notifications(result):
-        if notification['name'] == name:
+        if notification.name == name:
             return notification
     return None
 
@@ -300,10 +304,12 @@ def update_notification(want, result):
     if not module.check_mode:
         try:
             response = client.update_notification(notification_resource=want, id=str(want.id))
+        except sonarr.ApiException as e:
+            module.fail_json('Error updating notification: {}\n body: {}'.format(to_native(e.reason), to_native(e.body)), **result)
         except Exception as e:
-            module.fail_json('Error updating notification: %s' % to_native(e.reason), **result)
+            module.fail_json('Error updating notification: {}'.format(to_native(e)), **result)
     # No need to exit module since it will exit by default either way
-    result.update(response.dict(by_alias=False))
+    result.update(response.model_dump(by_alias=False))
 
 
 def delete_notification(result):
@@ -312,8 +318,10 @@ def delete_notification(result):
         if not module.check_mode:
             try:
                 client.delete_notification(result['id'])
+            except sonarr.ApiException as e:
+                module.fail_json('Error deleting notification: {}\n body: {}'.format(to_native(e.reason), to_native(e.body)), **result)
             except Exception as e:
-                module.fail_json('Error deleting notification: %s' % to_native(e.reason), **result)
+                module.fail_json('Error deleting notification: {}'.format(to_native(e)), **result)
             result['id'] = 0
     module.exit_json(**result)
 
@@ -342,7 +350,7 @@ def run_module():
     # Check if a resource is present already.
     state = find_notification(module.params['name'], result)
     if state:
-        result.update(state.dict(by_alias=False))
+        result.update(state.model_dump(by_alias=False))
 
     # Delete the resource if needed.
     if module.params['state'] == 'absent':

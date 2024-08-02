@@ -155,8 +155,10 @@ def init_module_args():
 def list_notifications(result):
     try:
         return client.list_notification()
+    except sonarr.ApiException as e:
+        module.fail_json('Error listing notifications: {}\n body: {}'.format(to_native(e.reason), to_native(e.body)), **result)
     except Exception as e:
-        module.fail_json('Error listing notifications: %s' % to_native(e.reason), **result)
+        module.fail_json('Error listing notifications: {}'.format(to_native(e)), **result)
 
 
 def populate_notifications(result):
@@ -164,10 +166,10 @@ def populate_notifications(result):
     # Check if a resource is present already.
     for notification in list_notifications(result):
         if module.params['name']:
-            if notification['name'] == module.params['name']:
-                notifications = [notification.dict(by_alias=False)]
+            if notification.name == module.params['name']:
+                notifications = [notification.model_dump(by_alias=False)]
         else:
-            notifications.append(notification.dict(by_alias=False))
+            notifications.append(notification.model_dump(by_alias=False))
     return notifications
 
 

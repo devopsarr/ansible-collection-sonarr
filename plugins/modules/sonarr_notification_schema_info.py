@@ -155,8 +155,10 @@ def init_module_args():
 def list_notification_schema(result):
     try:
         return client.list_notification_schema()
+    except sonarr.ApiException as e:
+        module.fail_json('Error listing notification schemas: {}\n body: {}'.format(to_native(e.reason), to_native(e.body)), **result)
     except Exception as e:
-        module.fail_json('Error listing notification schemas: %s' % to_native(e.reason), **result)
+        module.fail_json('Error listing notification schemas: {}'.format(to_native(e)), **result)
 
 
 def populate_notification_schema(result):
@@ -164,10 +166,10 @@ def populate_notification_schema(result):
     # Check if a resource is present already.
     for notification in list_notification_schema(result):
         if module.params['name']:
-            if notification['implementation'] == module.params['name']:
-                notifications = [notification.dict(by_alias=False)]
+            if notification.implementation == module.params['name']:
+                notifications = [notification.model_dump(by_alias=False)]
         else:
-            notifications.append(notification.dict(by_alias=False))
+            notifications.append(notification.model_dump(by_alias=False))
     return notifications
 
 

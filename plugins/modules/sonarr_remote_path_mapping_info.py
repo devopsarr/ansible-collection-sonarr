@@ -90,8 +90,10 @@ def init_module_args():
 def list_remote_path_mapping(result):
     try:
         return client.list_remote_path_mapping()
+    except sonarr.ApiException as e:
+        module.fail_json('Error listing remote path mappings: {}\n body: {}'.format(to_native(e.reason), to_native(e.body)), **result)
     except Exception as e:
-        module.fail_json('Error listing remote path mappings: %s' % to_native(e.reason), **result)
+        module.fail_json('Error listing remote path mappings: {}'.format(to_native(e)), **result)
 
 
 def populate_remote_path_mappings(result):
@@ -99,10 +101,10 @@ def populate_remote_path_mappings(result):
     # Check if a resource is present already.
     for remote_path_mapping in list_remote_path_mapping(result):
         if module.params['id']:
-            if remote_path_mapping['id'] == module.params['id']:
-                mappings = [remote_path_mapping.dict(by_alias=False)]
+            if remote_path_mapping.id == module.params['id']:
+                mappings = [remote_path_mapping.model_dump(by_alias=False)]
         else:
-            mappings.append(remote_path_mapping.dict(by_alias=False))
+            mappings.append(remote_path_mapping.model_dump(by_alias=False))
     return mappings
 
 

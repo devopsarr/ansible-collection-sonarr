@@ -125,8 +125,10 @@ def init_module_args():
 def list_download_client_schema(result):
     try:
         return client.list_download_client_schema()
+    except sonarr.ApiException as e:
+        module.fail_json('Error listing download client schemas: {}\n body: {}'.format(to_native(e.reason), to_native(e.body)), **result)
     except Exception as e:
-        module.fail_json('Error listing download client schemas: %s' % to_native(e.reason), **result)
+        module.fail_json('Error listing download client schemas: {}'.format(to_native(e)), **result)
 
 
 def populate_download_client_schema(result):
@@ -134,10 +136,10 @@ def populate_download_client_schema(result):
     # Check if a resource is present already.
     for download_client in list_download_client_schema(result):
         if module.params['name']:
-            if download_client['implementation'] == module.params['name']:
-                download_clients = [download_client.dict(by_alias=False)]
+            if download_client.implementation == module.params['name']:
+                download_clients = [download_client.model_dump(by_alias=False)]
         else:
-            download_clients.append(download_client.dict(by_alias=False))
+            download_clients.append(download_client.model_dump(by_alias=False))
     return download_clients
 
 

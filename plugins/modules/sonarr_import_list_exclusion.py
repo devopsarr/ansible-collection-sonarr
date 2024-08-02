@@ -95,23 +95,27 @@ def create_import_list_exclusion(want, result):
     if not module.check_mode:
         try:
             response = client.create_import_list_exclusion(import_list_exclusion_resource=want)
+        except sonarr.ApiException as e:
+            module.fail_json('Error creating import list exclusion: {}\n body: {}'.format(to_native(e.reason), to_native(e.body)), **result)
         except Exception as e:
-            module.fail_json('Error creating import list exclusion: %s' % to_native(e.reason), **result)
-        result.update(response.dict(by_alias=False))
+            module.fail_json('Error creating import list exclusion: {}'.format(to_native(e)), **result)
+        result.update(response.model_dump(by_alias=False))
     module.exit_json(**result)
 
 
 def list_import_list_exclusions(result):
     try:
         return client.list_import_list_exclusion()
+    except sonarr.ApiException as e:
+        module.fail_json('Error listing import list exclusions: {}\n body: {}'.format(to_native(e.reason), to_native(e.body)), **result)
     except Exception as e:
-        module.fail_json('Error listing import list exclusions: %s' % to_native(e.reason), **result)
+        module.fail_json('Error listing import list exclusions: {}'.format(to_native(e)), **result)
 
 
 def find_import_list_exclusion(title, tvdb_id, result):
     for import_list_exclusion in list_import_list_exclusions(result):
-        if import_list_exclusion['tvdb_id'] == tvdb_id and \
-           import_list_exclusion['title'] == title:
+        if import_list_exclusion.tvdb_id == tvdb_id and \
+           import_list_exclusion.title == title:
             return import_list_exclusion
     return None
 
@@ -122,8 +126,10 @@ def delete_import_list_exclusion(result):
         if not module.check_mode:
             try:
                 client.delete_import_list_exclusion(result['id'])
+            except sonarr.ApiException as e:
+                module.fail_json('Error deleting import list exclusion: {}\n body: {}'.format(to_native(e.reason), to_native(e.body)), **result)
             except Exception as e:
-                module.fail_json('Error deleting import list exclusion: %s' % to_native(e.reason), **result)
+                module.fail_json('Error deleting import list exclusion: {}'.format(to_native(e)), **result)
             result['id'] = 0
     module.exit_json(**result)
 
@@ -148,17 +154,17 @@ def run_module():
     # Check if a resource is present already.
     state = find_import_list_exclusion(module.params['title'], module.params['tvdb_id'], result)
     if state:
-        result.update(state.dict(by_alias=False))
+        result.update(state.model_dump(by_alias=False))
 
     # Delete the resource if needed.
     if module.params['state'] == 'absent':
         delete_import_list_exclusion(result)
 
     # Set wanted resource.
-    want = sonarr.ImportListExclusionResource(**{
-        'tvdb_id': module.params['tvdb_id'],
-        'title': module.params['title'],
-    })
+    want = sonarr.ImportListExclusionResource(
+        tvdb_id=module.params['tvdb_id'],
+        title=module.params['title'],
+    )
 
     # Create a new resource if needed.
     if result['id'] == 0:

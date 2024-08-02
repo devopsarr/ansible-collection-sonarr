@@ -135,8 +135,10 @@ def init_module_args():
 def list_import_lists(result):
     try:
         return client.list_import_list()
+    except sonarr.ApiException as e:
+        module.fail_json('Error listing import lists: {}\n body: {}'.format(to_native(e.reason), to_native(e.body)), **result)
     except Exception as e:
-        module.fail_json('Error listing import lists: %s' % to_native(e.reason), **result)
+        module.fail_json('Error listing import lists: {}'.format(to_native(e)), **result)
 
 
 def populate_import_lists(result):
@@ -144,10 +146,10 @@ def populate_import_lists(result):
     # Check if a resource is present already.
     for import_list in list_import_lists(result):
         if module.params['name']:
-            if import_list['name'] == module.params['name']:
-                import_lists = [import_list.dict(by_alias=False)]
+            if import_list.name == module.params['name']:
+                import_lists = [import_list.model_dump(by_alias=False)]
         else:
-            import_lists.append(import_list.dict(by_alias=False))
+            import_lists.append(import_list.model_dump(by_alias=False))
     return import_lists
 
 

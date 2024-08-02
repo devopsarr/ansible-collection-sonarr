@@ -111,13 +111,15 @@ def init_module_args():
 def list_qualities(result):
     try:
         return client.list_quality_definition()
+    except sonarr.ApiException as e:
+        module.fail_json('Error listing qualities: {}\n body: {}'.format(to_native(e.reason), to_native(e.body)), **result)
     except Exception as e:
-        module.fail_json('Error listing qualities: %s' % to_native(e.reason), **result)
+        module.fail_json('Error listing qualities: {}'.format(to_native(e)), **result)
 
 
 def find_quality(name, result):
     for quality in list_qualities(result):
-        if quality['quality']['name'] == name:
+        if quality.quality.name == name:
             return quality
     return None
 
@@ -128,10 +130,12 @@ def update_quality(want, result):
     if not module.check_mode:
         try:
             response = client.update_quality_definition(quality_definition_resource=want, id=str(want.id))
+        except sonarr.ApiException as e:
+            module.fail_json('Error updating quality: {}\n body: {}'.format(to_native(e.reason), to_native(e.body)), **result)
         except Exception as e:
-            module.fail_json('Error updating quality: %s' % to_native(e.reason), **result)
+            module.fail_json('Error updating quality: {}'.format(to_native(e)), **result)
     # No need to exit module since it will exit by default either way
-    result.update(response.dict(by_alias=False))
+    result.update(response.model_dump(by_alias=False))
 
 
 def run_module():
@@ -154,15 +158,15 @@ def run_module():
     # Check if a resource is present already.
     state = find_quality(module.params['name'], result)
     if state:
-        result.update(state.dict(by_alias=False))
+        result.update(state.model_dump(by_alias=False))
 
     # No delete is needed
-    want = sonarr.QualityDefinitionResource(**{
-        'title': module.params['title'],
-        'min_size': module.params['min_size'],
-        'max_size': module.params['max_size'],
-        'preferred_size': module.params['preferred_size'],
-    })
+    want = sonarr.QualityDefinitionResource(
+        title=module.params['title'],
+        min_size=module.params['min_size'],
+        max_size=module.params['max_size'],
+        preferred_size=module.params['preferred_size'],
+    )
 
     # Update an existing resource if needed.
     want.id = result['id']

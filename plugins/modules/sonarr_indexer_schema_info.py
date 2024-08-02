@@ -130,8 +130,10 @@ def init_module_args():
 def list_indexer_schema(result):
     try:
         return client.list_indexer_schema()
+    except sonarr.ApiException as e:
+        module.fail_json('Error listing indexer schemas: {}\n body: {}'.format(to_native(e.reason), to_native(e.body)), **result)
     except Exception as e:
-        module.fail_json('Error listing indexer schemas: %s' % to_native(e.reason), **result)
+        module.fail_json('Error listing indexer schemas: {}'.format(to_native(e)), **result)
 
 
 def populate_indexer_schema(result):
@@ -139,10 +141,10 @@ def populate_indexer_schema(result):
     # Check if a resource is present already.
     for indexer in list_indexer_schema(result):
         if module.params['name']:
-            if indexer['name'] == module.params['name']:
-                indexers = [indexer.dict(by_alias=False)]
+            if indexer.name == module.params['name']:
+                indexers = [indexer.model_dump(by_alias=False)]
         else:
-            indexers.append(indexer.dict(by_alias=False))
+            indexers.append(indexer.model_dump(by_alias=False))
     return indexers
 
 

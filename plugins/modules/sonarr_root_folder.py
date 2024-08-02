@@ -92,22 +92,26 @@ def create_root_folder(want, result):
     if not module.check_mode:
         try:
             response = client.create_root_folder(root_folder_resource=want)
+        except sonarr.ApiException as e:
+            module.fail_json('Error creating root folder: {}\n body: {}'.format(to_native(e.reason), to_native(e.body)), **result)
         except Exception as e:
-            module.fail_json('Error creating root folder: %s' % to_native(e.reason), **result)
-        result.update(response.dict(by_alias=False))
+            module.fail_json('Error creating root folder: {}'.format(to_native(e)), **result)
+        result.update(response.model_dump(by_alias=False))
     module.exit_json(**result)
 
 
 def list_root_folders(result):
     try:
         return client.list_root_folder()
+    except sonarr.ApiException as e:
+        module.fail_json('Error listing root folders: {}\n body: {}'.format(to_native(e.reason), to_native(e.body)), **result)
     except Exception as e:
-        module.fail_json('Error listing root folders: %s' % to_native(e.reason), **result)
+        module.fail_json('Error listing root folders: {}'.format(to_native(e)), **result)
 
 
 def find_root_folder(path, result):
     for folder in list_root_folders(result):
-        if folder['path'] == path:
+        if folder.path == path:
             return folder
     return None
 
@@ -118,8 +122,10 @@ def delete_root_folder(result):
         if not module.check_mode:
             try:
                 client.delete_root_folder(result['id'])
+            except sonarr.ApiException as e:
+                module.fail_json('Error deleting root folder: {}\n body: {}'.format(to_native(e.reason), to_native(e.body)), **result)
             except Exception as e:
-                module.fail_json('Error deleting root folder: %s' % to_native(e.reason), **result)
+                module.fail_json('Error deleting root folder: {}'.format(to_native(e)), **result)
             result['id'] = 0
     module.exit_json(**result)
 
@@ -144,7 +150,7 @@ def run_module():
     # Check if a resource is present already.
     state = find_root_folder(module.params['path'], result)
     if state:
-        result.update(state.dict(by_alias=False))
+        result.update(state.model_dump(by_alias=False))
 
     # Delete the resource if needed.
     if module.params['state'] == 'absent':

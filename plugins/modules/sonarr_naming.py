@@ -176,8 +176,10 @@ def init_module_args():
 def read_naming(result):
     try:
         return client.get_naming_config()
+    except sonarr.ApiException as e:
+        module.fail_json('Error getting naming: {}\n body: {}'.format(to_native(e.reason), to_native(e.body)), **result)
     except Exception as e:
-        module.fail_json('Error getting naming: %s' % to_native(e.reason), **result)
+        module.fail_json('Error getting naming: {}'.format(to_native(e)), **result)
 
 
 def update_naming(want, result):
@@ -186,10 +188,12 @@ def update_naming(want, result):
     if not module.check_mode:
         try:
             response = client.update_naming_config(naming_config_resource=want, id="1")
+        except sonarr.ApiException as e:
+            module.fail_json('Error updating naming: {}\n body: {}'.format(to_native(e.reason), to_native(e.body)), **result)
         except Exception as e:
-            module.fail_json('Error updating naming: %s' % to_native(e.reason), **result)
+            module.fail_json('Error updating naming: {}'.format(to_native(e)), **result)
     # No need to exit module since it will exit by default either way
-    result.update(response.dict(by_alias=False))
+    result.update(response.model_dump(by_alias=False))
 
 
 def run_module():
@@ -212,28 +216,28 @@ def run_module():
     # Get resource.
     state = read_naming(result)
     if state:
-        result.update(state.dict(by_alias=False))
+        result.update(state.model_dump(by_alias=False))
 
-    want = sonarr.NamingConfigResource(**{
-        'standard_episode_format': module.params['standard_episode_format'],
-        'daily_episode_format': module.params['daily_episode_format'],
-        'anime_episode_format': module.params['anime_episode_format'],
-        'series_folder_format': module.params['series_folder_format'],
-        'season_folder_format': module.params['season_folder_format'],
-        'specials_folder_format': module.params['specials_folder_format'],
-        'multi_episode_style': module.params['multi_episode_style'],
-        'colon_replacement_format': module.params['colon_replacement_format'],
-        'rename_episodes': module.params['rename_episodes'],
-        'replace_illegal_characters': module.params['replace_illegal_characters'],
-        'id': 1,
+    want = sonarr.NamingConfigResource(
+        standard_episode_format=module.params['standard_episode_format'],
+        daily_episode_format=module.params['daily_episode_format'],
+        anime_episode_format=module.params['anime_episode_format'],
+        series_folder_format=module.params['series_folder_format'],
+        season_folder_format=module.params['season_folder_format'],
+        specials_folder_format=module.params['specials_folder_format'],
+        multi_episode_style=module.params['multi_episode_style'],
+        colon_replacement_format=module.params['colon_replacement_format'],
+        rename_episodes=module.params['rename_episodes'],
+        replace_illegal_characters=module.params['replace_illegal_characters'],
+        id=1,
         # add not used parameters to compare resource
-        'include_series_title': False,
-        'include_episode_title': False,
-        'include_quality': False,
-        'replace_spaces': True,
-        'separator': ' - ',
-        'number_style': 'S{season:00}E{episode:00}',
-    })
+        include_series_title=False,
+        include_episode_title=False,
+        include_quality=False,
+        replace_spaces=True,
+        separator=' - ',
+        number_style='S{season:00}E{episode:00}',
+    )
 
     # Update an existing resource.
     if want != state:
