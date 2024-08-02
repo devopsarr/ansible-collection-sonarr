@@ -1,23 +1,23 @@
 ---
-- name: list a single import list schema
+- name: List a single import list schema
   devopsarr.sonarr.sonarr_import_list_schema_info:
-    name: "PlexImport"
+    name: PlexImport
     sonarr_api_key: "{{ sonarr_api_key }}"
     sonarr_url: "{{ sonarr_url }}"
   register: result
 
-- name: assert single import list schema
-  assert:
+- name: Assert single import list schema
+  ansible.builtin.assert:
     that:
       - result['import_lists'][0]['implementation'] == 'PlexImport'
 # ----------------------------------------------------------------------------
-- name: list all import list schemas
+- name: List all import list schemas
   devopsarr.sonarr.sonarr_import_list_schema_info:
     sonarr_api_key: "{{ sonarr_api_key }}"
     sonarr_url: "{{ sonarr_url }}"
   register: result
 
-- name: assert multiple import list schemas
-  assert:
+- name: Assert multiple import list schemas
+  ansible.builtin.assert:
     that:
       - result['import_lists'] | length > 1

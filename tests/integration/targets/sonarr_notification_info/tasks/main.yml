@@ -1,47 +1,47 @@
 ---
-- name: create notification
+- name: Create notification
   devopsarr.sonarr.sonarr_notification:
     name: "{{ item }}"
-    config_contract: "CustomScriptSettings"
-    implementation: "CustomScript"
+    config_contract: CustomScriptSettings
+    implementation: CustomScript
     fields:
-    - name: "path"
-      value: "/scripts/test.sh"
+      - name: path
+        value: /scripts/test.sh
     sonarr_api_key: "{{ sonarr_api_key }}"
     sonarr_url: "{{ sonarr_url }}"
   with_items:
-    - 'info_test'
-    - 'info_test1'
+    - info_test
+    - info_test1
 
-- name: list a single notification
+- name: List a single notification
   devopsarr.sonarr.sonarr_notification_info:
-    name: "info_test"
+    name: info_test
     sonarr_api_key: "{{ sonarr_api_key }}"
     sonarr_url: "{{ sonarr_url }}"
   register: result
 
-- name: assert single notification
-  assert:
+- name: Assert single notification
+  ansible.builtin.assert:
     that:
       - result['notifications'][0]['name'] == 'info_test'
 # ----------------------------------------------------------------------------
-- name: list all notifications
+- name: List all notifications
   devopsarr.sonarr.sonarr_notification_info:
     sonarr_api_key: "{{ sonarr_api_key }}"
     sonarr_url: "{{ sonarr_url }}"
   register: result
 
-- name: assert multiple notifications
-  assert:
+- name: Assert multiple notifications
+  ansible.builtin.assert:
     that:
       - result['notifications'] | length > 1
 # ----------------------------------------------------------------------------
-- name: clean up notification
+- name: Clean up notification
   devopsarr.sonarr.sonarr_notification:
     name: "{{ item }}"
     state: absent
     sonarr_api_key: "{{ sonarr_api_key }}"
     sonarr_url: "{{ sonarr_url }}"
   with_items:
-    - 'info_test'
-    - 'info_test1'
+    - info_test
+    - info_test1

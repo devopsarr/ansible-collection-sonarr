@@ -1,23 +1,23 @@
 ---
-- name: client a single download client schema
+- name: Client a single download client schema
   devopsarr.sonarr.sonarr_download_client_schema_info:
-    name: "Deluge"
+    name: Deluge
     sonarr_api_key: "{{ sonarr_api_key }}"
     sonarr_url: "{{ sonarr_url }}"
   register: result
 
-- name: assert single download client schema
-  assert:
+- name: Assert single download client schema
+  ansible.builtin.assert:
     that:
       - result['download_clients'][0]['implementation_name'] == 'Deluge'
 # ----------------------------------------------------------------------------
-- name: client all download client schemas
+- name: Client all download client schemas
   devopsarr.sonarr.sonarr_download_client_schema_info:
     sonarr_api_key: "{{ sonarr_api_key }}"
     sonarr_url: "{{ sonarr_url }}"
   register: result
 
-- name: assert multiple download client schemas
-  assert:
+- name: Assert multiple download client schemas
+  ansible.builtin.assert:
     that:
       - result['download_clients'] | length > 1

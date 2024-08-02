@@ -1,45 +1,45 @@
 ---
 # ----------------------------------------------------------------------------
-- name: edit naming
+- name: Edit naming
   devopsarr.sonarr.sonarr_naming:
     rename_episodes: true
     replace_illegal_characters: true
     multi_episode_style: 0
     colon_replacement_format: 0
-    daily_episode_format: '{Series Title} - {Air-Date} - {Episode Title} {Quality Full}'
-    anime_episode_format: '{Series Title} - S{season:00}E{episode:00} - {Episode Title} {Quality Full}'
-    series_folder_format: '{Series Title}'
-    season_folder_format: 'Season {season}'
-    specials_folder_format: 'S00'
-    standard_episode_format: '{Series Title} - S{season:00}E{episode:00} - {Episode Title} {Quality Full}'
+    daily_episode_format: "{Series Title} - {Air-Date} - {Episode Title} {Quality Full}"
+    anime_episode_format: "{Series Title} - S{season:00}E{episode:00} - {Episode Title} {Quality Full}"
+    series_folder_format: "{Series Title}"
+    season_folder_format: Season {season}
+    specials_folder_format: S00
+    standard_episode_format: "{Series Title} - S{season:00}E{episode:00} - {Episode Title} {Quality Full}"
     sonarr_api_key: "{{ sonarr_api_key }}"
     sonarr_url: "{{ sonarr_url }}"
   register: result
-- name: test
+- name: Test
   ansible.builtin.debug:
-    msg: "{{result}}"
-- name: assert naming changes
-  assert:
+    msg: "{{ result }}"
+- name: Assert naming changes
+  ansible.builtin.assert:
     that:
       - result.specials_folder_format == "S00"
 # ----------------------------------------------------------------------------
-- name: test idempotency
+- name: Test idempotency
   devopsarr.sonarr.sonarr_naming:
     rename_episodes: true
     replace_illegal_characters: true
     multi_episode_style: 0
     colon_replacement_format: 0
-    daily_episode_format: '{Series Title} - {Air-Date} - {Episode Title} {Quality Full}'
-    anime_episode_format: '{Series Title} - S{season:00}E{episode:00} - {Episode Title} {Quality Full}'
-    series_folder_format: '{Series Title}'
-    season_folder_format: 'Season {season}'
-    specials_folder_format: 'S00'
-    standard_episode_format: '{Series Title} - S{season:00}E{episode:00} - {Episode Title} {Quality Full}'
+    daily_episode_format: "{Series Title} - {Air-Date} - {Episode Title} {Quality Full}"
+    anime_episode_format: "{Series Title} - S{season:00}E{episode:00} - {Episode Title} {Quality Full}"
+    series_folder_format: "{Series Title}"
+    season_folder_format: Season {season}
+    specials_folder_format: S00
+    standard_episode_format: "{Series Title} - S{season:00}E{episode:00} - {Episode Title} {Quality Full}"
     sonarr_api_key: "{{ sonarr_api_key }}"
     sonarr_url: "{{ sonarr_url }}"
   register: result
-- name: assert delay profile idempotency
-  assert:
+- name: Assert delay profile idempotency
+  ansible.builtin.assert:
     that:
       - result.changed == false
       - result.specials_folder_format == "S00"

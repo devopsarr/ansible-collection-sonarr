@@ -1,23 +1,23 @@
 ---
-- name: format a single custom format schema
+- name: Format a single custom format schema
   devopsarr.sonarr.sonarr_custom_format_schema_info:
-    name: "LanguageSpecification"
+    name: LanguageSpecification
     sonarr_api_key: "{{ sonarr_api_key }}"
     sonarr_url: "{{ sonarr_url }}"
   register: result
 
-- name: assert single custom format schema
-  assert:
+- name: Assert single custom format schema
+  ansible.builtin.assert:
     that:
       - result['custom_formats'][0]['implementation'] == 'LanguageSpecification'
 # ----------------------------------------------------------------------------
-- name: format all custom format schemas
+- name: Format all custom format schemas
   devopsarr.sonarr.sonarr_custom_format_schema_info:
     sonarr_api_key: "{{ sonarr_api_key }}"
     sonarr_url: "{{ sonarr_url }}"
   register: result
 
-- name: assert multiple custom format schemas
-  assert:
+- name: Assert multiple custom format schemas
+  ansible.builtin.assert:
     that:
       - result['custom_formats'] | length > 1

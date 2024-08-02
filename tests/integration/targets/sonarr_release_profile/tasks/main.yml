@@ -1,56 +1,56 @@
 ---
-- name: create release profile
+- name: Create release profile
   devopsarr.sonarr.sonarr_release_profile:
     enabled: true
-    name: "Example"
-    required: ["proper"]
-    ignored: ["repack"]
+    name: Example
+    required: [proper]
+    ignored: [repack]
     sonarr_api_key: "{{ sonarr_api_key }}"
     sonarr_url: "{{ sonarr_url }}"
   register: result
-- name: assert release profile creation
-  assert:
+- name: Assert release profile creation
+  ansible.builtin.assert:
     that:
       - result['required'] == ['proper']
 # ----------------------------------------------------------------------------
-- name: edit already present release profile
+- name: Edit already present release profile
   devopsarr.sonarr.sonarr_release_profile:
     enabled: true
-    name: "Example"
-    required: ["proper"]
-    ignored: ["repack", "dvdrip"]
+    name: Example
+    required: [proper]
+    ignored: [repack, dvdrip]
     sonarr_api_key: "{{ sonarr_api_key }}"
     sonarr_url: "{{ sonarr_url }}"
   register: result
-- name: assert release profile changes
-  assert:
+- name: Assert release profile changes
+  ansible.builtin.assert:
     that:
       - result.changed == true
       - result.ignored == ["repack", "dvdrip"]
 # ----------------------------------------------------------------------------
-- name: create already present release profile
+- name: Create already present release profile
   devopsarr.sonarr.sonarr_release_profile:
     enabled: true
-    name: "Example"
-    required: ["proper"]
-    ignored: ["repack", "dvdrip"]
+    name: Example
+    required: [proper]
+    ignored: [repack, dvdrip]
     sonarr_api_key: "{{ sonarr_api_key }}"
     sonarr_url: "{{ sonarr_url }}"
   register: result
-- name: assert release profile idempotency
-  assert:
+- name: Assert release profile idempotency
+  ansible.builtin.assert:
     that:
       - result.changed == false
       - result.ignored == ["repack", "dvdrip"]
 # ----------------------------------------------------------------------------
-- name: delete release profile
+- name: Delete release profile
   devopsarr.sonarr.sonarr_release_profile:
-    name: "Example"
+    name: Example
     sonarr_api_key: "{{ sonarr_api_key }}"
     sonarr_url: "{{ sonarr_url }}"
-    state: 'absent'
+    state: absent
   register: result
-- name: assert release profile deletion
-  assert:
+- name: Assert release profile deletion
+  ansible.builtin.assert:
     that:
       - result['id'] == 0
