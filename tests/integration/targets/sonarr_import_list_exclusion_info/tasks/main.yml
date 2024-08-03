@@ -1,8 +1,8 @@
 ---
-- name: create remote path mapping
+- name: Create remote path mapping
   devopsarr.sonarr.sonarr_import_list_exclusion:
-    title: 'test'
-    tvdb_id: '{{ item }}'
+    title: test
+    tvdb_id: "{{ item }}"
     sonarr_api_key: "{{ sonarr_api_key }}"
     sonarr_url: "{{ sonarr_url }}"
   register: import_list_exclusions
@@ -10,33 +10,33 @@
     - 54321
     - 654321
 
-- name: list a single remote path mapping
+- name: List a single remote path mapping
   devopsarr.sonarr.sonarr_import_list_exclusion_info:
     tvdb_id: 654321
     sonarr_api_key: "{{ sonarr_api_key }}"
     sonarr_url: "{{ sonarr_url }}"
   register: result
 
-- name: assert single remote path mapping
-  assert:
+- name: Assert single remote path mapping
+  ansible.builtin.assert:
     that:
       - result['import_list_exclusions'][0]['title'] == 'test'
 # ----------------------------------------------------------------------------
-- name: list all import list exclusion
+- name: List all import list exclusion
   devopsarr.sonarr.sonarr_import_list_exclusion_info:
     sonarr_api_key: "{{ sonarr_api_key }}"
     sonarr_url: "{{ sonarr_url }}"
   register: result
 
-- name: assert multiple import list exclusion
-  assert:
+- name: Assert multiple import list exclusion
+  ansible.builtin.assert:
     that:
       - result['import_list_exclusions'] | length > 1
 # ----------------------------------------------------------------------------
-- name: clean up remote path mapping
+- name: Clean up remote path mapping
   devopsarr.sonarr.sonarr_import_list_exclusion:
-    title: 'test'
-    tvdb_id: '{{ item }}'
+    title: test
+    tvdb_id: "{{ item }}"
     state: absent
     sonarr_api_key: "{{ sonarr_api_key }}"
     sonarr_url: "{{ sonarr_url }}"

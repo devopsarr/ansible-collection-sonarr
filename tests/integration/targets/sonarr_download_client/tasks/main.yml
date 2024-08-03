@@ -1,183 +1,183 @@
 ---
-- name: create download client
+- name: Create download client
   devopsarr.sonarr.sonarr_download_client:
     remove_completed_downloads: false
     remove_failed_downloads: false
     enable: false
     priority: 1
-    name: "Hadouken"
+    name: Hadouken
     fields:
-    - name: "host"
-      value: "hadouken.lcl"
-    - name: "urlBase"
-      value: "/hadouken/"
-    - name: "port"
-      value: 9091
-    - name: "category"
-      value: "sonarr-tv"
-    - name: "username"
-      value: "username"
-    - name: "password"
-      value: "password"
-    - name: "useSsl"
-      value: false
-    protocol: "torrent"
-    config_contract: "HadoukenSettings"
-    implementation: "Hadouken"
+      - name: host
+        value: hadouken.lcl
+      - name: urlBase
+        value: /hadouken/
+      - name: port
+        value: 9091
+      - name: category
+        value: sonarr-tv
+      - name: username
+        value: username
+      - name: password
+        value: password
+      - name: useSsl
+        value: false
+    protocol: torrent
+    config_contract: HadoukenSettings
+    implementation: Hadouken
     tags: []
     sonarr_api_key: "{{ sonarr_api_key }}"
     sonarr_url: "{{ sonarr_url }}"
   register: result
-- name: assert download client creation
-  assert:
+- name: Assert download client creation
+  ansible.builtin.assert:
     that:
       - result['implementation'] == 'Hadouken'
 # ----------------------------------------------------------------------------
-- name: edit already present download client
+- name: Edit already present download client
   devopsarr.sonarr.sonarr_download_client:
     remove_completed_downloads: false
     remove_failed_downloads: false
     enable: false
     priority: 1
-    name: "Hadouken"
+    name: Hadouken
     fields:
-    - name: "host"
-      value: "hadouken.lcl"
-    - name: "urlBase"
-      value: "/hadouken/"
-    - name: "port"
-      value: 9091
-    - name: "category"
-      value: "sonarr-tv"
-    - name: "username"
-      value: "username"
-    - name: "password"
-      value: "password"
-    - name: "useSsl"
-      value: true
-    protocol: "torrent"
-    config_contract: "HadoukenSettings"
-    implementation: "Hadouken"
+      - name: host
+        value: hadouken.lcl
+      - name: urlBase
+        value: /hadouken/
+      - name: port
+        value: 9091
+      - name: category
+        value: sonarr-tv
+      - name: username
+        value: username
+      - name: password
+        value: password
+      - name: useSsl
+        value: true
+    protocol: torrent
+    config_contract: HadoukenSettings
+    implementation: Hadouken
     tags: []
     sonarr_api_key: "{{ sonarr_api_key }}"
     sonarr_url: "{{ sonarr_url }}"
   register: result
-- name: assert download client changes
-  assert:
+- name: Assert download client changes
+  ansible.builtin.assert:
     that:
       - result.changed == true
 # ----------------------------------------------------------------------------
-- name: test idempotency
+- name: Test idempotency
   devopsarr.sonarr.sonarr_download_client:
     remove_completed_downloads: false
     remove_failed_downloads: false
     enable: false
     priority: 1
-    name: "Hadouken"
+    name: Hadouken
     fields:
-    - name: "host"
-      value: "hadouken.lcl"
-    - name: "urlBase"
-      value: "/hadouken/"
-    - name: "port"
-      value: 9091
-    - name: "category"
-      value: "sonarr-tv"
-    - name: "username"
-      value: "username"
-    - name: "password"
-      value: "password"
-    - name: "useSsl"
-      value: true
-    protocol: "torrent"
-    config_contract: "HadoukenSettings"
-    implementation: "Hadouken"
+      - name: host
+        value: hadouken.lcl
+      - name: urlBase
+        value: /hadouken/
+      - name: port
+        value: 9091
+      - name: category
+        value: sonarr-tv
+      - name: username
+        value: username
+      - name: password
+        value: password
+      - name: useSsl
+        value: true
+    protocol: torrent
+    config_contract: HadoukenSettings
+    implementation: Hadouken
     tags: []
     sonarr_api_key: "{{ sonarr_api_key }}"
     sonarr_url: "{{ sonarr_url }}"
   register: result
-- name: assert download client idempotency
-  assert:
+- name: Assert download client idempotency
+  ansible.builtin.assert:
     that:
       - result.changed == false
 # ----------------------------------------------------------------------------
-- name: test sensitive un-change
+- name: Test sensitive un-change
   devopsarr.sonarr.sonarr_download_client:
     remove_completed_downloads: false
     remove_failed_downloads: false
     enable: false
     priority: 1
-    name: "Hadouken"
+    name: Hadouken
     fields:
-    - name: "host"
-      value: "hadouken.lcl"
-    - name: "urlBase"
-      value: "/hadouken/"
-    - name: "port"
-      value: 9091
-    - name: "category"
-      value: "sonarr-tv"
-    - name: "username"
-      value: "username"
-    - name: "password"
-      value: "password123"
-    - name: "useSsl"
-      value: true
-    protocol: "torrent"
-    config_contract: "HadoukenSettings"
-    implementation: "Hadouken"
+      - name: host
+        value: hadouken.lcl
+      - name: urlBase
+        value: /hadouken/
+      - name: port
+        value: 9091
+      - name: category
+        value: sonarr-tv
+      - name: username
+        value: username
+      - name: password
+        value: password123
+      - name: useSsl
+        value: true
+    protocol: torrent
+    config_contract: HadoukenSettings
+    implementation: Hadouken
     tags: []
     sonarr_api_key: "{{ sonarr_api_key }}"
     sonarr_url: "{{ sonarr_url }}"
   register: result
-- name: assert download client idempotency
-  assert:
+- name: Assert download client idempotency
+  ansible.builtin.assert:
     that:
       - result.changed == false
 # ----------------------------------------------------------------------------
-- name: test key change
+- name: Test key change
   devopsarr.sonarr.sonarr_download_client:
     remove_completed_downloads: false
     remove_failed_downloads: false
     enable: false
     priority: 1
-    name: "Hadouken"
+    name: Hadouken
     fields:
-    - name: "host"
-      value: "hadouken.lcl"
-    - name: "urlBase"
-      value: "/hadouken/"
-    - name: "port"
-      value: 9091
-    - name: "category"
-      value: "sonarr-tv"
-    - name: "username"
-      value: "username"
-    - name: "password"
-      value: "password123"
-    - name: "useSsl"
-      value: true
-    protocol: "torrent"
-    config_contract: "HadoukenSettings"
-    implementation: "Hadouken"
+      - name: host
+        value: hadouken.lcl
+      - name: urlBase
+        value: /hadouken/
+      - name: port
+        value: 9091
+      - name: category
+        value: sonarr-tv
+      - name: username
+        value: username
+      - name: password
+        value: password123
+      - name: useSsl
+        value: true
+    protocol: torrent
+    config_contract: HadoukenSettings
+    implementation: Hadouken
     tags: []
     update_secrets: true
     sonarr_api_key: "{{ sonarr_api_key }}"
     sonarr_url: "{{ sonarr_url }}"
   register: result
-- name: assert download client idempotency
-  assert:
+- name: Assert download client idempotency
+  ansible.builtin.assert:
     that:
       - result.changed == true
 # ----------------------------------------------------------------------------
-- name: delete download client
+- name: Delete download client
   devopsarr.sonarr.sonarr_download_client:
-    name: "Hadouken"
+    name: Hadouken
     sonarr_api_key: "{{ sonarr_api_key }}"
     sonarr_url: "{{ sonarr_url }}"
-    state: 'absent'
+    state: absent
   register: result
-- name: assert download client deletion
-  assert:
+- name: Assert download client deletion
+  ansible.builtin.assert:
     that:
       - result['id'] == 0

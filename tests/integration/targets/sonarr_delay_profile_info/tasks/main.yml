@@ -1,15 +1,15 @@
 ---
-- name: create tag for delay profile
+- name: Create tag for delay profile
   devopsarr.sonarr.sonarr_tag:
     label: "{{ item }}"
     sonarr_api_key: "{{ sonarr_api_key }}"
     sonarr_url: "{{ sonarr_url }}"
   register: tags
   with_items:
-    - 'delay1'
-    - 'delay2'
+    - delay1
+    - delay2
 
-- name: create delay profile
+- name: Create delay profile
   devopsarr.sonarr.sonarr_delay_profile:
     preferred_protocol: torrent
     usenet_delay: 0
@@ -24,41 +24,41 @@
     sonarr_url: "{{ sonarr_url }}"
   with_items: "{{ tags.results }}"
 
-- name: list a single delay profile
+- name: List a single delay profile
   devopsarr.sonarr.sonarr_delay_profile_info:
     tag: "{{ tags.results[0].id }}"
     sonarr_api_key: "{{ sonarr_api_key }}"
     sonarr_url: "{{ sonarr_url }}"
   register: result
 
-- name: assert single delay profile
-  assert:
+- name: Assert single delay profile
+  ansible.builtin.assert:
     that:
       - result['delay_profiles'][0]['preferred_protocol'] == 'torrent'
 # ----------------------------------------------------------------------------
-- name: list all delay profiles
+- name: List all delay profiles
   devopsarr.sonarr.sonarr_delay_profile_info:
     sonarr_api_key: "{{ sonarr_api_key }}"
     sonarr_url: "{{ sonarr_url }}"
   register: result
 
-- name: assert multiple delay profiles
-  assert:
+- name: Assert multiple delay profiles
+  ansible.builtin.assert:
     that:
       - result['delay_profiles'] | length > 2
 # ----------------------------------------------------------------------------
-- name: clean up relay_profiles
+- name: Clean up relay_profiles
   devopsarr.sonarr.sonarr_delay_profile:
     tags: ["{{ item.id }}"]
-    state: 'absent'
+    state: absent
     sonarr_api_key: "{{ sonarr_api_key }}"
     sonarr_url: "{{ sonarr_url }}"
   with_items: "{{ tags.results }}"
 
-- name: clean up tags
+- name: Clean up tags
   devopsarr.sonarr.sonarr_tag:
     label: "{{ item.label }}"
-    state: 'absent'
+    state: absent
     sonarr_api_key: "{{ sonarr_api_key }}"
     sonarr_url: "{{ sonarr_url }}"
   with_items: "{{ tags.results }}"

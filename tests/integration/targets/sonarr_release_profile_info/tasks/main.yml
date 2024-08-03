@@ -1,5 +1,5 @@
 ---
-- name: create release profile
+- name: Create release profile
   devopsarr.sonarr.sonarr_release_profile:
     enabled: true
     name: "{{ item }}"
@@ -7,33 +7,33 @@
     sonarr_api_key: "{{ sonarr_api_key }}"
     sonarr_url: "{{ sonarr_url }}"
   with_items:
-    - 'info_test'
-    - 'info_test1'
+    - info_test
+    - info_test1
 
-- name: list a single release profile
+- name: List a single release profile
   devopsarr.sonarr.sonarr_release_profile_info:
-    name: "info_test"
+    name: info_test
     sonarr_api_key: "{{ sonarr_api_key }}"
     sonarr_url: "{{ sonarr_url }}"
   register: result
 
-- name: assert single release profile
-  assert:
+- name: Assert single release profile
+  ansible.builtin.assert:
     that:
       - result['release_profiles'][0]['name'] == 'info_test'
 # ----------------------------------------------------------------------------
-- name: list all release profiles
+- name: List all release profiles
   devopsarr.sonarr.sonarr_release_profile_info:
     sonarr_api_key: "{{ sonarr_api_key }}"
     sonarr_url: "{{ sonarr_url }}"
   register: result
 
-- name: assert multiple release profiles
-  assert:
+- name: Assert multiple release profiles
+  ansible.builtin.assert:
     that:
       - result['release_profiles'] | length > 1
 # ----------------------------------------------------------------------------
-- name: clean up release profile
+- name: Clean up release profile
   devopsarr.sonarr.sonarr_release_profile:
     enabled: true
     name: "{{ item }}"
@@ -41,5 +41,5 @@
     sonarr_api_key: "{{ sonarr_api_key }}"
     sonarr_url: "{{ sonarr_url }}"
   with_items:
-    - 'info_test'
-    - 'info_test1'
+    - info_test
+    - info_test1

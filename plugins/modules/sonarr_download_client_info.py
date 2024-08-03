@@ -115,41 +115,54 @@ except ImportError:
     HAS_SONARR_LIBRARY = False
 
 
-def run_module():
+def init_module_args():
     # define available arguments/parameters a user can pass to the module
-    module_args = dict(
+    return dict(
         name=dict(type='str'),
     )
 
+
+def list_download_clients(result):
+    try:
+        return client.list_download_client()
+    except sonarr.ApiException as e:
+        module.fail_json('Error listing download clients: {}\n body: {}'.format(to_native(e.reason), to_native(e.body)), **result)
+    except Exception as e:
+        module.fail_json('Error listing download clients: {}'.format(to_native(e)), **result)
+
+
+def populate_download_clients(result):
+    download_clients = []
+    # Check if a resource is present already.
+    for download_client in list_download_clients(result):
+        if module.params['name']:
+            if download_client.name == module.params['name']:
+                download_clients = [download_client.model_dump(by_alias=False)]
+        else:
+            download_clients.append(download_client.model_dump(by_alias=False))
+    return download_clients
+
+
+def run_module():
+    global client
+    global module
+
+    # Define available arguments/parameters a user can pass to the module
+    module = SonarrModule(
+        argument_spec=init_module_args(),
+        supports_check_mode=True,
+    )
+    # Init client and result.
+    client = sonarr.DownloadClientApi(module.api)
     result = dict(
         changed=False,
         download_clients=[],
     )
 
-    module = SonarrModule(
-        argument_spec=module_args,
-        supports_check_mode=True
-    )
-
-    client = sonarr.DownloadClientApi(module.api)
-
     # List resources.
-    try:
-        clients = client.list_download_client()
-    except Exception as e:
-        module.fail_json('Error listing download clients: %s' % to_native(e.reason), **result)
+    result.update(download_clients=populate_download_clients(result))
 
-    download_clients = []
-    # Check if a resource is present already.
-    for download_client in clients:
-        if module.params['name']:
-            if download_client['name'] == module.params['name']:
-                download_clients = [download_client.dict(by_alias=False)]
-        else:
-            download_clients.append(download_client.dict(by_alias=False))
-
-    result.update(download_clients=download_clients)
-
+    # Exit with data.
     module.exit_json(**result)
 
 

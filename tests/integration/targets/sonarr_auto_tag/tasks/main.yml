@@ -1,90 +1,90 @@
 ---
-- name: create tag
+- name: Create tag
   devopsarr.sonarr.sonarr_tag:
-    label: 'autotagtest'
+    label: autotagtest
     sonarr_api_key: "{{ sonarr_api_key }}"
     sonarr_url: "{{ sonarr_url }}"
   register: tag
 
-- name: create auto tag
+- name: Create auto tag
   devopsarr.sonarr.sonarr_auto_tag:
     remove_tags_automatically: false
-    name: "Type"
+    name: Type
     tags: ["{{ tag['id'] }}"]
     specifications:
-    - name: "anime"
-      implementation: "SeriesTypeSpecification"
-      negate: true
-      required: false
-      fields:
-      - name: "value"
-        value: 2
+      - name: anime
+        implementation: SeriesTypeSpecification
+        negate: true
+        required: false
+        fields:
+          - name: value
+            value: 2
     sonarr_api_key: "{{ sonarr_api_key }}"
     sonarr_url: "{{ sonarr_url }}"
   register: result
-- name: assert auto tag creation
-  assert:
+- name: Assert auto tag creation
+  ansible.builtin.assert:
     that:
       - result['name'] == 'Type'
 # ----------------------------------------------------------------------------
-- name: edit already present auto tag
+- name: Edit already present auto tag
   devopsarr.sonarr.sonarr_auto_tag:
     remove_tags_automatically: false
-    name: "Type"
+    name: Type
     tags: ["{{ tag['id'] }}"]
     specifications:
-    - name: "daily"
-      implementation: "SeriesTypeSpecification"
-      negate: true
-      required: false
-      fields:
-      - name: "value"
-        value: 1
+      - name: daily
+        implementation: SeriesTypeSpecification
+        negate: true
+        required: false
+        fields:
+          - name: value
+            value: 1
     sonarr_api_key: "{{ sonarr_api_key }}"
     sonarr_url: "{{ sonarr_url }}"
   register: result
-- name: assert auto tag changes
-  assert:
+- name: Assert auto tag changes
+  ansible.builtin.assert:
     that:
       - result.changed == true
 # ----------------------------------------------------------------------------
-- name: test idempotency
+- name: Test idempotency
   devopsarr.sonarr.sonarr_auto_tag:
     remove_tags_automatically: false
-    name: "Type"
+    name: Type
     tags: ["{{ tag['id'] }}"]
     specifications:
-    - name: "daily"
-      implementation: "SeriesTypeSpecification"
-      negate: true
-      required: false
-      fields:
-      - name: "value"
-        value: 1
+      - name: daily
+        implementation: SeriesTypeSpecification
+        negate: true
+        required: false
+        fields:
+          - name: value
+            value: 1
     sonarr_api_key: "{{ sonarr_api_key }}"
     sonarr_url: "{{ sonarr_url }}"
   register: result
-- name: assert auto tag idempotency
-  assert:
+- name: Assert auto tag idempotency
+  ansible.builtin.assert:
     that:
       - result.changed == false
 # ----------------------------------------------------------------------------
-- name: delete auto tag
+- name: Delete auto tag
   devopsarr.sonarr.sonarr_auto_tag:
-    name: "Type"
+    name: Type
     sonarr_api_key: "{{ sonarr_api_key }}"
     sonarr_url: "{{ sonarr_url }}"
-    state: 'absent'
+    state: absent
   register: result
-- name: assert auto tag deletion
-  assert:
+- name: Assert auto tag deletion
+  ansible.builtin.assert:
     that:
       - result['id'] == 0
 
-- name: clean up tag
+- name: Clean up tag
   devopsarr.sonarr.sonarr_tag:
-    label: 'autotagtest'
-    state: 'absent'
+    label: autotagtest
+    state: absent
     sonarr_api_key: "{{ sonarr_api_key }}"
     sonarr_url: "{{ sonarr_url }}"
   register: result

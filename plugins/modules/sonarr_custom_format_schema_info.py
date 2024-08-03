@@ -74,41 +74,54 @@ except ImportError:
     HAS_SONARR_LIBRARY = False
 
 
-def run_module():
+def init_module_args():
     # define available arguments/parameters a user can pass to the module
-    module_args = dict(
+    return dict(
         name=dict(type='str'),
     )
 
+
+def list_custom_format_schema(result):
+    try:
+        return client.list_custom_format_schema()
+    except sonarr.ApiException as e:
+        module.fail_json('Error listing custom formats: {}\n body: {}'.format(to_native(e.reason), to_native(e.body)), **result)
+    except Exception as e:
+        module.fail_json('Error listing custom formats: {}'.format(to_native(e)), **result)
+
+
+def populate_custom_format_schema(result):
+    custom_formats = []
+    # Check if a resource is present already.
+    for custom_format in list_custom_format_schema(result):
+        if module.params['name']:
+            if custom_format.implementation == module.params['name']:
+                custom_formats = [custom_format.model_dump(by_alias=False)]
+        else:
+            custom_formats.append(custom_format.model_dump(by_alias=False))
+    return custom_formats
+
+
+def run_module():
+    global client
+    global module
+
+    # Define available arguments/parameters a user can pass to the module
+    module = SonarrModule(
+        argument_spec=init_module_args(),
+        supports_check_mode=True,
+    )
+    # Init client and result.
+    client = sonarr.CustomFormatApi(module.api)
     result = dict(
         changed=False,
         custom_formats=[],
     )
 
-    module = SonarrModule(
-        argument_spec=module_args,
-        supports_check_mode=True
-    )
-
-    client = sonarr.CustomFormatApi(module.api)
-
     # List resources.
-    try:
-        formats = client.list_custom_format_schema()
-    except Exception as e:
-        module.fail_json('Error listing custom formats: %s' % to_native(e.reason), **result)
+    result.update(custom_formats=populate_custom_format_schema(result))
 
-    custom_formats = []
-    # Check if a resource is present already.
-    for custom_format in formats:
-        if module.params['name']:
-            if custom_format['implementation'] == module.params['name']:
-                custom_formats = [custom_format.dict(by_alias=False)]
-        else:
-            custom_formats.append(custom_format.dict(by_alias=False))
-
-    result.update(custom_formats=custom_formats)
-
+    # Exit with data.
     module.exit_json(**result)
 
 

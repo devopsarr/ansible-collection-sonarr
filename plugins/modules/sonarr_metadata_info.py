@@ -95,41 +95,54 @@ except ImportError:
     HAS_SONARR_LIBRARY = False
 
 
-def run_module():
+def init_module_args():
     # define available arguments/parameters a user can pass to the module
-    module_args = dict(
+    return dict(
         name=dict(type='str'),
     )
 
+
+def list_metadatas(result):
+    try:
+        return client.list_metadata()
+    except sonarr.ApiException as e:
+        module.fail_json('Error listing metadatas: {}\n body: {}'.format(to_native(e.reason), to_native(e.body)), **result)
+    except Exception as e:
+        module.fail_json('Error listing metadatas: {}'.format(to_native(e)), **result)
+
+
+def populate_metadatas(result):
+    metadatas = []
+    # Check if a resource is present already.
+    for metadata in list_metadatas(result):
+        if module.params['name']:
+            if metadata.name == module.params['name']:
+                metadatas = [metadata.model_dump(by_alias=False)]
+        else:
+            metadatas.append(metadata.model_dump(by_alias=False))
+    return metadatas
+
+
+def run_module():
+    global client
+    global module
+
+    # Define available arguments/parameters a user can pass to the module
+    module = SonarrModule(
+        argument_spec=init_module_args(),
+        supports_check_mode=True,
+    )
+    # Init client and result.
+    client = sonarr.MetadataApi(module.api)
     result = dict(
         changed=False,
         metadatas=[],
     )
 
-    module = SonarrModule(
-        argument_spec=module_args,
-        supports_check_mode=True
-    )
-
-    client = sonarr.MetadataApi(module.api)
-
     # List resources.
-    try:
-        metadata_list = client.list_metadata()
-    except Exception as e:
-        module.fail_json('Error listing metadatas: %s' % to_native(e.reason), **result)
+    result.update(metadatas=populate_metadatas(result))
 
-    metadatas = []
-    # Check if a resource is present already.
-    for metadata in metadata_list:
-        if module.params['name']:
-            if metadata['name'] == module.params['name']:
-                metadatas = [metadata.dict(by_alias=False)]
-        else:
-            metadatas.append(metadata.dict(by_alias=False))
-
-    result.update(metadatas=metadatas)
-
+    # Exit with data.
     module.exit_json(**result)
 
 

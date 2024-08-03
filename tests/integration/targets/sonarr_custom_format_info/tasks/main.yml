@@ -1,50 +1,50 @@
 ---
-- name: create custom format
+- name: Create custom format
   devopsarr.sonarr.sonarr_custom_format:
     include_custom_format_when_renaming: false
     name: "{{ item }}"
     specifications:
-    - name: "arabic"
-      implementation: "LanguageSpecification"
-      negate: false
-      required: true
-      fields:
-      - name: "value"
-        value: 26
+      - name: arabic
+        implementation: LanguageSpecification
+        negate: false
+        required: true
+        fields:
+          - name: value
+            value: 26
     sonarr_api_key: "{{ sonarr_api_key }}"
     sonarr_url: "{{ sonarr_url }}"
   with_items:
-    - 'info_test'
-    - 'info_test1'
+    - info_test
+    - info_test1
 
-- name: list a single custom format
+- name: List a single custom format
   devopsarr.sonarr.sonarr_custom_format_info:
-    name: "info_test"
+    name: info_test
     sonarr_api_key: "{{ sonarr_api_key }}"
     sonarr_url: "{{ sonarr_url }}"
   register: result
 
-- name: assert single custom format
-  assert:
+- name: Assert single custom format
+  ansible.builtin.assert:
     that:
       - result['custom_formats'][0]['name'] == 'info_test'
 # ----------------------------------------------------------------------------
-- name: list all custom formats
+- name: List all custom formats
   devopsarr.sonarr.sonarr_custom_format_info:
     sonarr_api_key: "{{ sonarr_api_key }}"
     sonarr_url: "{{ sonarr_url }}"
   register: result
-- name: assert multiple custom formats
-  assert:
+- name: Assert multiple custom formats
+  ansible.builtin.assert:
     that:
       - result['custom_formats'] | length > 1
 # ----------------------------------------------------------------------------
-- name: clean up custom format
+- name: Clean up custom format
   devopsarr.sonarr.sonarr_custom_format:
     name: "{{ item }}"
     state: absent
     sonarr_api_key: "{{ sonarr_api_key }}"
     sonarr_url: "{{ sonarr_url }}"
   with_items:
-    - 'info_test'
-    - 'info_test1'
+    - info_test
+    - info_test1

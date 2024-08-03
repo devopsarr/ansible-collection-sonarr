@@ -1,5 +1,5 @@
 ---
-- name: create download client
+- name: Create download client
   devopsarr.sonarr.sonarr_download_client:
     name: "{{ item }}"
     remove_completed_downloads: false
@@ -7,59 +7,59 @@
     enable: false
     priority: 1
     fields:
-    - name: "host"
-      value: "hadouken.lcl"
-    - name: "urlBase"
-      value: "/hadouken/"
-    - name: "port"
-      value: 9091
-    - name: "category"
-      value: "sonarr-tv"
-    - name: "username"
-      value: "username"
-    - name: "password"
-      value: "password"
-    - name: "useSsl"
-      value: false
-    protocol: "torrent"
-    config_contract: "HadoukenSettings"
-    implementation: "Hadouken"
+      - name: host
+        value: hadouken.lcl
+      - name: urlBase
+        value: /hadouken/
+      - name: port
+        value: 9091
+      - name: category
+        value: sonarr-tv
+      - name: username
+        value: username
+      - name: password
+        value: password
+      - name: useSsl
+        value: false
+    protocol: torrent
+    config_contract: HadoukenSettings
+    implementation: Hadouken
     tags: []
     sonarr_api_key: "{{ sonarr_api_key }}"
     sonarr_url: "{{ sonarr_url }}"
   with_items:
-    - 'info_test'
-    - 'info_test1'
+    - info_test
+    - info_test1
 
-- name: list a single download client
+- name: List a single download client
   devopsarr.sonarr.sonarr_download_client_info:
-    name: "info_test"
+    name: info_test
     sonarr_api_key: "{{ sonarr_api_key }}"
     sonarr_url: "{{ sonarr_url }}"
   register: result
 
-- name: assert single download client
-  assert:
+- name: Assert single download client
+  ansible.builtin.assert:
     that:
       - result['download_clients'][0]['name'] == 'info_test'
 # ----------------------------------------------------------------------------
-- name: list all download clients
+- name: List all download clients
   devopsarr.sonarr.sonarr_download_client_info:
     sonarr_api_key: "{{ sonarr_api_key }}"
     sonarr_url: "{{ sonarr_url }}"
   register: result
 
-- name: assert multiple download clients
-  assert:
+- name: Assert multiple download clients
+  ansible.builtin.assert:
     that:
       - result['download_clients'] | length > 1
 # ----------------------------------------------------------------------------
-- name: clean up download client
+- name: Clean up download client
   devopsarr.sonarr.sonarr_download_client:
     name: "{{ item }}"
     state: absent
     sonarr_api_key: "{{ sonarr_api_key }}"
     sonarr_url: "{{ sonarr_url }}"
   with_items:
-    - 'info_test'
-    - 'info_test1'
+    - info_test
+    - info_test1

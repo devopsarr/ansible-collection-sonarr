@@ -1,6 +1,6 @@
 ---
 # ----------------------------------------------------------------------------
-- name: edit quality
+- name: Edit quality
   devopsarr.sonarr.sonarr_quality:
     name: HDTV-2160p
     title: HDTV-2160p
@@ -10,15 +10,15 @@
     sonarr_api_key: "{{ sonarr_api_key }}"
     sonarr_url: "{{ sonarr_url }}"
   register: result
-- name: test
+- name: Test
   ansible.builtin.debug:
-    msg: "{{result}}"
-- name: assert quality changes
-  assert:
+    msg: "{{ result }}"
+- name: Assert quality changes
+  ansible.builtin.assert:
     that:
       - result.min_size == 1.0
 # ----------------------------------------------------------------------------
-- name: test idempotency
+- name: Test idempotency
   devopsarr.sonarr.sonarr_quality:
     name: HDTV-2160p
     title: HDTV-2160p
@@ -28,8 +28,8 @@
     sonarr_api_key: "{{ sonarr_api_key }}"
     sonarr_url: "{{ sonarr_url }}"
   register: result
-- name: assert delay profile idempotency
-  assert:
+- name: Assert quality idempotency
+  ansible.builtin.assert:
     that:
       - result.changed == false
       - result.min_size == 1.0

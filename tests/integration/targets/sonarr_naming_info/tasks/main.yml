@@ -1,10 +1,10 @@
 ---
-- name: get info
+- name: Get info
   devopsarr.sonarr.sonarr_naming_info:
     sonarr_api_key: "{{ sonarr_api_key }}"
     sonarr_url: "{{ sonarr_url }}"
   register: result
-- name: assert info population
-  assert:
+- name: Assert info population
+  ansible.builtin.assert:
     that:
       - result['id'] == 1

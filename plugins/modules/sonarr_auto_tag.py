@@ -147,11 +147,9 @@ def is_changed(status, want):
     return False
 
 
-def run_module():
-    specification_helper = SpecificationHelper()
-
+def init_module_args():
     # define available arguments/parameters a user can pass to the module
-    module_args = dict(
+    return dict(
         name=dict(type='str', required=True),
         remove_tags_automatically=dict(type='bool'),
         tags=dict(type='list', elements='int', default=[]),
@@ -159,73 +157,113 @@ def run_module():
         state=dict(default='present', type='str', choices=['present', 'absent']),
     )
 
+
+def create_auto_tagging(want, result):
+    result['changed'] = True
+    # Only without check mode.
+    if not module.check_mode:
+        try:
+            response = client.create_auto_tagging(auto_tagging_resource=want)
+        except sonarr.ApiException as e:
+            module.fail_json('Error creating auto tag: {}\n body: {}'.format(to_native(e.reason), to_native(e.body)), **result)
+        except Exception as e:
+            module.fail_json('Error creating auto tag: {}'.format(to_native(e)), **result)
+        result.update(response.model_dump(by_alias=False))
+    module.exit_json(**result)
+
+
+def list_auto_taggings(result):
+    try:
+        return client.list_auto_tagging()
+    except sonarr.ApiException as e:
+        module.fail_json('Error listing auto tags: {}\n body: {}'.format(to_native(e.reason), to_native(e.body)), **result)
+    except Exception as e:
+        module.fail_json('Error listing auto tags: {}'.format(to_native(e)), **result)
+
+
+def find_auto_tagging(name, result):
+    for auto_tagging in list_auto_taggings(result):
+        if auto_tagging.name == name:
+            return auto_tagging
+    return None
+
+
+def update_auto_tagging(want, result):
+    result['changed'] = True
+    # Only without check mode.
+    if not module.check_mode:
+        try:
+            response = client.update_auto_tagging(auto_tagging_resource=want, id=str(want.id))
+        except sonarr.ApiException as e:
+            module.fail_json('Error updating auto tag: {}\n body: {}'.format(to_native(e.reason), to_native(e.body)), **result)
+        except Exception as e:
+            module.fail_json('Error updating auto tag: {}'.format(to_native(e)), **result)
+    # No need to exit module since it will exit by default either way
+    result.update(response.model_dump(by_alias=False))
+
+
+def delete_auto_tagging(result):
+    if result['id'] != 0:
+        result['changed'] = True
+        if not module.check_mode:
+            try:
+                client.delete_auto_tagging(result['id'])
+            except sonarr.ApiException as e:
+                module.fail_json('Error deleting auto tag: {}\n body: {}'.format(to_native(e.reason), to_native(e.body)), **result)
+            except Exception as e:
+                module.fail_json('Error deleting auto tag: {}'.format(to_native(e)), **result)
+            result['id'] = 0
+    module.exit_json(**result)
+
+
+def run_module():
+    global client
+    global module
+    global specification_helper
+
+    # Init helper.
+    specification_helper = SpecificationHelper()
+
+    # Define available arguments/parameters a user can pass to the module
+    module = SonarrModule(
+        argument_spec=init_module_args(),
+        supports_check_mode=True,
+    )
+
+    # Init client and result.
+    client = sonarr.AutoTaggingApi(module.api)
     result = dict(
         changed=False,
         id=0,
     )
 
-    module = SonarrModule(
-        argument_spec=module_args,
-        supports_check_mode=True
-    )
-
-    client = sonarr.AutoTaggingApi(module.api)
-
-    # list resources.
-    try:
-        tags = client.list_auto_tagging()
-    except Exception as e:
-        module.fail_json('Error listing auto tags: %s' % to_native(e.reason), **result)
-
-    state = sonarr.AutoTaggingResource()
     # Check if a resource is present already.
-    for auto_tag in tags:
-        if auto_tag['name'] == module.params['name']:
-            result.update(auto_tag.dict(by_alias=False))
-            state = auto_tag
+    state = find_auto_tagging(module.params['name'], result)
+    if state:
+        result.update(state.model_dump(by_alias=False))
 
     # Delete the resource if needed.
     if module.params['state'] == 'absent':
-        if result['id'] != 0:
-            result['changed'] = True
-            if not module.check_mode:
-                try:
-                    response = client.delete_auto_tagging(result['id'])
-                except Exception as e:
-                    module.fail_json('Error deleting auto tag: %s' % to_native(e.reason), **result)
-                result['id'] = 0
-        module.exit_json(**result)
+        delete_auto_tagging(result)
 
-    want = sonarr.AutoTaggingResource(**{
-        'name': module.params['name'],
-        'remove_tags_automatically': module.params['remove_tags_automatically'],
-        'tags': module.params['tags'],
-        'specifications': specification_helper.populate_specifications(module.params['specifications'], 'auto_tag'),
-    })
+    # Set wanted resource.
+    want = sonarr.AutoTaggingResource(
+        name=module.params['name'],
+        remove_tags_automatically=module.params['remove_tags_automatically'],
+        tags=module.params['tags'],
+        specifications=specification_helper.populate_specifications(module.params['specifications'], 'auto_tag'),
+    )
 
-    # Create a new resource.
+    # Create a new resource, if needed.
     if result['id'] == 0:
-        result['changed'] = True
-        # Only without check mode.
-        if not module.check_mode:
-            try:
-                response = client.create_auto_tagging(auto_tagging_resource=want)
-            except Exception as e:
-                module.fail_json('Error creating auto tag: %s' % to_native(e.reason), **result)
-            result.update(response.dict(by_alias=False))
-        module.exit_json(**result)
+        create_auto_tagging(want, result)
 
     # Update an existing resource.
     want.id = result['id']
     if is_changed(state, want):
-        result['changed'] = True
-        if not module.check_mode:
-            try:
-                response = client.update_auto_tagging(auto_tagging_resource=want, id=str(want.id))
-            except Exception as e:
-                module.fail_json('Error updating auto tag: %s' % to_native(e), **result)
-        result.update(response.dict(by_alias=False))
+        update_auto_tagging(want, result)
 
+    # Exit whith no changes.
     module.exit_json(**result)
 
 

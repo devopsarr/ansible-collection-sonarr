@@ -76,7 +76,6 @@ auto_tags:
 '''
 
 from ansible_collections.devopsarr.sonarr.plugins.module_utils.sonarr_module import SonarrModule
-from ansible_collections.devopsarr.sonarr.plugins.module_utils.sonarr_specification_utils import SpecificationHelper
 from ansible.module_utils.common.text.converters import to_native
 
 try:
@@ -86,43 +85,54 @@ except ImportError:
     HAS_SONARR_LIBRARY = False
 
 
-def run_module():
-    specification_helper = SpecificationHelper()
-
+def init_module_args():
     # define available arguments/parameters a user can pass to the module
-    module_args = dict(
+    return dict(
         name=dict(type='str'),
     )
 
+
+def list_auto_tags(result):
+    try:
+        return client.list_auto_tagging()
+    except sonarr.ApiException as e:
+        module.fail_json('Error listing auto tags: {}\n body: {}'.format(to_native(e.reason), to_native(e.body)), **result)
+    except Exception as e:
+        module.fail_json('Error listing auto tags: {}'.format(to_native(e)), **result)
+
+
+def populate_auto_tags(result):
+    auto_tags = []
+    # Check if a resource is present already.
+    for auto_tag in list_auto_tags(result):
+        if module.params['name']:
+            if auto_tag.name == module.params['name']:
+                auto_tags = [auto_tag.model_dump(by_alias=False)]
+        else:
+            auto_tags.append(auto_tag.model_dump(by_alias=False))
+    return auto_tags
+
+
+def run_module():
+    global client
+    global module
+
+    # Define available arguments/parameters a user can pass to the module
+    module = SonarrModule(
+        argument_spec=init_module_args(),
+        supports_check_mode=True,
+    )
+    # Init client and result.
+    client = sonarr.AutoTaggingApi(module.api)
     result = dict(
         changed=False,
         auto_tags=[],
     )
 
-    module = SonarrModule(
-        argument_spec=module_args,
-        supports_check_mode=True
-    )
+    # List resources.
+    result.update(auto_tags=populate_auto_tags(result))
 
-    client = sonarr.AutoTaggingApi(module.api)
-
-    # list resources.
-    try:
-        tags = client.list_auto_tagging()
-    except Exception as e:
-        module.fail_json('Error listing auto tags: %s' % to_native(e.reason), **result)
-
-    auto_tags = []
-    # Check if a resource is present already.
-    for auto_tag in tags:
-        if module.params['name']:
-            if auto_tag['name'] == module.params['name']:
-                auto_tags = [auto_tag.dict(by_alias=False)]
-        else:
-            auto_tags.append(auto_tag.dict(by_alias=False))
-
-    result.update(auto_tags=auto_tags)
-
+    # Exit with data.
     module.exit_json(**result)
 
 

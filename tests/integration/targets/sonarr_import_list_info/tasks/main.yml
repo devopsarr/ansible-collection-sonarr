@@ -1,58 +1,58 @@
 ---
-- name: create import list
+- name: Create import list
   devopsarr.sonarr.sonarr_import_list:
     name: "{{ item }}"
     enable_automatic_add: false
-    should_monitor: "unknown"
+    should_monitor: unknown
     quality_profile_id: 1
-    root_folder_path: "/config"
+    root_folder_path: /config
     season_folder: false
     fields:
-    - name: "apiKey"
-      value: "Key"
-    - name: "baseUrl"
-      value: "localhost"
-    - name: "languageProfileIds"
-      value: [1]
-    series_type: "standard"
-    config_contract: "SonarrSettings"
-    implementation: "SonarrImport"
+      - name: apiKey
+        value: Key
+      - name: baseUrl
+        value: localhost
+      - name: languageProfileIds
+        value: [1]
+    series_type: standard
+    config_contract: SonarrSettings
+    implementation: SonarrImport
     tags: []
     sonarr_api_key: "{{ sonarr_api_key }}"
     sonarr_url: "{{ sonarr_url }}"
   with_items:
-    - 'info_test'
-    - 'info_test1'
+    - info_test
+    - info_test1
 
-- name: list a single import list
+- name: List a single import list
   devopsarr.sonarr.sonarr_import_list_info:
-    name: "info_test"
+    name: info_test
     sonarr_api_key: "{{ sonarr_api_key }}"
     sonarr_url: "{{ sonarr_url }}"
   register: result
 
-- name: assert single import list
-  assert:
+- name: Assert single import list
+  ansible.builtin.assert:
     that:
       - result['import_lists'][0]['name'] == 'info_test'
 # ----------------------------------------------------------------------------
-- name: list all import lists
+- name: List all import lists
   devopsarr.sonarr.sonarr_import_list_info:
     sonarr_api_key: "{{ sonarr_api_key }}"
     sonarr_url: "{{ sonarr_url }}"
   register: result
 
-- name: assert multiple import lists
-  assert:
+- name: Assert multiple import lists
+  ansible.builtin.assert:
     that:
       - result['import_lists'] | length > 1
 # ----------------------------------------------------------------------------
-- name: clean up import list
+- name: Clean up import list
   devopsarr.sonarr.sonarr_import_list:
     name: "{{ item }}"
     state: absent
     sonarr_api_key: "{{ sonarr_api_key }}"
     sonarr_url: "{{ sonarr_url }}"
   with_items:
-    - 'info_test'
-    - 'info_test1'
+    - info_test
+    - info_test1

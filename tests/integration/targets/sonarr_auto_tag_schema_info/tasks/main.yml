@@ -1,23 +1,23 @@
 ---
-- name: tag a single auto tag schema
+- name: Tag a single auto tag schema
   devopsarr.sonarr.sonarr_auto_tag_schema_info:
-    name: "SeriesTypeSpecification"
+    name: SeriesTypeSpecification
     sonarr_api_key: "{{ sonarr_api_key }}"
     sonarr_url: "{{ sonarr_url }}"
   register: result
 
-- name: assert single auto tag schema
-  assert:
+- name: Assert single auto tag schema
+  ansible.builtin.assert:
     that:
       - result['auto_tags'][0]['implementation'] == 'SeriesTypeSpecification'
 # ----------------------------------------------------------------------------
-- name: tag all auto tag schemas
+- name: Tag all auto tag schemas
   devopsarr.sonarr.sonarr_auto_tag_schema_info:
     sonarr_api_key: "{{ sonarr_api_key }}"
     sonarr_url: "{{ sonarr_url }}"
   register: result
 
-- name: assert multiple auto tag schemas
-  assert:
+- name: Assert multiple auto tag schemas
+  ansible.builtin.assert:
     that:
       - result['auto_tags'] | length > 1

@@ -58,81 +58,6 @@ languages:
             returned: always
             type: str
             sample: "Example"
-        on_grab:
-            description: On grab flag.
-            returned: always
-            type: bool
-            sample: true
-        on_download:
-            description: On download flag.
-            returned: always
-            type: bool
-            sample: false
-        on_rename:
-            description: On rename flag.
-            returned: always
-            type: bool
-            sample: true
-        on_series_add:
-            description: On series add flag.
-            returned: always
-            type: bool
-            sample: true
-        on_series_delete:
-            description: On series delete flag.
-            returned: always
-            type: bool
-            sample: true
-        on_episode_file_delete:
-            description: On episode file delete flag.
-            returned: always
-            type: bool
-            sample: true
-        on_episode_file_delete_for_upgrade:
-            description: On episode file delete for upgrade flag.
-            returned: always
-            type: bool
-            sample: true
-        on_health_issue:
-            description: On health issue flag.
-            returned: always
-            type: bool
-            sample: true
-        on_health_restored:
-            description: On health restored flag.
-            returned: always
-            type: bool
-            sample: true
-        on_application_update:
-            description: On application update flag.
-            returned: always
-            type: bool
-            sample: true
-        on_manual_interaction_required:
-            description: On manual interaction required flag.
-            returned: always
-            type: bool
-            sample: true
-        config_contract:
-            description: Config contract.
-            returned: always
-            type: str
-            sample: "WebhookSettings"
-        implementation:
-            description: Implementation.
-            returned: always
-            type: str
-            sample: "Webhook"
-        tags:
-            description: Tag list.
-            type: list
-            returned: always
-            elements: int
-            sample: [1,2]
-        fields:
-            description: field list.
-            type: list
-            returned: always
 '''
 
 from ansible_collections.devopsarr.sonarr.plugins.module_utils.sonarr_module import SonarrModule
@@ -145,41 +70,54 @@ except ImportError:
     HAS_SONARR_LIBRARY = False
 
 
-def run_module():
+def init_module_args():
     # define available arguments/parameters a user can pass to the module
-    module_args = dict(
+    return dict(
         name=dict(type='str'),
     )
 
+
+def list_languages(result):
+    try:
+        return client.list_language()
+    except sonarr.ApiException as e:
+        module.fail_json('Error getting languages: {}\n body: {}'.format(to_native(e.reason), to_native(e.body)), **result)
+    except Exception as e:
+        module.fail_json('Error getting languages: {}'.format(to_native(e)), **result)
+
+
+def populate_languages(result):
+    languages = []
+    # Check if a resource is present already.
+    for language in list_languages(result):
+        if module.params['name']:
+            if language.name == module.params['name']:
+                languages = [language.model_dump(by_alias=False)]
+        else:
+            languages.append(language.model_dump(by_alias=False))
+    return languages
+
+
+def run_module():
+    global client
+    global module
+
+    # Define available arguments/parameters a user can pass to the module
+    module = SonarrModule(
+        argument_spec=init_module_args(),
+        supports_check_mode=True,
+    )
+    # Init client and result.
+    client = sonarr.LanguageApi(module.api)
     result = dict(
         changed=False,
         languages=[],
     )
 
-    module = SonarrModule(
-        argument_spec=module_args,
-        supports_check_mode=True
-    )
-
-    client = sonarr.LanguageApi(module.api)
-
     # List resources.
-    try:
-        language_list = client.list_language()
-    except Exception as e:
-        module.fail_json('Error listing languages: %s' % to_native(e.reason), **result)
+    result.update(languages=populate_languages(result))
 
-    languages = []
-    # Check if a resource is present already.
-    for language in language_list:
-        if module.params['name']:
-            if language['name'] == module.params['name']:
-                languages = [language.dict(by_alias=False)]
-        else:
-            languages.append(language.dict(by_alias=False))
-
-    result.update(languages=languages)
-
+    # Exit with data.
     module.exit_json(**result)
 
 

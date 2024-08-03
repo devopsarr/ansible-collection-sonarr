@@ -1,34 +1,34 @@
 ---
-- name: create tag
+- name: Create tag
   devopsarr.sonarr.sonarr_tag:
-    label: 'hello'
+    label: hello
     sonarr_api_key: "{{ sonarr_api_key }}"
     sonarr_url: "{{ sonarr_url }}"
   register: result
-- name: assert tag creation
-  assert:
+- name: Assert tag creation
+  ansible.builtin.assert:
     that:
       - result['label'] == 'hello'
 # ----------------------------------------------------------------------------
-- name: create already present tag
+- name: Create already present tag
   devopsarr.sonarr.sonarr_tag:
-    label: 'hello'
+    label: hello
     sonarr_api_key: "{{ sonarr_api_key }}"
     sonarr_url: "{{ sonarr_url }}"
   register: result
-- name: assert tag idempotency
-  assert:
+- name: Assert tag idempotency
+  ansible.builtin.assert:
     that:
       - result.changed == false
 # ----------------------------------------------------------------------------
-- name: delete tag
+- name: Delete tag
   devopsarr.sonarr.sonarr_tag:
-    label: 'hello'
-    state: 'absent'
+    label: hello
+    state: absent
     sonarr_api_key: "{{ sonarr_api_key }}"
     sonarr_url: "{{ sonarr_url }}"
   register: result
-- name: assert tag deletion
-  assert:
+- name: Assert tag deletion
+  ansible.builtin.assert:
     that:
       - result['id'] == 0

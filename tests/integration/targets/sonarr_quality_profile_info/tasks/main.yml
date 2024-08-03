@@ -1,23 +1,23 @@
 ---
-- name: list a single quality profile
+- name: List a single quality profile
   devopsarr.sonarr.sonarr_quality_profile_info:
-    name: "Any"
+    name: Any
     sonarr_api_key: "{{ sonarr_api_key }}"
     sonarr_url: "{{ sonarr_url }}"
   register: result
 
-- name: assert single quality profile
-  assert:
+- name: Assert single quality profile
+  ansible.builtin.assert:
     that:
       - result['quality_profiles'][0]['name'] == 'Any'
 # ----------------------------------------------------------------------------
-- name: list all quality profiles
+- name: List all quality profiles
   devopsarr.sonarr.sonarr_quality_profile_info:
     sonarr_api_key: "{{ sonarr_api_key }}"
     sonarr_url: "{{ sonarr_url }}"
   register: result
 
-- name: assert multiple quality profiles
-  assert:
+- name: Assert multiple quality profiles
+  ansible.builtin.assert:
     that:
       - result['quality_profiles'] | length > 1

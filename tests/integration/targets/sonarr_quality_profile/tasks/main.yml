@@ -1,76 +1,76 @@
 ---
-- name: create example custom format
+- name: Create example custom format
   devopsarr.sonarr.sonarr_custom_format:
     include_custom_format_when_renaming: false
-    name: "Arab"
+    name: Arab
     specifications:
-    - name: "arabic"
-      implementation: "LanguageSpecification"
-      negate: false
-      required: true
-      fields:
-      - name: "value"
-        value: 26
+      - name: arabic
+        implementation: LanguageSpecification
+        negate: false
+        required: true
+        fields:
+          - name: value
+            value: 26
     sonarr_api_key: "{{ sonarr_api_key }}"
     sonarr_url: "{{ sonarr_url }}"
   register: format
-- name: create quality profile
+- name: Create quality profile
   devopsarr.sonarr.sonarr_quality_profile:
-    name: "Example"
+    name: Example
     upgrade_allowed: true
     cutoff: 1
     min_format_score: 0
     cutoff_format_score: 0
     quality_groups:
       - qualities:
-        - id: 1
-          name: "SDTV"
-          source: "television"
-          resolution: 480
-      - name: "WEB 720p"
+          - id: 1
+            name: SDTV
+            source: television
+            resolution: 480
+      - name: WEB 720p
         id: 1001
         qualities:
-        - id: 14
-          name: "WEBRip-720p"
-          source: "webRip"
-          resolution: 720
-        - id: 5
-          name: "WEBDL-720p"
-          source: "web"
-          resolution: 720
+          - id: 14
+            name: WEBRip-720p
+            source: webRip
+            resolution: 720
+          - id: 5
+            name: WEBDL-720p
+            source: web
+            resolution: 720
     formats: []
     sonarr_api_key: "{{ sonarr_api_key }}"
     sonarr_url: "{{ sonarr_url }}"
   register: result
-- name: assert quality profile creation
-  assert:
+- name: Assert quality profile creation
+  ansible.builtin.assert:
     that:
       - result['cutoff'] == 1
 # ----------------------------------------------------------------------------
-- name: edit already present quality profile
+- name: Edit already present quality profile
   devopsarr.sonarr.sonarr_quality_profile:
-    name: "Example"
+    name: Example
     upgrade_allowed: false
     cutoff: 1
     min_format_score: 0
     cutoff_format_score: 0
     quality_groups:
       - qualities:
-        - id: 1
-          name: "SDTV"
-          source: "television"
-          resolution: 480
-      - name: "WEB 720p"
+          - id: 1
+            name: SDTV
+            source: television
+            resolution: 480
+      - name: WEB 720p
         id: 1001
         qualities:
-        - id: 14
-          name: "WEBRip-720p"
-          source: "webRip"
-          resolution: 720
-        - id: 5
-          name: "WEBDL-720p"
-          source: "web"
-          resolution: 720
+          - id: 14
+            name: WEBRip-720p
+            source: webRip
+            resolution: 720
+          - id: 5
+            name: WEBDL-720p
+            source: web
+            resolution: 720
     formats:
       - name: "{{ format['name'] }}"
         id: "{{ format['id'] }}"
@@ -78,36 +78,36 @@
     sonarr_api_key: "{{ sonarr_api_key }}"
     sonarr_url: "{{ sonarr_url }}"
   register: result
-- name: assert quality profile changes
-  assert:
+- name: Assert quality profile changes
+  ansible.builtin.assert:
     that:
       - result.changed == true
       - result.upgrade_allowed == false
 # ----------------------------------------------------------------------------
-- name: test idempotency
+- name: Test idempotency
   devopsarr.sonarr.sonarr_quality_profile:
-    name: "Example"
+    name: Example
     upgrade_allowed: false
     cutoff: 1
     min_format_score: 0
     cutoff_format_score: 0
     quality_groups:
       - qualities:
-        - id: 1
-          name: "SDTV"
-          source: "television"
-          resolution: 480
-      - name: "WEB 720p"
+          - id: 1
+            name: SDTV
+            source: television
+            resolution: 480
+      - name: WEB 720p
         id: 1001
         qualities:
-        - id: 14
-          name: "WEBRip-720p"
-          source: "webRip"
-          resolution: 720
-        - id: 5
-          name: "WEBDL-720p"
-          source: "web"
-          resolution: 720
+          - id: 14
+            name: WEBRip-720p
+            source: webRip
+            resolution: 720
+          - id: 5
+            name: WEBDL-720p
+            source: web
+            resolution: 720
     formats:
       - name: "{{ format['name'] }}"
         id: "{{ format['id'] }}"
@@ -115,26 +115,26 @@
     sonarr_api_key: "{{ sonarr_api_key }}"
     sonarr_url: "{{ sonarr_url }}"
   register: result
-- name: assert quality profile idempotency
-  assert:
+- name: Assert quality profile idempotency
+  ansible.builtin.assert:
     that:
       - result.changed == false
       - result.upgrade_allowed == false
 # ----------------------------------------------------------------------------
-- name: delete quality profile
+- name: Delete quality profile
   devopsarr.sonarr.sonarr_quality_profile:
-    name: "Example"
+    name: Example
     sonarr_api_key: "{{ sonarr_api_key }}"
     sonarr_url: "{{ sonarr_url }}"
-    state: 'absent'
+    state: absent
   register: result
-- name: assert quality profile deletion
-  assert:
+- name: Assert quality profile deletion
+  ansible.builtin.assert:
     that:
       - result['id'] == 0
-- name: clean up custom format
+- name: Clean up custom format
   devopsarr.sonarr.sonarr_custom_format:
-    name: "Arab"
+    name: Arab
     sonarr_api_key: "{{ sonarr_api_key }}"
     sonarr_url: "{{ sonarr_url }}"
-    state: 'absent'
+    state: absent

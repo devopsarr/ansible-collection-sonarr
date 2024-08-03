@@ -1,23 +1,23 @@
 ---
-- name: list a single metadata schema
+- name: List a single metadata schema
   devopsarr.sonarr.sonarr_metadata_schema_info:
-    name: "PlexMetadata"
+    name: PlexMetadata
     sonarr_api_key: "{{ sonarr_api_key }}"
     sonarr_url: "{{ sonarr_url }}"
   register: result
 
-- name: assert single metadata
-  assert:
+- name: Assert single metadata
+  ansible.builtin.assert:
     that:
       - result['metadatas'][0]['implementation'] == 'PlexMetadata'
 # ----------------------------------------------------------------------------
-- name: list all metadata schemas
+- name: List all metadata schemas
   devopsarr.sonarr.sonarr_metadata_schema_info:
     sonarr_api_key: "{{ sonarr_api_key }}"
     sonarr_url: "{{ sonarr_url }}"
   register: result
 
-- name: assert multiple metadata schemas
-  assert:
+- name: Assert multiple metadata schemas
+  ansible.builtin.assert:
     that:
       - result['metadatas'] | length > 1

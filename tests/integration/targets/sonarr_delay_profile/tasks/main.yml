@@ -1,11 +1,11 @@
 ---
-- name: create tag for delay profile
+- name: Create tag for delay profile
   devopsarr.sonarr.sonarr_tag:
-    label: "delay_profile_test"
+    label: delay_profile_test
     sonarr_api_key: "{{ sonarr_api_key }}"
     sonarr_url: "{{ sonarr_url }}"
   register: tag
-- name: create delay profile
+- name: Create delay profile
   devopsarr.sonarr.sonarr_delay_profile:
     preferred_protocol: torrent
     usenet_delay: 0
@@ -19,12 +19,12 @@
     sonarr_api_key: "{{ sonarr_api_key }}"
     sonarr_url: "{{ sonarr_url }}"
   register: result
-- name: assert delay profile creation
-  assert:
+- name: Assert delay profile creation
+  ansible.builtin.assert:
     that:
       - result['preferred_protocol'] == 'torrent'
 # ----------------------------------------------------------------------------
-- name: edit already present delay profile
+- name: Edit already present delay profile
   devopsarr.sonarr.sonarr_delay_profile:
     preferred_protocol: torrent
     usenet_delay: 10
@@ -38,13 +38,13 @@
     sonarr_api_key: "{{ sonarr_api_key }}"
     sonarr_url: "{{ sonarr_url }}"
   register: result
-- name: assert delay profile changes
-  assert:
+- name: Assert delay profile changes
+  ansible.builtin.assert:
     that:
       - result.changed == true
       - result.usenet_delay == 10
 # ----------------------------------------------------------------------------
-- name: test idempotency
+- name: Test idempotency
   devopsarr.sonarr.sonarr_delay_profile:
     preferred_protocol: torrent
     usenet_delay: 10
@@ -58,20 +58,20 @@
     sonarr_api_key: "{{ sonarr_api_key }}"
     sonarr_url: "{{ sonarr_url }}"
   register: result
-- name: assert delay profile idempotency
-  assert:
+- name: Assert delay profile idempotency
+  ansible.builtin.assert:
     that:
       - result.changed == false
       - result.usenet_delay == 10
 # ----------------------------------------------------------------------------
-- name: delete delay profile
+- name: Delete delay profile
   devopsarr.sonarr.sonarr_delay_profile:
     tags: ["{{ tag.id }}"]
     sonarr_api_key: "{{ sonarr_api_key }}"
     sonarr_url: "{{ sonarr_url }}"
-    state: 'absent'
+    state: absent
   register: result
-- name: assert delay profile deletion
-  assert:
+- name: Assert delay profile deletion
+  ansible.builtin.assert:
     that:
       - result['id'] == 0

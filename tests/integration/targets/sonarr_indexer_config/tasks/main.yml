@@ -1,6 +1,6 @@
 ---
 # ----------------------------------------------------------------------------
-- name: edit indexer_config
+- name: Edit indexer_config
   devopsarr.sonarr.sonarr_indexer_config:
     maximum_size: 0
     minimum_age: 0
@@ -9,15 +9,15 @@
     sonarr_api_key: "{{ sonarr_api_key }}"
     sonarr_url: "{{ sonarr_url }}"
   register: result
-- name: test
+- name: Test
   ansible.builtin.debug:
-    msg: "{{result}}"
-- name: assert indexer_config changes
-  assert:
+    msg: "{{ result }}"
+- name: Assert indexer_config changes
+  ansible.builtin.assert:
     that:
       - result.rss_sync_interval == 70
 # ----------------------------------------------------------------------------
-- name: test idempotency
+- name: Test idempotency
   devopsarr.sonarr.sonarr_indexer_config:
     maximum_size: 0
     minimum_age: 0
@@ -26,8 +26,8 @@
     sonarr_api_key: "{{ sonarr_api_key }}"
     sonarr_url: "{{ sonarr_url }}"
   register: result
-- name: assert delay profile idempotency
-  assert:
+- name: Assert indexer idempotency
+  ansible.builtin.assert:
     that:
       - result.changed == false
       - result.rss_sync_interval == 70

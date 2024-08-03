@@ -1,23 +1,23 @@
 ---
-- name: list a single language
+- name: List a single language
   devopsarr.sonarr.sonarr_language_info:
-    name: "English"
+    name: English
     sonarr_api_key: "{{ sonarr_api_key }}"
     sonarr_url: "{{ sonarr_url }}"
   register: result
 
-- name: assert single language
-  assert:
+- name: Assert single language
+  ansible.builtin.assert:
     that:
       - result['languages'][0]['name'] == 'English'
 # ----------------------------------------------------------------------------
-- name: list all languages
+- name: List all languages
   devopsarr.sonarr.sonarr_language_info:
     sonarr_api_key: "{{ sonarr_api_key }}"
     sonarr_url: "{{ sonarr_url }}"
   register: result
 
-- name: assert multiple languages
-  assert:
+- name: Assert multiple languages
+  ansible.builtin.assert:
     that:
       - result['languages'] | length > 1

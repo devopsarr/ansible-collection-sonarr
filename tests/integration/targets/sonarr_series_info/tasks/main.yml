@@ -1,71 +1,71 @@
 ---
-- name: create first series
+- name: Create first series
   devopsarr.sonarr.sonarr_series:
-    title: "Breaking Bad"
-    title_slug: "breaking-bad"
+    title: Breaking Bad
+    title_slug: breaking-bad
     tvdb_id: 81189
     monitored: false
     season_folder: true
     use_scene_numbering: false
-    path: "/config/breaking-bad"
-    root_folder_path: "/config"
+    path: /config/breaking-bad
+    root_folder_path: /config
     quality_profile_id: 1
     sonarr_api_key: "{{ sonarr_api_key }}"
     sonarr_url: "{{ sonarr_url }}"
 
-- name: create second series
+- name: Create second series
   devopsarr.sonarr.sonarr_series:
-    title: "The Walking Dead"
-    title_slug: "the-walking-dead"
+    title: The Walking Dead
+    title_slug: the-walking-dead
     tvdb_id: 153021
     monitored: false
     season_folder: true
     use_scene_numbering: false
-    path: "/config/the-walking-dead"
-    root_folder_path: "/config"
+    path: /config/the-walking-dead
+    root_folder_path: /config
     quality_profile_id: 1
     sonarr_api_key: "{{ sonarr_api_key }}"
     sonarr_url: "{{ sonarr_url }}"
 
-- name: list a single series
+- name: List a single series
   devopsarr.sonarr.sonarr_series_info:
     tvdb_id: 81189
     sonarr_api_key: "{{ sonarr_api_key }}"
     sonarr_url: "{{ sonarr_url }}"
   register: result
 
-- name: assert single series
-  assert:
+- name: Assert single series
+  ansible.builtin.assert:
     that:
       - result['series_list'][0]['title'] == 'Breaking Bad'
 # ----------------------------------------------------------------------------
-- name: list all series_list
+- name: List all series_list
   devopsarr.sonarr.sonarr_series_info:
     sonarr_api_key: "{{ sonarr_api_key }}"
     sonarr_url: "{{ sonarr_url }}"
   register: result
 
-- name: assert multiple series_list
-  assert:
+- name: Assert multiple series_list
+  ansible.builtin.assert:
     that:
       - result['series_list'] | length > 1
 # ----------------------------------------------------------------------------
-- name: clean up first series
+- name: Clean up first series
   devopsarr.sonarr.sonarr_series:
-    title: "Breaking Bad"
-    title_slug: "breaking-bad"
+    title: Breaking Bad
+    title_slug: breaking-bad
     tvdb_id: 81189
-    path: "/config/breaking-bad"
+    path: /config/breaking-bad
     state: absent
     sonarr_api_key: "{{ sonarr_api_key }}"
     sonarr_url: "{{ sonarr_url }}"
 
-- name: clean up second series
+- name: Clean up second series
   devopsarr.sonarr.sonarr_series:
-    title: "The Walking Dead"
-    title_slug: "the-walking-dead"
+    title: The Walking Dead
+    title_slug: the-walking-dead
     tvdb_id: 153021
-    path: "/config/the-walking-dead"
+    path: /config/the-walking-dead
     state: absent
     sonarr_api_key: "{{ sonarr_api_key }}"
     sonarr_url: "{{ sonarr_url }}"

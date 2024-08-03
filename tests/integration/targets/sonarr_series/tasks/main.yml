@@ -1,72 +1,72 @@
 ---
-- name: create series
+- name: Create series
   devopsarr.sonarr.sonarr_series:
-    title: "Breaking Bad"
-    title_slug: "breaking-bad"
+    title: Breaking Bad
+    title_slug: breaking-bad
     tvdb_id: 81189
     monitored: false
     season_folder: true
     use_scene_numbering: false
-    path: "/config/breaking-bad"
-    root_folder_path: "/config"
+    path: /config/breaking-bad
+    root_folder_path: /config
     quality_profile_id: 1
     sonarr_api_key: "{{ sonarr_api_key }}"
     sonarr_url: "{{ sonarr_url }}"
   register: result
-- name: assert series creation
-  assert:
+- name: Assert series creation
+  ansible.builtin.assert:
     that:
       - result['tvdb_id'] == 81189
 # ----------------------------------------------------------------------------
-- name: edit already present series
+- name: Edit already present series
   devopsarr.sonarr.sonarr_series:
-    title: "Breaking Bad"
-    title_slug: "breaking-bad"
+    title: Breaking Bad
+    title_slug: breaking-bad
     tvdb_id: 81189
     monitored: true
     season_folder: true
     use_scene_numbering: false
-    path: "/config/breaking-bad"
-    root_folder_path: "/config"
+    path: /config/breaking-bad
+    root_folder_path: /config
     quality_profile_id: 1
     sonarr_api_key: "{{ sonarr_api_key }}"
     sonarr_url: "{{ sonarr_url }}"
   register: result
-- name: assert series changes
-  assert:
+- name: Assert series changes
+  ansible.builtin.assert:
     that:
       - result.changed == true
 # ----------------------------------------------------------------------------
-- name: test idempotency
+- name: Test idempotency
   devopsarr.sonarr.sonarr_series:
-    title: "Breaking Bad"
-    title_slug: "breaking-bad"
+    title: Breaking Bad
+    title_slug: breaking-bad
     tvdb_id: 81189
     monitored: true
     season_folder: true
     use_scene_numbering: false
-    path: "/config/breaking-bad"
-    root_folder_path: "/config"
+    path: /config/breaking-bad
+    root_folder_path: /config
     quality_profile_id: 1
     sonarr_api_key: "{{ sonarr_api_key }}"
     sonarr_url: "{{ sonarr_url }}"
   register: result
-- name: assert series idempotency
-  assert:
+- name: Assert series idempotency
+  ansible.builtin.assert:
     that:
       - result.changed == false
 # ----------------------------------------------------------------------------
-- name: delete series
+- name: Delete series
   devopsarr.sonarr.sonarr_series:
-    title: "Breaking Bad"
-    title_slug: "breaking-bad"
+    title: Breaking Bad
+    title_slug: breaking-bad
     tvdb_id: 81189
-    path: "/config/breaking-bad"
+    path: /config/breaking-bad
     sonarr_api_key: "{{ sonarr_api_key }}"
     sonarr_url: "{{ sonarr_url }}"
-    state: 'absent'
+    state: absent
   register: result
-- name: assert series deletion
-  assert:
+- name: Assert series deletion
+  ansible.builtin.assert:
     that:
       - result['id'] == 0

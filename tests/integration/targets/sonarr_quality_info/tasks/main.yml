@@ -1,23 +1,23 @@
 ---
-- name: list a single quality
+- name: List a single quality
   devopsarr.sonarr.sonarr_quality_info:
-    name: "SDTV"
+    name: SDTV
     sonarr_api_key: "{{ sonarr_api_key }}"
     sonarr_url: "{{ sonarr_url }}"
   register: result
 
-- name: assert single quality
-  assert:
+- name: Assert single quality
+  ansible.builtin.assert:
     that:
       - result['qualities'][0]['quality']['name'] == 'SDTV'
 # ----------------------------------------------------------------------------
-- name: list all qualitys
+- name: List all qualitys
   devopsarr.sonarr.sonarr_quality_info:
     sonarr_api_key: "{{ sonarr_api_key }}"
     sonarr_url: "{{ sonarr_url }}"
   register: result
 
-- name: assert multiple qualitys
-  assert:
+- name: Assert multiple qualitys
+  ansible.builtin.assert:
     that:
       - result['qualities'] | length > 1

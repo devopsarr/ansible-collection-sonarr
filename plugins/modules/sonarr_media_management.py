@@ -246,7 +246,6 @@ copy_using_hardlinks:
 from ansible_collections.devopsarr.sonarr.plugins.module_utils.sonarr_module import SonarrModule
 from ansible.module_utils.common.text.converters import to_native
 
-
 try:
     import sonarr
     HAS_SONARR_LIBRARY = True
@@ -254,9 +253,9 @@ except ImportError:
     HAS_SONARR_LIBRARY = False
 
 
-def run_module():
+def init_module_args():
     # define available arguments/parameters a user can pass to the module
-    module_args = dict(
+    return dict(
         chmod_folder=dict(type='str', required=True),
         rescan_after_refresh=dict(type='str', required=True, choices=["always", "afterManual", "never"]),
         recycle_bin=dict(type='str', required=True),
@@ -279,60 +278,81 @@ def run_module():
         copy_using_hardlinks=dict(type='bool', required=True),
     )
 
+
+def read_media_management(result):
+    try:
+        return client.get_media_management_config()
+    except sonarr.ApiException as e:
+        module.fail_json('Error getting media management: {}\n body: {}'.format(to_native(e.reason), to_native(e.body)), **result)
+    except Exception as e:
+        module.fail_json('Error getting media management: {}'.format(to_native(e)), **result)
+
+
+def update_media_management(want, result):
+    result['changed'] = True
+    # Only without check mode.
+    if not module.check_mode:
+        try:
+            response = client.update_media_management_config(media_management_config_resource=want, id="1")
+        except sonarr.ApiException as e:
+            module.fail_json('Error updating media management: {}\n body: {}'.format(to_native(e.reason), to_native(e.body)), **result)
+        except Exception as e:
+            module.fail_json('Error updating media management: {}'.format(to_native(e)), **result)
+    # No need to exit module since it will exit by default either way
+    result.update(response.model_dump(by_alias=False))
+
+
+def run_module():
+    global client
+    global module
+
+    # Define available arguments/parameters a user can pass to the module
+    module = SonarrModule(
+        argument_spec=init_module_args(),
+        supports_check_mode=True,
+    )
+
+    # Init client and result.
+    client = sonarr.MediaManagementConfigApi(module.api)
     result = dict(
         changed=False,
         id=0,
     )
 
-    module = SonarrModule(
-        argument_spec=module_args,
-        supports_check_mode=True,
+    # Get resource.
+    state = read_media_management(result)
+    if state:
+        result.update(state.model_dump(by_alias=False))
+
+    want = sonarr.MediaManagementConfigResource(
+        chmod_folder=module.params['chmod_folder'],
+        rescan_after_refresh=module.params['rescan_after_refresh'],
+        recycle_bin=module.params['recycle_bin'],
+        script_import_path=module.params['script_import_path'],
+        file_date=module.params['file_date'],
+        extra_file_extensions=module.params['extra_file_extensions'],
+        episode_title_required=module.params['episode_title_required'],
+        download_propers_and_repacks=module.params['download_propers_and_repacks'],
+        chown_group=module.params['chown_group'],
+        id=1,
+        minimum_free_space_when_importing=module.params['minimum_free_space_when_importing'],
+        recycle_bin_cleanup_days=module.params['recycle_bin_cleanup_days'],
+        use_script_import=module.params['use_script_import'],
+        auto_unmonitor_previously_downloaded_episodes=module.params['auto_unmonitor_previously_downloaded_episodes'],
+        skip_free_space_check_when_importing=module.params['skip_free_space_check_when_importing'],
+        set_permissions_linux=module.params['set_permissions_linux'],
+        import_extra_files=module.params['import_extra_files'],
+        enable_media_info=module.params['enable_media_info'],
+        delete_empty_folders=module.params['delete_empty_folders'],
+        create_empty_series_folders=module.params['create_empty_series_folders'],
+        copy_using_hardlinks=module.params['copy_using_hardlinks'],
     )
 
-    client = sonarr.MediaManagementConfigApi(module.api)
-
-    # Get resource.
-    try:
-        media_management = client.get_media_management_config()
-    except Exception as e:
-        module.fail_json('Error getting media managements: %s' % to_native(e.reason), **result)
-
-    result.update(media_management.dict(by_alias=False))
-
-    want = sonarr.MediaManagementConfigResource(**{
-        'chmod_folder': module.params['chmod_folder'],
-        'rescan_after_refresh': module.params['rescan_after_refresh'],
-        'recycle_bin': module.params['recycle_bin'],
-        'script_import_path': module.params['script_import_path'],
-        'file_date': module.params['file_date'],
-        'extra_file_extensions': module.params['extra_file_extensions'],
-        'episode_title_required': module.params['episode_title_required'],
-        'download_propers_and_repacks': module.params['download_propers_and_repacks'],
-        'chown_group': module.params['chown_group'],
-        'id': 1,
-        'minimum_free_space_when_importing': module.params['minimum_free_space_when_importing'],
-        'recycle_bin_cleanup_days': module.params['recycle_bin_cleanup_days'],
-        'use_script_import': module.params['use_script_import'],
-        'auto_unmonitor_previously_downloaded_episodes': module.params['auto_unmonitor_previously_downloaded_episodes'],
-        'skip_free_space_check_when_importing': module.params['skip_free_space_check_when_importing'],
-        'set_permissions_linux': module.params['set_permissions_linux'],
-        'import_extra_files': module.params['import_extra_files'],
-        'enable_media_info': module.params['enable_media_info'],
-        'delete_empty_folders': module.params['delete_empty_folders'],
-        'create_empty_series_folders': module.params['create_empty_series_folders'],
-        'copy_using_hardlinks': module.params['copy_using_hardlinks'],
-    })
-
     # Update an existing resource.
-    if want != media_management:
-        result['changed'] = True
-        if not module.check_mode:
-            try:
-                response = client.update_media_management_config(media_management_config_resource=want, id=str(want.id))
-            except Exception as e:
-                module.fail_json('Error updating media management: %s' % to_native(e.reason), **result)
-        result.update(response.dict(by_alias=False))
+    if want != state:
+        update_media_management(want, result)
 
+    # Exit whith no changes.
     module.exit_json(**result)
 
 

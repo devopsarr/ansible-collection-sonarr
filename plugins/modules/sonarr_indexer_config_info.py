@@ -62,7 +62,6 @@ rss_sync_interval:
 from ansible_collections.devopsarr.sonarr.plugins.module_utils.sonarr_module import SonarrModule
 from ansible.module_utils.common.text.converters import to_native
 
-
 try:
     import sonarr
     HAS_SONARR_LIBRARY = True
@@ -70,26 +69,34 @@ except ImportError:
     HAS_SONARR_LIBRARY = False
 
 
+def get_indexer_config(result):
+    try:
+        return client.get_indexer_config()
+    except sonarr.ApiException as e:
+        module.fail_json('Error getting indexer config: {}\n body: {}'.format(to_native(e.reason), to_native(e.body)), **result)
+    except Exception as e:
+        module.fail_json('Error getting indexer config: {}'.format(to_native(e)), **result)
+
+
 def run_module():
+    global client
+    global module
+
+    # Define available arguments/parameters a user can pass to the module
+    module = SonarrModule(
+        argument_spec={},
+        supports_check_mode=True,
+    )
+    # Init client and result.
+    client = sonarr.IndexerConfigApi(module.api)
     result = dict(
         changed=False,
     )
 
-    module = SonarrModule(
-        argument_spec={},
-        supports_check_mode=True
-    )
-
-    client = sonarr.IndexerConfigApi(module.api)
-
     # Get resource.
-    try:
-        indexer_config = client.get_indexer_config()
-    except Exception as e:
-        module.fail_json('Error getting indexer config: %s' % to_native(e.reason), **result)
+    result.update(get_indexer_config(result).model_dump(by_alias=False))
 
-    result.update(indexer_config.dict(by_alias=False))
-
+    # Exit with data.
     module.exit_json(**result)
 
 

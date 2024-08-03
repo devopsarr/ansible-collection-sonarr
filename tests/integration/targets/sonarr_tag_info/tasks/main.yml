@@ -1,42 +1,42 @@
 ---
-- name: create tags
+- name: Create tags
   devopsarr.sonarr.sonarr_tag:
     label: "{{ item }}"
     sonarr_api_key: "{{ sonarr_api_key }}"
     sonarr_url: "{{ sonarr_url }}"
   with_items:
-    - 'first'
-    - 'second'
+    - first
+    - second
 
-- name: list a single tag
+- name: List a single tag
   devopsarr.sonarr.sonarr_tag_info:
-    label: 'second'
+    label: second
     sonarr_api_key: "{{ sonarr_api_key }}"
     sonarr_url: "{{ sonarr_url }}"
   register: result
 
-- name: assert single tag
-  assert:
+- name: Assert single tag
+  ansible.builtin.assert:
     that:
       - result['tags'][0]['label'] == 'second'
 # ----------------------------------------------------------------------------
-- name: list all tags
+- name: List all tags
   devopsarr.sonarr.sonarr_tag_info:
     sonarr_api_key: "{{ sonarr_api_key }}"
     sonarr_url: "{{ sonarr_url }}"
   register: result
 
-- name: assert multiple tags
-  assert:
+- name: Assert multiple tags
+  ansible.builtin.assert:
     that:
       - result['tags'] | length > 1
 # ----------------------------------------------------------------------------
-- name: clean up tags
+- name: Clean up tags
   devopsarr.sonarr.sonarr_tag:
     label: "{{ item }}"
-    state: 'absent'
+    state: absent
     sonarr_api_key: "{{ sonarr_api_key }}"
     sonarr_url: "{{ sonarr_url }}"
   with_items:
-    - 'first'
-    - 'second'
+    - first
+    - second

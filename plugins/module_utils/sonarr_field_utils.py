@@ -20,15 +20,15 @@ class FieldHelper():
         )
 
     def populate_fields(self, field_list):
-        # type: (list) -> list[sonarr.Field]
+        # type: (list) -> list[sonarr.ContractField]
         fields = []
 
         for field in field_list:
             fields.append(
-                sonarr.Field(**{
-                    'name': field['name'],
-                    'value': field['value'],
-                }),
+                sonarr.ContractField(
+                    name=field['name'],
+                    value=field['value'],
+                ),
             )
 
         return fields

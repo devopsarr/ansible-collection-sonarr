@@ -1,15 +1,15 @@
 ---
 # ----------------------------------------------------------------------------
-- name: edit media management
+- name: Edit media management
   devopsarr.sonarr.sonarr_media_management:
     chmod_folder: "755"
-    rescan_after_refresh: "always"
+    rescan_after_refresh: always
     recycle_bin: ""
-    file_date: "localAirDate"
-    extra_file_extensions: "srt,info"
-    episode_title_required: "always"
-    download_propers_and_repacks: "doNotPrefer"
-    chown_group: "arrs"
+    file_date: localAirDate
+    extra_file_extensions: srt,info
+    episode_title_required: always
+    download_propers_and_repacks: doNotPrefer
+    chown_group: arrs
     minimum_free_space_when_importing: 100
     recycle_bin_cleanup_days: 7
     auto_unmonitor_previously_downloaded_episodes: true
@@ -23,24 +23,24 @@
     sonarr_api_key: "{{ sonarr_api_key }}"
     sonarr_url: "{{ sonarr_url }}"
   register: result
-- name: test
+- name: Test
   ansible.builtin.debug:
-    msg: "{{result}}"
-- name: assert media management changes
-  assert:
+    msg: "{{ result }}"
+- name: Assert media management changes
+  ansible.builtin.assert:
     that:
       - result.chmod_folder == "755"
 # ----------------------------------------------------------------------------
-- name: test idempotency
+- name: Test idempotency
   devopsarr.sonarr.sonarr_media_management:
     chmod_folder: "755"
-    rescan_after_refresh: "always"
+    rescan_after_refresh: always
     recycle_bin: ""
-    file_date: "localAirDate"
-    extra_file_extensions: "srt,info"
-    episode_title_required: "always"
-    download_propers_and_repacks: "doNotPrefer"
-    chown_group: "arrs"
+    file_date: localAirDate
+    extra_file_extensions: srt,info
+    episode_title_required: always
+    download_propers_and_repacks: doNotPrefer
+    chown_group: arrs
     minimum_free_space_when_importing: 100
     recycle_bin_cleanup_days: 7
     auto_unmonitor_previously_downloaded_episodes: true
@@ -54,8 +54,8 @@
     sonarr_api_key: "{{ sonarr_api_key }}"
     sonarr_url: "{{ sonarr_url }}"
   register: result
-- name: assert media management idempotency
-  assert:
+- name: Assert media management idempotency
+  ansible.builtin.assert:
     that:
       - result.changed == false
       - result.chown_group == "arrs"

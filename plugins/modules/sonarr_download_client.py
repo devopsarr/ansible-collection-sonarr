@@ -178,11 +178,9 @@ def is_changed(status, want):
     return False
 
 
-def run_module():
-    field_helper = FieldHelper()
-
+def init_module_args():
     # define available arguments/parameters a user can pass to the module
-    module_args = dict(
+    return dict(
         name=dict(type='str', required=True),
         remove_completed_downloads=dict(type='bool'),
         remove_failed_downloads=dict(type='bool'),
@@ -198,79 +196,119 @@ def run_module():
         update_secrets=dict(type='bool', default=False),
     )
 
+
+def create_download_client(want, result):
+    result['changed'] = True
+    # Only without check mode.
+    if not module.check_mode:
+        try:
+            response = client.create_download_client(download_client_resource=want)
+        except sonarr.ApiException as e:
+            module.fail_json('Error creating download client: {}\n body: {}'.format(to_native(e.reason), to_native(e.body)), **result)
+        except Exception as e:
+            module.fail_json('Error creating download client: {}'.format(to_native(e)), **result)
+        result.update(response.model_dump(by_alias=False))
+    module.exit_json(**result)
+
+
+def list_download_clients(result):
+    try:
+        return client.list_download_client()
+    except sonarr.ApiException as e:
+        module.fail_json('Error listing download clients: {}\n body: {}'.format(to_native(e.reason), to_native(e.body)), **result)
+    except Exception as e:
+        module.fail_json('Error listing download clients: {}'.format(to_native(e)), **result)
+
+
+def find_download_client(name, result):
+    for download_client in list_download_clients(result):
+        if download_client.name == name:
+            return download_client
+    return None
+
+
+def update_download_client(want, result):
+    result['changed'] = True
+    # Only without check mode.
+    if not module.check_mode:
+        try:
+            response = client.update_download_client(download_client_resource=want, id=str(want.id))
+        except sonarr.ApiException as e:
+            module.fail_json('Error updating download client: {}\n body: {}'.format(to_native(e.reason), to_native(e.body)), **result)
+        except Exception as e:
+            module.fail_json('Error updating download client: {}'.format(to_native(e)), **result)
+    # No need to exit module since it will exit by default either way
+    result.update(response.model_dump(by_alias=False))
+
+
+def delete_download_client(result):
+    if result['id'] != 0:
+        result['changed'] = True
+        if not module.check_mode:
+            try:
+                client.delete_download_client(result['id'])
+            except sonarr.ApiException as e:
+                module.fail_json('Error deleting download client: {}\n body: {}'.format(to_native(e.reason), to_native(e.body)), **result)
+            except Exception as e:
+                module.fail_json('Error deleting download client: {}'.format(to_native(e)), **result)
+            result['id'] = 0
+    module.exit_json(**result)
+
+
+def run_module():
+    global client
+    global module
+    global field_helper
+
+    # Init helper.
+    field_helper = FieldHelper()
+
+    # Define available arguments/parameters a user can pass to the module
+    module = SonarrModule(
+        argument_spec=init_module_args(),
+        supports_check_mode=True,
+    )
+
+    # Init client and result.
+    client = sonarr.DownloadClientApi(module.api)
     result = dict(
         changed=False,
         id=0,
     )
 
-    module = SonarrModule(
-        argument_spec=module_args,
-        supports_check_mode=True
-    )
-
-    client = sonarr.DownloadClientApi(module.api)
-
-    # List resources.
-    try:
-        clients = client.list_download_client()
-    except Exception as e:
-        module.fail_json('Error listing download clients: %s' % to_native(e.reason), **result)
-
-    state = sonarr.DownloadClientResource()
     # Check if a resource is present already.
-    for download_client in clients:
-        if download_client['name'] == module.params['name']:
-            result.update(download_client.dict(by_alias=False))
-            state = download_client
+    state = find_download_client(module.params['name'], result)
+    if state:
+        result.update(state.model_dump(by_alias=False))
 
     # Delete the resource if needed.
     if module.params['state'] == 'absent':
-        if result['id'] != 0:
-            result['changed'] = True
-            if not module.check_mode:
-                try:
-                    response = client.delete_download_client(result['id'])
-                except Exception as e:
-                    module.fail_json('Error deleting download client: %s' % to_native(e.reason), **result)
-                result['id'] = 0
-        module.exit_json(**result)
+        delete_download_client(result)
 
-    want = sonarr.DownloadClientResource(**{
-        'name': module.params['name'],
-        'remove_completed_downloads': module.params['remove_completed_downloads'],
-        'remove_failed_downloads': module.params['remove_failed_downloads'],
-        'enable': module.params['enable'],
-        'priority': module.params['priority'],
-        'config_contract': module.params['config_contract'],
-        'implementation': module.params['implementation'],
-        'protocol': module.params['protocol'],
-        'tags': module.params['tags'],
-        'fields': field_helper.populate_fields(module.params['fields']),
-    })
+    # Set wanted resource.
+    want = sonarr.DownloadClientResource(
+        name=module.params['name'],
+        remove_completed_downloads=module.params['remove_completed_downloads'],
+        remove_failed_downloads=module.params['remove_failed_downloads'],
+        enable=module.params['enable'],
+        priority=module.params['priority'],
+        config_contract=module.params['config_contract'],
+        implementation=module.params['implementation'],
+        protocol=module.params['protocol'],
+        tags=module.params['tags'],
+        fields=field_helper.populate_fields(module.params['fields']),
+    )
 
-    # Create a new resource.
+    # Create a new resource, if needed.
     if result['id'] == 0:
-        result['changed'] = True
-        # Only without check mode.
-        if not module.check_mode:
-            try:
-                response = client.create_download_client(download_client_resource=want)
-            except Exception as e:
-                module.fail_json('Error creating download client: %s' % to_native(e.reason), **result)
-            result.update(response.dict(by_alias=False))
-        module.exit_json(**result)
+        create_download_client(want, result)
 
     # Update an existing resource.
     want.id = result['id']
     if is_changed(state, want) or module.params['update_secrets']:
-        result['changed'] = True
-        if not module.check_mode:
-            try:
-                response = client.update_download_client(download_client_resource=want, id=str(want.id))
-            except Exception as e:
-                module.fail_json('Error updating download client: %s' % to_native(e), **result)
-        result.update(response.dict(by_alias=False))
+        update_download_client(want, result)
 
+    # Exit whith no changes.
     module.exit_json(**result)
 
 

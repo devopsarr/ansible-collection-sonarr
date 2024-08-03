@@ -1,136 +1,136 @@
 ---
-- name: create notification
+- name: Create notification
   devopsarr.sonarr.sonarr_notification:
-    name: "Example"
-    config_contract: "CustomScriptSettings"
-    implementation: "CustomScript"
+    name: Example
+    config_contract: CustomScriptSettings
+    implementation: CustomScript
     fields:
-    - name: "path"
-      value: "/scripts/test.sh"
+      - name: path
+        value: /scripts/test.sh
     sonarr_api_key: "{{ sonarr_api_key }}"
     sonarr_url: "{{ sonarr_url }}"
   register: result
-- name: assert notification creation
-  assert:
+- name: Assert notification creation
+  ansible.builtin.assert:
     that:
       - result['implementation'] == 'CustomScript'
 # ----------------------------------------------------------------------------
-- name: edit already present notification
+- name: Edit already present notification
   devopsarr.sonarr.sonarr_notification:
-    name: "Example"
+    name: Example
     on_grab: true
-    config_contract: "CustomScriptSettings"
-    implementation: "CustomScript"
+    config_contract: CustomScriptSettings
+    implementation: CustomScript
     fields:
-    - name: "path"
-      value: "/scripts/test.sh"
+      - name: path
+        value: /scripts/test.sh
     sonarr_api_key: "{{ sonarr_api_key }}"
     sonarr_url: "{{ sonarr_url }}"
   register: result
-- name: assert notification changes
-  assert:
+- name: Assert notification changes
+  ansible.builtin.assert:
     that:
       - result.changed == true
 # ----------------------------------------------------------------------------
-- name: test idempotency
+- name: Test idempotency
   devopsarr.sonarr.sonarr_notification:
-    name: "Example"
+    name: Example
     on_grab: true
-    config_contract: "CustomScriptSettings"
-    implementation: "CustomScript"
+    config_contract: CustomScriptSettings
+    implementation: CustomScript
     fields:
-    - name: "path"
-      value: "/scripts/test.sh"
+      - name: path
+        value: /scripts/test.sh
     sonarr_api_key: "{{ sonarr_api_key }}"
     sonarr_url: "{{ sonarr_url }}"
   register: result
-- name: assert notification idempotency
-  assert:
+- name: Assert notification idempotency
+  ansible.builtin.assert:
     that:
       - result.changed == false
 # ----------------------------------------------------------------------------
-- name: delete notification
+- name: Delete notification
   devopsarr.sonarr.sonarr_notification:
-    name: "Example"
+    name: Example
     sonarr_api_key: "{{ sonarr_api_key }}"
     sonarr_url: "{{ sonarr_url }}"
-    state: 'absent'
+    state: absent
   register: result
-- name: assert notification deletion
-  assert:
+- name: Assert notification deletion
+  ansible.builtin.assert:
     that:
       - result['id'] == 0
 # ----------------------------------------------------------------------------
-- name: create another notification with sensitive values
+- name: Create another notification with sensitive values
   devopsarr.sonarr.sonarr_notification:
-    name: "Example"
-    config_contract: "WebhookSettings"
-    implementation: "Webhook"
+    name: Example
+    config_contract: WebhookSettings
+    implementation: Webhook
     fields:
-    - name: "username"
-      value: "User"
-    - name: "password"
-      value: "test"
-    - name: "url"
-      value: "webhook.lcl"
-    - name: "method"
-      value: 1
+      - name: username
+        value: User
+      - name: password
+        value: test
+      - name: url
+        value: webhook.lcl
+      - name: method
+        value: 1
     sonarr_api_key: "{{ sonarr_api_key }}"
     sonarr_url: "{{ sonarr_url }}"
   register: result
-- name: assert notification creation
-  assert:
+- name: Assert notification creation
+  ansible.builtin.assert:
     that:
       - result['implementation'] == 'Webhook'
 # ----------------------------------------------------------------------------
-- name: test idempotency
+- name: Test idempotency
   devopsarr.sonarr.sonarr_notification:
-    name: "Example"
-    config_contract: "WebhookSettings"
-    implementation: "Webhook"
+    name: Example
+    config_contract: WebhookSettings
+    implementation: Webhook
     fields:
-    - name: "username"
-      value: "User"
-    - name: "password123"
-      value: "test"
-    - name: "url"
-      value: "webhook.lcl"
-    - name: "method"
-      value: 1
+      - name: username
+        value: User
+      - name: password123
+        value: test
+      - name: url
+        value: webhook.lcl
+      - name: method
+        value: 1
     sonarr_api_key: "{{ sonarr_api_key }}"
     sonarr_url: "{{ sonarr_url }}"
   register: result
-- name: assert notification idempotency
-  assert:
+- name: Assert notification idempotency
+  ansible.builtin.assert:
     that:
       - result.changed == false
 # ----------------------------------------------------------------------------
-- name: test key change
+- name: Test key change
   devopsarr.sonarr.sonarr_notification:
-    name: "Example"
-    config_contract: "WebhookSettings"
-    implementation: "Webhook"
+    name: Example
+    config_contract: WebhookSettings
+    implementation: Webhook
     fields:
-    - name: "username"
-      value: "User"
-    - name: "password123"
-      value: "test"
-    - name: "url"
-      value: "webhook.lcl"
-    - name: "method"
-      value: 1
+      - name: username
+        value: User
+      - name: password123
+        value: test
+      - name: url
+        value: webhook.lcl
+      - name: method
+        value: 1
     update_secrets: true
     sonarr_api_key: "{{ sonarr_api_key }}"
     sonarr_url: "{{ sonarr_url }}"
   register: result
-- name: assert notification idempotency
-  assert:
+- name: Assert notification idempotency
+  ansible.builtin.assert:
     that:
       - result.changed == true
 # ----------------------------------------------------------------------------
-- name: clean up
+- name: Clean up
   devopsarr.sonarr.sonarr_notification:
-    name: "Example"
+    name: Example
     state: absent
     sonarr_api_key: "{{ sonarr_api_key }}"
     sonarr_url: "{{ sonarr_url }}"

@@ -1,48 +1,48 @@
 ---
-- name: create metadata
+- name: Create metadata
   devopsarr.sonarr.sonarr_metadata:
     name: "{{ item }}"
-    config_contract: "WdtvMetadataSettings"
-    implementation: "WdtvMetadata"
+    config_contract: WdtvMetadataSettings
+    implementation: WdtvMetadata
     enable: true
     fields:
-    - name: "seasonImages"
-      value: true
+      - name: seasonImages
+        value: true
     sonarr_api_key: "{{ sonarr_api_key }}"
     sonarr_url: "{{ sonarr_url }}"
   with_items:
-    - 'info_test'
-    - 'info_test1'
+    - info_test
+    - info_test1
 
-- name: list a single metadata
+- name: List a single metadata
   devopsarr.sonarr.sonarr_metadata_info:
-    name: "info_test"
+    name: info_test
     sonarr_api_key: "{{ sonarr_api_key }}"
     sonarr_url: "{{ sonarr_url }}"
   register: result
 
-- name: assert single metadata
-  assert:
+- name: Assert single metadata
+  ansible.builtin.assert:
     that:
       - result['metadatas'][0]['name'] == 'info_test'
 # ----------------------------------------------------------------------------
-- name: list all metadatas
+- name: List all metadatas
   devopsarr.sonarr.sonarr_metadata_info:
     sonarr_api_key: "{{ sonarr_api_key }}"
     sonarr_url: "{{ sonarr_url }}"
   register: result
 
-- name: assert multiple metadatas
-  assert:
+- name: Assert multiple metadatas
+  ansible.builtin.assert:
     that:
       - result['metadatas'] | length > 1
 # ----------------------------------------------------------------------------
-- name: clean up metadata
+- name: Clean up metadata
   devopsarr.sonarr.sonarr_metadata:
     name: "{{ item }}"
     state: absent
     sonarr_api_key: "{{ sonarr_api_key }}"
     sonarr_url: "{{ sonarr_url }}"
   with_items:
-    - 'info_test'
-    - 'info_test1'
+    - info_test
+    - info_test1

@@ -1,54 +1,54 @@
 ---
-- name: create indexer
+- name: Create indexer
   devopsarr.sonarr.sonarr_indexer:
     name: "{{ item }}"
     enable_automatic_search: false
     enable_interactive_search: false
     enable_rss: false
     priority: 10
-    config_contract: "FanzubSettings"
-    implementation: "Fanzub"
-    protocol: "usenet"
+    config_contract: FanzubSettings
+    implementation: Fanzub
+    protocol: usenet
     fields:
-    - name: "baseUrl"
-      value: "http://fanzub.com/rss/"
-    - name: "animeStandardFormatSearch"
-      value: true
+      - name: baseUrl
+        value: http://fanzub.com/rss/
+      - name: animeStandardFormatSearch
+        value: true
     sonarr_api_key: "{{ sonarr_api_key }}"
     sonarr_url: "{{ sonarr_url }}"
   with_items:
-    - 'info_test'
-    - 'info_test1'
+    - info_test
+    - info_test1
 
-- name: list a single indexer
+- name: List a single indexer
   devopsarr.sonarr.sonarr_indexer_info:
-    name: "info_test"
+    name: info_test
     sonarr_api_key: "{{ sonarr_api_key }}"
     sonarr_url: "{{ sonarr_url }}"
   register: result
 
-- name: assert single indexer
-  assert:
+- name: Assert single indexer
+  ansible.builtin.assert:
     that:
       - result['indexers'][0]['name'] == 'info_test'
 # ----------------------------------------------------------------------------
-- name: list all indexers
+- name: List all indexers
   devopsarr.sonarr.sonarr_indexer_info:
     sonarr_api_key: "{{ sonarr_api_key }}"
     sonarr_url: "{{ sonarr_url }}"
   register: result
 
-- name: assert multiple indexers
-  assert:
+- name: Assert multiple indexers
+  ansible.builtin.assert:
     that:
       - result['indexers'] | length > 1
 # ----------------------------------------------------------------------------
-- name: clean up indexer
+- name: Clean up indexer
   devopsarr.sonarr.sonarr_indexer:
     name: "{{ item }}"
     state: absent
     sonarr_api_key: "{{ sonarr_api_key }}"
     sonarr_url: "{{ sonarr_url }}"
   with_items:
-    - 'info_test'
-    - 'info_test1'
+    - info_test
+    - info_test1

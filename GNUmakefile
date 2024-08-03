@@ -1,6 +1,6 @@
 default: sanity
 
-TEST_MODULE ?= "sonarr_import_list_info"
+TEST_MODULE ?= "sonarr_tag"
 
 # Run sanity test
 .PHONY: sanity
@@ -10,7 +10,7 @@ sanity:
 # Run integration test
 .PHONY: integration
 integration:
-	ansible-test integration ${TEST_MODULE} -vvv
+	ansible-test integration ${TEST_MODULE} -vvv --venv
 
 # Generate doc
 .PHONY: doc

@@ -1,40 +1,40 @@
 ---
-- name: create remote path mapping
+- name: Create remote path mapping
   devopsarr.sonarr.sonarr_remote_path_mapping:
-    host: 'transmission'
-    remote_path: '/tmp/'
-    local_path: '/tmp/'
+    host: transmission
+    remote_path: /tmp/
+    local_path: /tmp/
     sonarr_api_key: "{{ sonarr_api_key }}"
     sonarr_url: "{{ sonarr_url }}"
   register: result
-- name: assert remote path mapping creation
-  assert:
+- name: Assert remote path mapping creation
+  ansible.builtin.assert:
     that:
       - result['remote_path'] == '/tmp/'
 # ----------------------------------------------------------------------------
-- name: check idempotency
+- name: Check idempotency
   devopsarr.sonarr.sonarr_remote_path_mapping:
-    host: 'transmission'
-    remote_path: '/tmp/'
-    local_path: '/tmp/'
+    host: transmission
+    remote_path: /tmp/
+    local_path: /tmp/
     sonarr_api_key: "{{ sonarr_api_key }}"
     sonarr_url: "{{ sonarr_url }}"
   register: result
-- name: assert remote path mapping idempotency
-  assert:
+- name: Assert remote path mapping idempotency
+  ansible.builtin.assert:
     that:
       - result.changed == false
 # ----------------------------------------------------------------------------
-- name: delete remote path mapping
+- name: Delete remote path mapping
   devopsarr.sonarr.sonarr_remote_path_mapping:
-    host: 'transmission'
-    remote_path: '/tmp/'
-    local_path: '/tmp/'
+    host: transmission
+    remote_path: /tmp/
+    local_path: /tmp/
     state: absent
     sonarr_api_key: "{{ sonarr_api_key }}"
     sonarr_url: "{{ sonarr_url }}"
   register: result
-- name: assert remote path mapping deletion
-  assert:
+- name: Assert remote path mapping deletion
+  ansible.builtin.assert:
     that:
       - result['id'] == 0

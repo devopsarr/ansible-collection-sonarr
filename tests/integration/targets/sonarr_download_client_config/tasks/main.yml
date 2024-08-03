@@ -1,29 +1,31 @@
 ---
 # ----------------------------------------------------------------------------
-- name: edit download_client_config
+- name: Edit download_client_config
   devopsarr.sonarr.sonarr_download_client_config:
     auto_redownload_failed: false
+    auto_redownload_failed_from_interactive_search: false
     enable_completed_download_handling: true
     sonarr_api_key: "{{ sonarr_api_key }}"
     sonarr_url: "{{ sonarr_url }}"
   register: result
-- name: test
+- name: Test
   ansible.builtin.debug:
-    msg: "{{result}}"
-- name: assert download_client_config changes
-  assert:
+    msg: "{{ result }}"
+- name: Assert download_client_config changes
+  ansible.builtin.assert:
     that:
       - result.auto_redownload_failed == false
 # ----------------------------------------------------------------------------
-- name: test idempotency
+- name: Test idempotency
   devopsarr.sonarr.sonarr_download_client_config:
     auto_redownload_failed: false
+    auto_redownload_failed_from_interactive_search: false
     enable_completed_download_handling: true
     sonarr_api_key: "{{ sonarr_api_key }}"
     sonarr_url: "{{ sonarr_url }}"
   register: result
-- name: assert delay profile idempotency
-  assert:
+- name: Assert download client idempotency
+  ansible.builtin.assert:
     that:
       - result.changed == false
       - result.auto_redownload_failed == false
