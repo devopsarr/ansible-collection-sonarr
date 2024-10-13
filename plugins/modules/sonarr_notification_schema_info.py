@@ -68,6 +68,11 @@ notifications:
             returned: always
             type: bool
             sample: false
+        on_import_complete:
+            description: On import complete flag.
+            returned: always
+            type: bool
+            sample: false
         on_rename:
             description: On rename flag.
             returned: always
