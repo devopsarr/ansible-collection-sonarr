@@ -29,6 +29,10 @@ options:
         description: On download flag.
         type: bool
         default: false
+    on_import_complete:
+        description: On import complete flag.
+        type: bool
+        default: false
     on_rename:
         description: On rename flag.
         type: bool
@@ -133,6 +137,11 @@ on_download:
     returned: always
     type: bool
     sample: false
+on_import_complete:
+    description: On import complete flag.
+    returned: always
+    type: bool
+    sample: false
 on_rename:
     description: On rename flag.
     returned: always
@@ -220,6 +229,7 @@ def is_changed(status, want):
     if (want.name != status.name or
             want.on_grab != status.on_grab or
             want.on_download != status.on_download or
+            want.on_import_complete != status.on_import_complete or
             want.on_rename != status.on_rename or
             want.on_series_add != status.on_series_add or
             want.on_series_delete != status.on_series_delete or
@@ -248,6 +258,7 @@ def init_module_args():
         name=dict(type='str', required=True),
         on_grab=dict(type='bool', default=False),
         on_download=dict(type='bool', default=False),
+        on_import_complete=dict(type='bool', default=False),
         on_rename=dict(type='bool', default=False),
         on_series_add=dict(type='bool', default=False),
         on_series_delete=dict(type='bool', default=False),
@@ -361,6 +372,7 @@ def run_module():
         'name': module.params['name'],
         'on_grab': module.params['on_grab'],
         'on_download': module.params['on_download'],
+        'on_import_complete': module.params['on_import_complete'],
         'on_rename': module.params['on_rename'],
         'on_series_add': module.params['on_series_add'],
         'on_series_delete': module.params['on_series_delete'],
