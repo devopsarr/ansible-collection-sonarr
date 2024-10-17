@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.1.2](https://github.com/devopsarr/ansible-collection-sonarr/compare/v1.1.1...v1.1.2) (2024-10-17)
+
+
+### Bug Fixes
+
+* move Field to ContractField ([785a572](https://github.com/devopsarr/ansible-collection-sonarr/commit/785a5725cb17844ba484420c590f5e1ef2d62bf0))
+
 ## [1.1.1](https://github.com/devopsarr/ansible-collection-sonarr/compare/v1.1.0...v1.1.1) (2023-10-12)
 
 
