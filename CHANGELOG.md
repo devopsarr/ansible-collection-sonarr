@@ -1,5 +1,18 @@
 # Changelog
 
+## [1.2.0](https://github.com/devopsarr/ansible-collection-sonarr/compare/v1.1.1...v1.2.0) (2024-10-23)
+
+
+### Features
+
+* add custom colon replacement format naming field ([d7b5d34](https://github.com/devopsarr/ansible-collection-sonarr/commit/d7b5d348f3278c2a10e7b7634ff672352dc49de3))
+
+
+### Bug Fixes
+
+* **#82:** Add on_import_complete option for notification ([795db4a](https://github.com/devopsarr/ansible-collection-sonarr/commit/795db4a0fb0235bf71af24a3a30d94db1f014431))
+* move Field to ContractField ([785a572](https://github.com/devopsarr/ansible-collection-sonarr/commit/785a5725cb17844ba484420c590f5e1ef2d62bf0))
+
 ## [1.1.1](https://github.com/devopsarr/ansible-collection-sonarr/compare/v1.1.0...v1.1.1) (2023-10-12)
 
 
