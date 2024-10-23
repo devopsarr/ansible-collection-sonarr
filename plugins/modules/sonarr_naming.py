@@ -41,6 +41,11 @@ options:
         description: Series folder format.
         required: true
         type: str
+    custom_colon_replacement_format:
+        description: Custom colon folder format.
+        required: false
+        default: ""
+        type: str
     multi_episode_style:
         description: Multi episode style. 0 - 'Extend' 1 - 'Duplicate' 2 - 'Repeat' 3 - 'Scene' 4 - 'Range' 5 - 'Prefixed Range'.
         required: true
@@ -49,10 +54,10 @@ options:
     colon_replacement_format:
         description: >
             Colon replacement format.
-            0 - 'Delete' 1 - 'Replace with Dash' 2 - 'Replace with Space Dash' 3 - 'Replace with Space Dash Space' 4 - 'Smart Replace'.
+            0 - 'Delete' 1 - 'Replace with Dash' 2 - 'Replace with Space Dash' 3 - 'Replace with Space Dash Space' 4 - 'Smart Replace', 5 - 'Custom Replace'.
         required: true
         type: int
-        choices: [0, 1, 2, 3, 4]
+        choices: [0, 1, 2, 3, 4, 5]
     rename_episodes:
         description: Rename episodes.
         required: true
@@ -123,6 +128,11 @@ specials_folder_format:
     returned: always
     type: str
     sample: 'S0'
+custom_colon_replacement_format:
+    description: Custom colon replacement format.
+    returned: always
+    type: str
+    sample: ':'
 multi_episode_style:
     description: Multi episode style. 0 - 'Extend' 1 - 'Duplicate' 2 - 'Repeat' 3 - 'Scene' 4 - 'Range' 5 - 'Prefixed Range'.
     returned: always
@@ -167,7 +177,8 @@ def init_module_args():
         season_folder_format=dict(type='str', required=True),
         specials_folder_format=dict(type='str', required=True),
         multi_episode_style=dict(type='int', required=True, choices=[0, 1, 2, 3, 4, 5]),
-        colon_replacement_format=dict(type='int', required=True, choices=[0, 1, 2, 3, 4]),
+        colon_replacement_format=dict(type='int', required=True, choices=[0, 1, 2, 3, 4, 5]),
+        custom_colon_replacement_format=dict(type='str', required=False, default=""),
         rename_episodes=dict(type='bool', required=True),
         replace_illegal_characters=dict(type='bool', required=True),
     )
@@ -227,6 +238,7 @@ def run_module():
         specials_folder_format=module.params['specials_folder_format'],
         multi_episode_style=module.params['multi_episode_style'],
         colon_replacement_format=module.params['colon_replacement_format'],
+        custom_colon_replacement_format=module.params['custom_colon_replacement_format'],
         rename_episodes=module.params['rename_episodes'],
         replace_illegal_characters=module.params['replace_illegal_characters'],
         id=1,
