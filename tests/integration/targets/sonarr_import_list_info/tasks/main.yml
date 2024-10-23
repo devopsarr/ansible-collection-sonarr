@@ -1,4 +1,10 @@
 ---
+- name: Create root folder
+  devopsarr.sonarr.sonarr_root_folder:
+    path: /config
+    sonarr_api_key: "{{ sonarr_api_key }}"
+    sonarr_url: "{{ sonarr_url }}"
+
 - name: Create import list
   devopsarr.sonarr.sonarr_import_list:
     name: "{{ item }}"
@@ -56,3 +62,10 @@
   with_items:
     - info_test
     - info_test1
+
+- name: Delete root folder
+  devopsarr.sonarr.sonarr_root_folder:
+    path: /config
+    state: absent
+    sonarr_api_key: "{{ sonarr_api_key }}"
+    sonarr_url: "{{ sonarr_url }}"

@@ -1,4 +1,10 @@
 ---
+- name: Create root folder
+  devopsarr.sonarr.sonarr_root_folder:
+    path: /config
+    sonarr_api_key: "{{ sonarr_api_key }}"
+    sonarr_url: "{{ sonarr_url }}"
+
 - name: Create import list
   devopsarr.sonarr.sonarr_import_list:
     enable_automatic_add: false
@@ -144,3 +150,10 @@
   ansible.builtin.assert:
     that:
       - result['id'] == 0
+
+- name: Delete root folder
+  devopsarr.sonarr.sonarr_root_folder:
+    path: /config
+    state: absent
+    sonarr_api_key: "{{ sonarr_api_key }}"
+    sonarr_url: "{{ sonarr_url }}"
