@@ -233,7 +233,7 @@ def update_indexer(want, result):
     # Only without check mode.
     if not module.check_mode:
         try:
-            response = client.update_indexer(indexer_resource=want, id=str(want.id))
+            response = client.update_indexer(indexer_resource=want, id=want.id)
         except sonarr.ApiException as e:
             module.fail_json('Error updating indexer: {}\n body: {}'.format(to_native(e.reason), to_native(e.body)), **result)
         except Exception as e:
