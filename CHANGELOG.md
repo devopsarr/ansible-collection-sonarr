@@ -1,5 +1,19 @@
 # Changelog
 
+## [1.3.0](https://github.com/devopsarr/ansible-collection-sonarr/compare/v1.2.0...v1.3.0) (2025-01-24)
+
+
+### Features
+
+* **#86:** add min_upgrade_format_score to quality_profile ([1684197](https://github.com/devopsarr/ansible-collection-sonarr/commit/1684197d07a4cc2d89162a12731f39545554c797))
+
+
+### Bug Fixes
+
+* **deps:** update dependency sonarr-py to v1.1.0 ([1e62ab3](https://github.com/devopsarr/ansible-collection-sonarr/commit/1e62ab38868cd250f5cdea52bd0956ba6bb1b1b6))
+* **deps:** update hotio/sonarr docker tag to release-4.0.12.2823 ([54339c9](https://github.com/devopsarr/ansible-collection-sonarr/commit/54339c9140008abea5724e2a3562696434a65b8f))
+* id from string to int ([adafc43](https://github.com/devopsarr/ansible-collection-sonarr/commit/adafc4392a387cf7a7cb737d4ec9f8209358b9cb))
+
 ## [1.2.0](https://github.com/devopsarr/ansible-collection-sonarr/compare/v1.1.1...v1.2.0) (2024-10-23)
 
 
