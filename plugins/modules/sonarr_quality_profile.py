@@ -36,6 +36,10 @@ options:
         description: Min format score.
         type: int
         default: 0
+    min_upgrade_format_score:
+        description: Min upgrade format score.
+        type: int
+        default: 1
     quality_groups:
         description: Quality groups ordered list. Define only the allowed groups.
         type: list
@@ -98,6 +102,7 @@ EXAMPLES = r'''
     upgrade_allowed: true
     cutoff: 1
     min_format_score: 0
+    min_upgrade_format_score: 1
     cutoff_format_score: 0
     quality_groups:
       - qualities:
@@ -187,6 +192,7 @@ def init_module_args():
         name=dict(type='str', required=True),
         cutoff=dict(type='int'),
         min_format_score=dict(type='int', default=0),
+        min_upgrade_format_score=dict(type='int', default=1),
         cutoff_format_score=dict(type='int', default=0),
         upgrade_allowed=dict(type='bool', default=False),
         quality_groups=dict(type='list', elements='dict', default=[]),
@@ -387,6 +393,7 @@ def run_module():
         upgrade_allowed=module.params['upgrade_allowed'],
         cutoff_format_score=module.params['cutoff_format_score'],
         min_format_score=module.params['min_format_score'],
+        min_upgrade_format_score=module.params['min_upgrade_format_score'],
         items=quality_groups,
         format_items=formats,
     )

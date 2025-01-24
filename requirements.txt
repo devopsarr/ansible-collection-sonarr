@@ -1,1 +1,1 @@
-sonarr-py==1.0.2
+sonarr-py==1.1.0

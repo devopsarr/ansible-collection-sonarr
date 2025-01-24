@@ -238,7 +238,7 @@ def update_import_list(want, result):
     # Only without check mode.
     if not module.check_mode:
         try:
-            response = client.update_import_list(import_list_resource=want, id=str(want.id))
+            response = client.update_import_list(import_list_resource=want, id=want.id)
         except sonarr.ApiException as e:
             module.fail_json('Error updating import list: {}\n body: {}'.format(to_native(e.reason), to_native(e.body)), **result)
         except Exception as e:
