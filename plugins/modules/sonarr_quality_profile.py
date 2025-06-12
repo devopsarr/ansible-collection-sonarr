@@ -52,6 +52,9 @@ options:
             id:
                 description: Quality group ID.
                 type: int
+            allowed:
+                description: Quality group allowed flag, if omitted it will default to `true`.
+                type: bool
             qualities:
                 description: Quality list.
                 type: list
@@ -271,7 +274,7 @@ def populate_quality_groups(result):
         module.fail_json('Error listing qualities: {}'.format(to_native(e)), **result)
 
     quality_groups = []
-    allowed_qualities = []
+    defined_qualities = []
     for item in module.params['quality_groups']:
         if len(item['qualities']) == 1:
             quality_groups.append(sonarr.QualityProfileQualityItemResource(
@@ -282,9 +285,9 @@ def populate_quality_groups(result):
                     resolution=item['qualities'][0]['resolution'],
                 ),
                 items=[],
-                allowed=True,
+                allowed=item.get('allowed', True),
             ))
-            allowed_qualities.append(item['qualities'][0]['id'])
+            defined_qualities.append(item['qualities'][0]['id'])
         else:
             qualities = []
             for quality in item['qualities']:
@@ -295,13 +298,13 @@ def populate_quality_groups(result):
                         source=quality['source'],
                         resolution=quality['resolution'],
                     ),
-                    allowed=True,
+                    allowed=item.get('allowed', True),
                     items=[]
                 ))
-                allowed_qualities.append(quality['id'])
+                defined_qualities.append(quality['id'])
 
             quality_groups.append(sonarr.QualityProfileQualityItemResource(
-                allowed=True,
+                allowed=item.get('allowed', True),
                 name=item['name'],
                 id=item['id'],
                 items=qualities,
@@ -309,7 +312,7 @@ def populate_quality_groups(result):
 
     # Add disallowed qualities
     for q in all_qualities[::-1]:
-        if q.quality.id not in allowed_qualities:
+        if q.quality.id not in defined_qualities:
             quality_groups.insert(0, sonarr.QualityProfileQualityItemResource(
                 quality=sonarr.Quality(
                     id=q.quality.id,
