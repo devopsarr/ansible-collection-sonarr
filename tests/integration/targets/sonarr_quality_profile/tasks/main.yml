@@ -60,6 +60,24 @@
             name: SDTV
             source: television
             resolution: 480
+      - allowed: false
+        qualities:
+          - id: 4
+            name: HDTV-720p
+            source: television
+            resolution: 720
+      - allowed: false
+        name: WEB 480p
+        id: 1002
+        qualities:
+          - id: 12
+            name: WEBRip-480p
+            source: webRip
+            resolution: 480
+          - id: 8
+            name: WEBDL-480p
+            source: web
+            resolution: 480
       - name: WEB 720p
         id: 1001
         qualities:
@@ -96,6 +114,24 @@
           - id: 1
             name: SDTV
             source: television
+            resolution: 480
+      - allowed: false
+        qualities:
+          - id: 4
+            name: HDTV-720p
+            source: television
+            resolution: 720
+      - allowed: false
+        name: WEB 480p
+        id: 1002
+        qualities:
+          - id: 12
+            name: WEBRip-480p
+            source: webRip
+            resolution: 480
+          - id: 8
+            name: WEBDL-480p
+            source: web
             resolution: 480
       - name: WEB 720p
         id: 1001
