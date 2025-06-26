@@ -1,5 +1,13 @@
 # Changelog
 
+## [1.3.1](https://github.com/devopsarr/ansible-collection-sonarr/compare/v1.3.0...v1.3.1) (2025-06-26)
+
+
+### Bug Fixes
+
+* **#90:** add allowed field to order disabled qualities in quality profile ([eb09105](https://github.com/devopsarr/ansible-collection-sonarr/commit/eb09105e5ca4055ee8a5c60a0bc3f65b22247479))
+* **deps:** update hotio/sonarr docker tag to release-4.0.15.2941 ([964dee0](https://github.com/devopsarr/ansible-collection-sonarr/commit/964dee0e898d16fdbc724c535221e8492596dbd5))
+
 ## [1.3.0](https://github.com/devopsarr/ansible-collection-sonarr/compare/v1.2.0...v1.3.0) (2025-01-24)
 
 
