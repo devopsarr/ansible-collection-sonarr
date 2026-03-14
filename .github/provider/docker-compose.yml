@@ -1,8 +1,8 @@
 ---
-version: "3.9"
+version: '3.9'
 services:
   sonarr:
-    image: hotio/sonarr:release-4.0.15.2941@sha256:ce095ff23043fe1397ac663d7d0885fbabdce9809257931ae9646c04d89567e8
+    image: ghcr.io/hotio/sonarr:release-4.0.15.2941@sha256:ce095ff23043fe1397ac663d7d0885fbabdce9809257931ae9646c04d89567e8
     container_name: sonarr
     depends_on:
       - transmission
@@ -18,7 +18,7 @@ services:
       - 8989:8989
     restart: unless-stopped
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8989/system/status"]
+      test: ['CMD', 'curl', '-f', 'http://localhost:8989/system/status']
   transmission:
     image: linuxserver/transmission:latest
     container_name: transmission
